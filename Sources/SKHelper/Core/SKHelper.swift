@@ -34,7 +34,7 @@ public class SKHelper: Observable {
     
     // MARK: - Init/deinit
     
-    init() {
+    public init() {
         // Start listening for App Store transactions, purchase intents and subscription changes
         transactionListener = handleTransactions()
         purchaseIntentListener = handlePurchaseIntents()
