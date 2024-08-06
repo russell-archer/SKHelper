@@ -1,0 +1,182 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "3AC40F58",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : true,
+      "internalID" : "CD569CF1",
+      "localizations" : [
+        {
+          "description" : "A beautiful large bunch of seasonal flowers.",
+          "displayName" : "Large Flowers",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.rarcher.nonconsumable.flowers.large",
+      "referenceName" : "Flowers Large",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "0.99",
+      "familyShareable" : true,
+      "internalID" : "BED1440F",
+      "localizations" : [
+        {
+          "description" : "A beautiful small bunch of seasonal flowers.",
+          "displayName" : "Small Flowers",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.rarcher.nonconsumable.flowers.small",
+      "referenceName" : "Flowers Small",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_billingGracePeriodEnabled" : false,
+    "_compatibilityTimeRate" : {
+      "3" : 6
+    },
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ],
+    "_timeRate" : 1001
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "198AC052",
+      "localizations" : [
+
+      ],
+      "name" : "vip",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "29.99",
+          "familyShareable" : true,
+          "groupNumber" : 2,
+          "internalID" : "FCD4BF83",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Subscribe to the silver service.",
+              "displayName" : "Silver Service",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.rarcher.subscription.vip.silver",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Silver",
+          "subscriptionGroupID" : "198AC052",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : true,
+          "groupNumber" : 1,
+          "internalID" : "DC911D37",
+          "introductoryOffer" : {
+            "displayPrice" : "0.99",
+            "internalID" : "850F1130",
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P3D"
+          },
+          "localizations" : [
+            {
+              "description" : "Subscribe to the gold service.",
+              "displayName" : "Gold Service",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.rarcher.subscription.vip.gold",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Gold",
+          "subscriptionGroupID" : "198AC052",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

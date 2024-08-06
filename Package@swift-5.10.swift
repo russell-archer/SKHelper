@@ -1,6 +1,6 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.10
 // The swift-tools-version declares the minimum version of Swift required to build this package.
-// Swift 6 requires Xcode 16.
+// Swift 5.10 requires Xcode 15.3.
 
 import PackageDescription
 
