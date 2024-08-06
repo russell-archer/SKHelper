@@ -8,7 +8,7 @@ public import StoreKit
 
 /// `SKHelperProduct` holds localized product information, along with a cached value for the user's entitlement to use the product.
 @MainActor
-@available(iOS 14.4, macOS 16.4, *)
+@available(iOS 16.4, macOS 14.6, *)
 public class SKHelperProduct: Identifiable {
     
     /// The unique `ProductId` for the `Product`

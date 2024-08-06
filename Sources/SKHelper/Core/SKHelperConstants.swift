@@ -8,7 +8,7 @@
 import Foundation
 
 /// Constants used in support of App Store operations.
-@available(iOS 14.4, macOS 16.4, *)
+@available(iOS 16.4, macOS 14.6, *)
 public struct SKHelperConstants: Sendable {
     
     /// Returns the name of the .plist configuration file that holds a list of `ProductId`.

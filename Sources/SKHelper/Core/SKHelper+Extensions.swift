@@ -8,7 +8,7 @@ public import StoreKit
 
 public typealias ProductId = String
 
-@available(iOS 14.4, macOS 16.4, *)
+@available(iOS 16.4, macOS 14.6, *)
 public extension SKHelper {
     // MARK: - Public product helpers
     
@@ -48,7 +48,7 @@ public extension SKHelper {
 // MARK: - UnwrappedVerificationResult
 
 /// Information on the result of unwrapping a transaction `VerificationResult`.
-@available(iOS 14.4, macOS 16.4, *)
+@available(iOS 16.4, macOS 14.6, *)
 public struct UnwrappedVerificationResult<T: Sendable> : Sendable{
     /// The verified or unverified transaction.
     public let transaction: T
@@ -63,7 +63,7 @@ public struct UnwrappedVerificationResult<T: Sendable> : Sendable{
 // MARK: - PurchaseState
 
 /// The state of a purchase.
-@available(iOS 14.4, macOS 16.4, *)
+@available(iOS 16.4, macOS 14.6, *)
 public enum PurchaseState {
     case notStarted, userCannotMakePayments, inProgress, purchased, pending, cancelled, failed, failedVerification, unknown, notPurchased
     

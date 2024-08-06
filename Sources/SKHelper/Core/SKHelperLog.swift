@@ -25,7 +25,7 @@ import os.log
 /// keyword. However, we don't know what the event(message:) function will be used to display,
 /// so its logs will be redacted.
 ///
-@available(iOS 14.4, macOS 16.4, *)
+@available(iOS 16.4, macOS 14.6, *)
 public struct SKHelperLog {
     private static let skhelperLog = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "STORE")
     

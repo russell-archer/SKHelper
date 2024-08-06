@@ -6,7 +6,7 @@ import PackageDescription
 
 let package = Package(
     name: "SKHelper",
-    platforms: [.macOS("16.4"), .iOS("14.4")],
+    platforms: [.iOS("16.4"), .macOS("14.6"), ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(name: "SKHelper", targets: ["SKHelper"]),
