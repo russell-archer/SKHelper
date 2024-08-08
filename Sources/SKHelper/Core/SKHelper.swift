@@ -344,14 +344,14 @@ public class SKHelper: Observable {
     /// - Returns: Returns a task for the transaction handling loop.
     private func handleTransactions() -> Task<Void, any Error> {
         
-        // Note: Previously had this a detached task. However, with Xcode 16 Beta 5 this produces the error:
+        // Note: Previously had this as a detached task. However, with Xcode 16 Beta 5 this produces the error:
         // "Main actor-isolated value of type '() async -> Void' passed as a strongly transferred parameter; later accesses could race"
         
         return Task { @MainActor [self] in
             for await verificationResult in Transaction.updates {
                 
                 // See if StoreKit validated the transaction
-                let checkResult = self.checkVerificationResult(result: verificationResult)
+                let checkResult = checkVerificationResult(result: verificationResult)
                 guard checkResult.verified else {
                     // StoreKit's attempts to validate the transaction failed
                     SKHelperLog.transaction(.transactionFailure, productId: checkResult.transaction.productID, transactionId: String(checkResult.transaction.id))
@@ -398,7 +398,7 @@ public class SKHelper: Observable {
                 
                 // Update the list of products the user has access to
                 SKHelperLog.transaction(.transactionSuccess, productId: transaction.productID, transactionId: String(transaction.id))
-                self.updatePurchasedProducts(transaction.productID, purchased: true)
+                updatePurchasedProducts(transaction.productID, purchased: true)
             }
         }
     }
