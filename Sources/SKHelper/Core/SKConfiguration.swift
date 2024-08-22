@@ -1,5 +1,6 @@
 //
-//  SKHelperConfiguration.swift
+//  SKConfiguration.swift
+//  SKHelper
 //
 //  Created by Russell Archer on 31/07/2024.
 //
@@ -81,8 +82,8 @@ import Foundation
 /// ```
 
 @MainActor
-@available(iOS 16.4, macOS 14.6, *)
-public struct SKHelperConfiguration {
+@available(iOS 17.0, macOS 14.6, *)
+public struct SKConfiguration {
     
     private struct SubscriptionGroupInfo {
         let group: String
@@ -99,35 +100,35 @@ public struct SKHelperConfiguration {
     /// - Parameter filename: The name of the file to read. If the parameter is not supplied
     /// the value of `SKHelperConstants.SKHelperConfiguration` is used instead.
     public static func readProductConfiguration(filename: String? = nil) -> [ProductId]? {
-        guard let result = read(filename: filename == nil ? SKHelperConstants.StoreConfiguration : filename!) else {
-            SKHelperLog.event(.configurationNotFound)
-            SKHelperLog.event(.configurationFailure)
+        guard let result = read(filename: filename == nil ? SKConstants.StoreConfiguration : filename!) else {
+            SKLog.event(.configurationNotFound)
+            SKLog.event(.configurationFailure)
             return nil
         }
         
         guard result.count > 0 else {
-            SKHelperLog.event(.configurationEmpty)
-            SKHelperLog.event(.configurationFailure)
+            SKLog.event(.configurationEmpty)
+            SKLog.event(.configurationFailure)
             return nil
         }
         
         // Read the "Products" list. This can contain consumable, non-consumable and subscription products
-        guard var values = result[SKHelperConstants.ProductsConfiguration] as? [String] else {
-            SKHelperLog.event(.configurationEmpty)
-            SKHelperLog.event(.configurationFailure)
+        guard var values = result[SKConstants.ProductsConfiguration] as? [String] else {
+            SKLog.event(.configurationEmpty)
+            SKLog.event(.configurationFailure)
             return nil
         }
         
         // Do we have an optional "Subscriptions" list?
         values = [ProductId](values.compactMap { $0 })
-        guard let subscriptions = result[SKHelperConstants.SubscriptionsConfiguration] as? [[String : AnyObject]] else { return values }
+        guard let subscriptions = result[SKConstants.SubscriptionsConfiguration] as? [[String : AnyObject]] else { return values }
         for subscriptionGroup in subscriptions {
-            guard subscriptionGroup[SKHelperConstants.SubscriptionGroupConfiguration] is String else { continue }
-            guard let subscriptionsInGroup = subscriptionGroup[SKHelperConstants.ProductsConfiguration] as? [String] else { continue }
+            guard subscriptionGroup[SKConstants.SubscriptionGroupConfiguration] is String else { continue }
+            guard let subscriptionsInGroup = subscriptionGroup[SKConstants.ProductsConfiguration] as? [String] else { continue }
             for subscription in subscriptionsInGroup { values.append(subscription) }
         }
         
-        SKHelperLog.event(.configurationSuccess)
+        SKLog.event(.configurationSuccess)
         return values
     }
     

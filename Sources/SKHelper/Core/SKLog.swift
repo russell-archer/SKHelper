@@ -1,6 +1,6 @@
 //
-//  SKHelperLog.swift
-//  StoreKitViewsDemo
+//  SKLog.swift
+//  SKHelper
 //
 //  Created by Russell Archer on 14/07/2024.
 //
@@ -25,40 +25,40 @@ import os.log
 /// keyword. However, we don't know what the event(message:) function will be used to display,
 /// so its logs will be redacted.
 ///
-@available(iOS 16.4, macOS 14.6, *)
-public struct SKHelperLog {
+@available(iOS 17.0, macOS 14.6, *)
+public struct SKLog {
     private static let skhelperLog = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "STORE")
     
     /// Logs a StoreNotification. Note that the text (shortDescription) of the log entry will be
     /// publically available in the Console app.
-    /// - Parameter event: A SKHelperNotification.
-    public static func event(_ event: SKHelperNotification) { logEvent(event) }
+    /// - Parameter event: A SKNotification.
+    public static func event(_ event: SKNotification) { logEvent(event) }
     
-    /// Logs an SKHelperNotification. Note that the text (shortDescription) and the productId for the
+    /// Logs an SKNotification. Note that the text (shortDescription) and the productId for the
     /// log entry will be publically available in the Console app.
     /// - Parameters:
-    ///   - event:      A SKHelperNotification.
+    ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
-    public static func event(_ event: SKHelperNotification, productId: ProductId, transactionId: String? = nil) {
+    public static func event(_ event: SKNotification, productId: ProductId, transactionId: String? = nil) {
         logEvent(event, productId: productId, transactionId: transactionId)
     }
     
-    /// Logs an SKHelperNotification. Note that the text (shortDescription) and the productId for the
+    /// Logs an SKNotification. Note that the text (shortDescription) and the productId for the
     /// log entry will be publically available in the Console app.
     /// - Parameters:
-    ///   - event:      A SKHelperNotification.
+    ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
     ///   - webOrderLineItemId: A unique ID that identifies subscription purchase events across devices, including subscription renewals
-    public static func event(_ event: SKHelperNotification, productId: ProductId, webOrderLineItemId: String?, transactionId: String? = nil) {
+    public static func event(_ event: SKNotification, productId: ProductId, webOrderLineItemId: String?, transactionId: String? = nil) {
         logEvent(event, productId: productId, webOrderLineItemId: webOrderLineItemId, transactionId: transactionId)
     }
     
-    /// Logs a SKHelperNotification as a transaction.
+    /// Logs a SKNotification as a transaction.
     /// Note that the text (shortDescription) and the productId for the log entry will be publically available in the Console app.
     /// - Parameters:
-    ///   - event:      A SKHelperNotification.
+    ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
-    public static func transaction(_ event: SKHelperNotification, productId: ProductId, transactionId: String? = nil) {
+    public static func transaction(_ event: SKNotification, productId: ProductId, transactionId: String? = nil) {
         #if DEBUG
         print("\(event.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)")")
         #else
@@ -66,14 +66,14 @@ public struct SKHelperLog {
         #endif
     }
     
-    /// Logs a SKHelperNotification as a transaction.
+    /// Logs a SKNotification as a transaction.
     /// Note that the text (shortDescription) and the productId for the log entry will be publically available in the Console app.
     /// - Parameters:
-    ///   - event:      A SKHelperNotification.
+    ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
     public static func subscriptionChanged(productId: ProductId, transactionId: String? = nil, newSubscriptionStatus: String) {
         #if DEBUG
-        print("\(SKHelperNotification.subscriptionStausChanged.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)") to \(newSubscriptionStatus)")
+        print("\(SKNotification.subscriptionStausChanged.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)") to \(newSubscriptionStatus)")
         #else
         os_log("%{public}s for product %{public}s", log: storeLog, type: .default, event.shortDescription(), productId)
         #endif
@@ -102,7 +102,7 @@ public struct SKHelperLog {
         #endif
     }
     
-    public static func logEvent(_ event: SKHelperNotification) {
+    public static func logEvent(_ event: SKNotification) {
         #if DEBUG
         print(event.shortDescription())
         #else
@@ -111,7 +111,7 @@ public struct SKHelperLog {
         #endif
     }
     
-    public static func logEvent(_ event: SKHelperNotification, productId: ProductId, transactionId: String? = nil) {
+    public static func logEvent(_ event: SKNotification, productId: ProductId, transactionId: String? = nil) {
         #if DEBUG
         print("\(event.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)")")
         #else
@@ -120,7 +120,7 @@ public struct SKHelperLog {
         #endif
     }
     
-    public static func logEvent(_ event: SKHelperNotification, productId: ProductId, webOrderLineItemId: String?, transactionId: String? = nil) {
+    public static func logEvent(_ event: SKNotification, productId: ProductId, webOrderLineItemId: String?, transactionId: String? = nil) {
         #if DEBUG
         print("\(event.shortDescription()) for product \(productId) with webOrderLineItemId \(webOrderLineItemId ?? "none") \(transactionId == nil ? "" : "and transaction id \(transactionId!)")")
         #else
@@ -136,7 +136,7 @@ public struct SKHelperLog {
 }
 
 //public struct TransactionLog: Hashable {
-//    let notification: SKHelperNotification
+//    let notification: SKNotification
 //    let productId: ProductId
 //    
 //    public static func == (lhs: TransactionLog, rhs: TransactionLog) -> Bool { return (lhs.productId == rhs.productId) && (lhs.notification == rhs.notification) }

@@ -1,6 +1,6 @@
 //
-//  SKHelperNotification.swift
-//  StoreKitViewsDemo
+//  SKNotification.swift
+//  SKHelper
 //
 //  Created by Russell Archer on 14/07/2024.
 //
@@ -8,8 +8,8 @@
 public import StoreKit
 
 /// Informational logging notifications issued by StoreHelper
-@available(iOS 16.4, macOS 14.6, *)
-public enum SKHelperNotification: Error, Equatable {
+@available(iOS 17.0, macOS 14.6, *)
+public enum SKNotification: Error, Equatable {
     case configurationNotFound
     case configurationEmpty
     case configurationSuccess
@@ -87,7 +87,7 @@ public enum SKHelperNotification: Error, Equatable {
 }
 
 /// SKHelper exceptions
-@available(iOS 16.4, macOS 14.6, *)
+@available(iOS 17.0, macOS 14.6, *)
 public enum StoreException: Error, Equatable {
     case purchaseException(UnderlyingError?)
     case purchaseInProgressException
@@ -106,7 +106,7 @@ public enum StoreException: Error, Equatable {
     }
 }
 
-@available(iOS 16.4, macOS 14.6, *)
+@available(iOS 17.0, macOS 14.6, *)
 extension StoreKitError: @retroactive Equatable {
     public static func == (lhs: StoreKitError, rhs: StoreKitError) -> Bool {
         switch (lhs, rhs) {
@@ -121,7 +121,7 @@ extension StoreKitError: @retroactive Equatable {
     }
 }
 
-@available(iOS 16.4, macOS 14.6, *)
+@available(iOS 17.0, macOS 14.6, *)
 public enum UnderlyingError: Equatable, Sendable {
     case purchase(Product.PurchaseError)
     case storeKit(StoreKitError)

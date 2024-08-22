@@ -1,15 +1,15 @@
 //
-//  SKHelperProduct.swift
-//  StoreKitViewsDemo
+//  SKProduct.swift
+//  SKHelper
 //
 //  Created by Russell Archer on 17/07/2024.
 
 public import StoreKit
 
-/// `SKHelperProduct` holds localized product information, along with a cached value for the user's entitlement to use the product.
+/// `SKProduct` holds localized product information, along with a cached value for the user's entitlement to use the product.
 @MainActor
-@available(iOS 16.4, macOS 14.6, *)
-public class SKHelperProduct: Identifiable {
+@available(iOS 17.0, macOS 14.6, *)
+public class SKProduct: Identifiable {
     
     /// The unique `ProductId` for the `Product`
     public let id: ProductId
@@ -17,7 +17,7 @@ public class SKHelperProduct: Identifiable {
     /// Localized product information retrieved from the App Store.
     public let product: Product
     
-    /// The subscription group (groupDisplayName) of the product, or an empty String if this is not a subscription
+    /// The subscription group (`groupDisplayName`) of the product, or an empty String if this is not a subscription
     public let group: String
     
     /// The group level of the subscription, or Int.max if this is not a subscription

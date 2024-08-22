@@ -1,6 +1,6 @@
 //
-//  SKHelperConstants.swift
-//  StoreKitViewsDemo
+//  SKConstants.swift
+//  SKHelper
 //
 //  Created by Russell Archer on 31/07/2024.
 //
@@ -8,8 +8,8 @@
 import Foundation
 
 /// Constants used in support of App Store operations.
-@available(iOS 16.4, macOS 14.6, *)
-public struct SKHelperConstants: Sendable {
+@available(iOS 17.0, macOS 14.6, *)
+public struct SKConstants: Sendable {
     
     /// Returns the name of the .plist configuration file that holds a list of `ProductId`.
     public static let StoreConfiguration = "Products"
@@ -28,4 +28,7 @@ public struct SKHelperConstants: Sendable {
     
     /// The name of the optional section of the Products.plist file that contains a subscription group
     public static let SubscriptionGroupConfiguration = "Group"
+    
+    /// A URL which users on macOS can use to request a refund for an IAP.
+    public static let requestRefundUrl = "https://reportaproblem.apple.com/"
 }
