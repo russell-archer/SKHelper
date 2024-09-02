@@ -7,7 +7,7 @@
 
 public import StoreKit
 
-/// SKHelper, a lightweight StoreKit helper
+/// SKHelper, a lightweight StoreKit helper.
 @available(iOS 17.0, macOS 14.6, *)
 @MainActor
 public class SKHelper: Observable {
@@ -16,6 +16,11 @@ public class SKHelper: Observable {
     
     /// Array of `SKProduct`, which includes localized `Product` info retrieved from the App Store and a cached product entitlement.
     public private(set) var products = [SKProduct]()
+    
+    /// When set to `true` `SKHelper` will use previously cached values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil.
+    /// Using cached entitlements can help mitigate issues where `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an
+    /// entitlement to use a product.
+    public var useCachedEntitlements = true
 
     // MARK: - Private properties
     
@@ -28,12 +33,14 @@ public class SKHelper: Observable {
     /// Handler for changes to subscriptions.
     private var subscriptionListener: Task<Void, any Error>? = nil
     
-    /// The current internal state of SKHelper. If `purchaseState == inProgress` then an attempt to start a new purchase will result in a `purchaseInProgressException` being thrown by `purchase(_:)`.
+    /// The current internal state of `SKHelper`.
     private var purchaseState: SKPurchaseState = .unknown
     
     // MARK: - Init/deinit
     
-    /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically start listening for App Store transactions, purchase intents and subscription changes.
+    /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically start listening for App Store transactions,
+    /// purchase intents and subscription changes.
+    ///
     public init() {
         transactionListener = handleTransactions()
         purchaseIntentListener = handlePurchaseIntents()
@@ -55,7 +62,20 @@ public class SKHelper: Observable {
         }
     }
     
+    /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically start listening for App Store transactions,
+    /// purchase intents and subscription changes.
+    ///
+    /// This initializer also allows you to set the value of `useCachedEntitlements` which, when set to `true` ensures that `SKHelper` will use previously cached
+    /// values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil. Using cached entitlements can help mitigate issues where
+    ///  `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an entitlement to use a product.
+    ///
+    public convenience init(useCachedEntitlements: Bool = true) {
+        self.init()
+        self.useCachedEntitlements = useCachedEntitlements
+    }
+    
     /// Stop listening for App Store transactions, purchase intents and subscription changes.
+    ///
     deinit {
         transactionListener?.cancel()
         purchaseIntentListener?.cancel()
@@ -68,6 +88,7 @@ public class SKHelper: Observable {
     ///
     /// - Parameter productIds: The product ids that you want localized information for.
     /// - Returns: Returns an array of `Product`, or nil if no product information is returned by the App Store.
+    ///
     public func requestProducts(productIds: [ProductId]) async -> [Product]? {
         SKLog.event(.requestProductsStart)
         
@@ -84,7 +105,8 @@ public class SKHelper: Observable {
     ///
     /// - Parameter product: The `Product` to purchase.
     /// - Parameter options: Purchase options. See `Product.PurchaseOption`.
-    /// - Returns: Returns a tuple consisting of a transaction object that represents the purchase and a `SKPurchaseState` describing the state of the purchase.
+    /// - Returns: Returns a tuple consisting of a `Transaction` object that represents the purchase and a `SKPurchaseState` describing the state of the purchase.
+    ///
     public func purchase(_ product: Product, options: Set<Product.PurchaseOption> = []) async -> (transaction: Transaction?, purchaseState: SKPurchaseState)  {
         
         guard AppStore.canMakePayments else {
@@ -93,7 +115,7 @@ public class SKHelper: Observable {
         }
         
         guard purchaseState != .inProgress else {
-            SKLog.exception(.purchaseInProgressException, productId: product.id)
+            SKLog.event(.purchaseAlreadyInProgress, productId: product.id)
             return (nil, .puchaseAlreadyInProgress)
         }
         
@@ -109,8 +131,11 @@ public class SKHelper: Observable {
     /// Call this method when the user starts a purchase via a StoreKit view and your code uses the `.onInAppPurchaseStart` view modifier.
     /// This allows SKHelper to prevent other purchases which may interfer with the process.
     ///
-    /// If you do not use the `.onInAppPurchaseStart` view modifier there is no requirement to call this method.
+    /// ## Note ##
+    /// If you do not use the `.onInAppPurchaseStart` view modifier in your SwiftUI code there is no requirement to call this method.
+    ///
     /// - Parameter product: The `Product` the user has started the purchase workflow for.
+    ///
     public func purchaseDidStart(product: Product) {
         guard AppStore.canMakePayments else {
             SKLog.event(.purchaseUserCannotMakePayments)
@@ -118,7 +143,7 @@ public class SKHelper: Observable {
         }
         
         guard purchaseState != .inProgress else {
-            SKLog.exception(.purchaseInProgressException, productId: product.id)
+            SKLog.event(.purchaseAlreadyInProgress, productId: product.id)
             return
         }
         
@@ -127,7 +152,8 @@ public class SKHelper: Observable {
     }
     
     /// Call this method when the user completes a purchase workflow via a StoreKit view and your code uses the `.onInAppPurchaseCompletion` view modifier.
-    /// For example:
+    ///
+    /// ## Example usage ##
     /// ```
     /// StoreView(ids: store.allProductIds) { product in
     ///     Image(product.id).resizable()
@@ -142,11 +168,15 @@ public class SKHelper: Observable {
     ///     }
     /// }
     /// ```
-    /// This allows SKHelper to process and finish the `Transaction` as the use of `.onInAppPurchaseCompletion` prevents transaction updates being
+    /// This allows `SKHelper` to process and finish the `Transaction` as the use of `.onInAppPurchaseCompletion` prevents transaction updates being
     /// handled in the normal manner by the `SKHelper.handleTransactions` (i.e. the transaction update is never received).
     ///
-    /// If you do not use the `.onInAppPurchaseCompletion` view modifier there is no requirement to call this method.
+    /// ## Note ##
+    /// If you do not use the `.onInAppPurchaseCompletion` view modifier in your SwiftUI code there is no requirement to call this method.
+    ///
     /// - Parameter result: The `Product.PurchaseResult` of the purchase process, or nil if there was an error during the purchase.
+    /// - Returns: Returns a tuple consisting of a `Transaction` object that represents the purchase and a `SKPurchaseState` describing the state of the purchase.
+    ///
     public func purchaseCompletion(for product: Product, with result: Product.PurchaseResult?) async -> (transaction: Transaction?, purchaseState: SKPurchaseState) {
         guard let result else {
             purchaseState = .failed
@@ -203,14 +233,18 @@ public class SKHelper: Observable {
     }
     
     /// Checks the current entitlement for `productId` and returns true if the user is entitled to use the product,
-    /// false otherwise. Intended for non-comsumable products. If `productId` identifies an auto-renewable subscription
+    /// false otherwise.
+    ///
+    /// ## Note ##
+    /// This method is intended for non-comsumable products. If `productId` identifies an auto-renewable subscription
     /// then `isSubscribed(productId)` is called.
     ///
     /// Note that the process of determining if a product is purchased can be unreliable. Calls to
     /// `Transaction.currentEntitlement(for:)` mostly produce the correct result. However, in both the Xcode testing
     /// and live production environments it is quite common for `Transaction.currentEntitlement(for:)` to erroneously
-    /// return nil, indicating the user has not purchased the product. Also, calling `Transaction.currentEntitlement(for:)`
-    /// can (seemingly randomly) result one of the following errors:
+    /// return nil, indicating the user has not purchased the product.
+    ///
+    /// Also, calling `Transaction.currentEntitlement(for:)` can (seemingly randomly) result one of the following errors:
     ///
     /// - UIDevice.current.identifierForVendor
     /// - AppStore.deviceVerificationID
@@ -243,8 +277,8 @@ public class SKHelper: Observable {
             return verified
         }
         
-        // The user appears not to have have an entitlement. See if we've had previous success validating an entitlement.
-        return product.hasEntitlement
+        // The user appears NOT to have have an entitlement. See if we've previously cached an entitlement.
+        return useCachedEntitlements ? product.hasEntitlement : false
     }
     
     /// Checks the current entitlement for `productId` to see if the user is entitled to use the product. A user may be
@@ -252,14 +286,16 @@ public class SKHelper: Observable {
     /// identified by `productId` is the highest value product currently subscribed to in the subscription group. If both
     /// checks are positive then true is returned, false otherwise.
     ///
-    /// Intended only for auto-renewable subscriptions. If `productId` identifies any other type of product then an
+    /// ## Note ##
+    /// This method is intended only for **auto-renewable subscriptions**. If `productId` identifies any other type of product then an
     /// exception of type `StoreException.productTypeNotSupported` is thrown.
     ///
     /// Note that the process of determining if a product is purchased can be unreliable. Calls to
     /// `Transaction.currentEntitlement(for:)` mostly produce the correct result. However, in both the Xcode testing
     /// and live production environments it is quite common for `Transaction.currentEntitlement(for:)` to erroneously
-    /// return nil, indicating the user has not purchased the product. Also, calling `Transaction.currentEntitlement(for:)`
-    /// can (seemingly randomly) result one of the following errors:
+    /// return nil, indicating the user has not purchased the product.
+    ///
+    /// Also, calling `Transaction.currentEntitlement(for:)` can (seemingly randomly) result one of the following errors:
     ///
     /// - UIDevice.current.identifierForVendor
     /// - AppStore.deviceVerificationID
@@ -274,9 +310,9 @@ public class SKHelper: Observable {
     ///
     /// - check the return of `Transaction.currentEntitlement(for:)`
     /// - check `SKProduct.hasEntitlement` for the product if the return from `Transaction.currentEntitlement(for:)` is nil
-    /// - check if the product is the highest value product subscribed to in the subscription group.
+    /// - check if the product is the highest value product subscribed to in the subscription group
     ///
-    /// **Important**
+    /// ## Important ##
     /// Note that when checking the value of a product within a subscription group the product with the highest value will
     /// have the **lowest** `Product.subscription.groupLevel` value.
     ///
@@ -291,13 +327,13 @@ public class SKHelper: Observable {
     ///
     /// - Parameter productId: The `ProductId` to check.
     /// - Returns: Returns `SKSubscriptionState.subscribed` if user is entitled to use the product.
-    /// Returns `SKSubscriptionState.notSubscribed` if the product is not an auto-renewable subscription, or if an activate subscription to this product is not been found.
-    /// Returns `SKSubscriptionState.notVerified` if the user has to have an entitlement to use the product but we couldn't verify the transaction.
-    /// Returns `SKSubscriptionState.superceeded` if the subscription to this product has been superceeded by a subscription with a higher value product in the same subscription group.
+    /// - Returns `SKSubscriptionState.notSubscribed` if the product is not an auto-renewable subscription, or if an activate subscription to this product is not been found.
+    /// - Returns `SKSubscriptionState.notVerified` if the user has to have an entitlement to use the product but we couldn't verify the transaction.
+    /// - Returns `SKSubscriptionState.superceeded` if the subscription to this product has been superceeded by a subscription with a higher value product in the same subscription group.
     ///
     public func isSubscribed(productId: ProductId) async -> SKSubscriptionState {
         guard isAutoRenewable(productId: productId) else { return .notSubscribed }
-        guard let storeProduct = storeProduct(for: productId) else { return .notSubscribed }
+        guard let storeProduct = storeProduct(for: productId), let groupName = storeProduct.groupName else { return .notSubscribed }
         
         // We're dealing with an auto-renewable product. Does the user have a current entitlement to use it?
         var hasEntitlement = false
@@ -312,123 +348,82 @@ public class SKHelper: Observable {
         }
         
         if !hasEntitlement {
-            // The user doesn't seem to have an entitlement to use the product. In case this is a invalid result
-            // from `Transaction.currentEntitlement(for:)` see if the user has previously had an entitlement.
+            // The user does NOT have an entitlement to use the product. In case this is a invalid result from
+            // `Transaction.currentEntitlement(for:)` see if the user has previously had an entitlement cached.
+            if !useCachedEntitlements { return .notSubscribed }
             if !storeProduct.hasEntitlement {
                 updatePurchasedProducts(productId, purchased: false)
                 return .notSubscribed
             }
         }
         
-        // The user does have an entitlement to this product, but do they have an entitlement to a subscription
-        // product of higher-value in the same subscription group? We check this because the user may be subscribed
+        // The user DOES have an entitlement to this product, but do they have an entitlement to a subscription
+        // product of a higher-value in the same subscription group? We check this because the user may be subscribed
         // to one or more products in a subscription group at the same time. This is usually related to family sharing.
         // However, normally we're only interested in the most high-value product the user is subscribed to in a group.
-        //
-        // Important: Remember, the higher the value product, the LOWER the `Product.subscription.groupLevel` value.
-        // The highest value product will have a `Product.subscription.groupLevel` value of 1.
-        //
-        // We'll now get an array of `Product.SubscriptionInfo.Status` (see `statusCollection` below). This array is empty
-        // if the user has never subscribed to a product in this subscription group. If the user is subscribed to a product
-        // the `statusCollection.count` should be at least 1. Also, note that even if the `Product.SubscriptionInfo.Status`
-        // collection does NOT contain a particular product `Transaction.currentEntitlement(for:)` may still report
-        // that the user has an entitlement. This can happen when upgrading or downgrading subscriptions. Because of this
-        // we always need to search the `Product.SubscriptionInfo.Status` collection for a subscribed product with a
-        // higher-value.
-        
-        guard let statusCollection = try? await storeProduct.product.subscription?.status, !statusCollection.isEmpty else {
-            updatePurchasedProducts(productId, purchased: false)
-            return .notSubscribed
-        }
-        
-        // See if we can find anything of higher value (lower `groupLevel`) than `storeProduct.groupLevel`
-        
-        for status in statusCollection {
-            // If the user's not subscribed to this product then keep looking
-            guard status.state == .subscribed else { continue }
-            
-            // Check the transaction verification
-            let statusTransactionResult = checkVerificationResult(result: status.transaction)
-            guard statusTransactionResult.verified else { continue }
-            
-            // Are we looking at the same product we're checking for a higher-value product? If so, ignore
-            if statusTransactionResult.transaction.productID == storeProduct.id { continue }
-            
-            // Check the renewal info verification
-            let renewalInfoResult = checkVerificationResult(result: status.renewalInfo)
-            guard renewalInfoResult.verified else { continue }
 
-            // Make sure this product is from the same subscription group as the product we're searching for
-            guard let currentGroup = subscriptionGroup(for: renewalInfoResult.transaction.currentProductID),
-                  currentGroup == storeProduct.group else { continue }
-            
-            // We've found a valid transaction for a product in the target subscription group.
-            // Is its service level higher (lower `groupLevel`) than that of the product we're testing for entitlement?
-            
-            let currentServiceLevel = product(from: renewalInfoResult.transaction.currentProductID)?.subscription?.groupLevel ?? Int.max
-            if currentServiceLevel < storeProduct.groupLevel {
-                // We found a higher value active subscription. So the product we're testing for entitlement is flagged as "superceeded"
-                updatePurchasedProducts(productId, purchased: false)
-                return .superceeded
-            }
+        let mostValuableActiveSubscription = await highestValueActiveSubscription(in: groupName)
+        
+        // Is the highestActiveSubscription the product we were asked to check?
+        var result: SKSubscriptionState
+        if let mostValuableActiveSubscription {
+            result = mostValuableActiveSubscription.id == storeProduct.id ? .subscribed : .superceeded
+        } else {
+            result = .notSubscribed
         }
-    
-        // We didn't find a higher value product, so the product we're testing for entitlement is flagged as "subscribed"
-        updatePurchasedProducts(productId, purchased: true)
-        return .subscribed
+        
+        updatePurchasedProducts(productId, purchased: result == .subscribed)
+        return result
     }
     
-    /// Information on the highest service level auto-renewing subscription the user is subscribed to
-    /// in the `subscriptionGroup`.
-    /// - Parameter subscriptionGroup: The name of the subscription group
-    /// - Returns: Information on the highest service level auto-renewing subscription the user is
-    /// subscribed to in the `subscriptionGroup`.
+    /// Return the highest service level auto-renewing subscription the user is subscribed to in the `subscriptionGroup`.
+    /// - Parameter subscriptionGroup: The name of the subscription group.
+    /// - Returns: Returns the `Product` for the highest service level auto-renewing subscription the user is subscribed to in the `subscriptionGroup`, or nil if the user isn't subscribed to a product in the group.
     ///
-    /// When getting information on the highest service level auto-renewing subscription the user is
-    /// subscribed to we enumerate the `Product.subscription.status` array that is a property of each
-    /// `Product` in the group. Each Product in a subscription group provides access to the same
-    /// `Product.SubscriptionInfo.Status` array via its `product.subscription.status` property.
+    /// When getting information on the highest service level auto-renewing subscription the user is subscribed to we enumerate the `Product.subscription.status` array that is a property of each `Product` in the group.
+    /// This array is empty if the user has never subscribed to a product in this subscription group. If the user is subscribed to a product the `statusCollection.count` should be at least 1.
+    /// Each `Product` in a subscription group provides access to the same `Product.SubscriptionInfo.Status` array via its `product.subscription.status` property.
     ///
-    /// Enumeration of the `SubscriptionInfo.Status` array is necessary because a user may have multiple
-    /// active subscriptions to products in the same subscription group. For example, a user may have
-    /// subscribed themselves to the "Gold" product, as well as receiving an automatic subscription
-    /// to the "Silver" product through family sharing. In this case, we'd need to return information
-    /// on the "Gold" product.
+    /// Enumeration of the `SubscriptionInfo.Status` array is necessary because a user may have multiple active subscriptions to products in the same subscription group. For example, a user may have
+    /// subscribed themselves to the "Gold" product, as well as receiving an automatic subscription to the "Silver" product through family sharing. In this case, we'd need to return information on the "Gold" product.
     ///
-    /// The `Product.subscription.status` is an array of type `[Product.SubscriptionInfo.Status]` that
-    /// contains status information for ALL subscription groups. This demo app only has one subscription
-    /// group, so all products in the `Product.subscription.status` array are part of the same group.
-    /// In an app with two or more subscription groups you need to distinguish between groups by using
-    /// the `product.subscription.subscriptionGroupID` property. Alternatively, use groupName(from:)
-    /// to find the subscription group associated with a product. This will allow you to distinguish
-    /// products by group and subscription service level.
-    public func getHighestValueActiveSubscription(in group: String) async -> Product? {
-        // The user does have an entitlement to this product, but do they have an entitlement to a subscription
-        // product of higher-value in the same subscription group? We check this because the user may be subscribed
-        // to one or more products in a subscription group at the same time. This is usually related to family sharing.
-        // However, normally we're only interested in the most high-value product the user is subscribed to in a group.
-        //
+    /// Also, note that even if the `Product.SubscriptionInfo.Status` collection does NOT contain a particular product `Transaction.currentEntitlement(for:)` may still report that the user has an
+    /// entitlement. This can happen when upgrading or downgrading subscriptions. Because of this we always need to search the `Product.SubscriptionInfo.Status` collection for a subscribed product with a higher-value.
+    ///
+    public func highestValueActiveSubscription(in groupName: String) async -> Product? {
+        // The higher the value product, the LOWER the `Product.subscription.groupLevel` value.
+        // The highest value product will have a `Product.subscription.groupLevel` value of 1.
+        
+        // Get the group id associated with the supplied group name
+        guard let groupId = subscriptionGroupId(from: groupName) else { return nil }
+        
+        // Get all the subscriptions statuses for the group
+        guard let groupSubscriptionStatus = try? await Product.SubscriptionInfo.status(for: groupId) else { return nil }
+        
+        // Filter-out any subscription the user's not actively subscribed to
+        let activeSubscriptions = groupSubscriptionStatus.filter { $0.state == .subscribed }
+        guard !activeSubscriptions.isEmpty else { return nil }
+        
+        // Check the transaction for each subscription is verified and collect their products ids
+        let verifiedActiveSubscriptionProductIds = activeSubscriptions.compactMap {
+            let statusTransactionResult = checkVerificationResult(result: $0.transaction)
+            if statusTransactionResult.verified { return statusTransactionResult.transaction.productID as ProductId } else { return nil }
+        }
+        
+        // Get the actual `Product` objects for each active and verified subscrition
+        let subscriptionProducts = products(from: verifiedActiveSubscriptionProductIds)
+        
+        // Return the active subscription with the highest value (lowest group level).
         // Important: Remember, the higher the value product, the LOWER the `Product.subscription.groupLevel` value.
         // The highest value product will have a `Product.subscription.groupLevel` value of 1.
-        //
-        // We'll now get an array of `Product.SubscriptionInfo.Status` (see `statusCollection` below). This array is empty
-        // if the user has never subscribed to a product in this subscription group. If the user is subscribed to a product
-        // the `statusCollection.count` should be at least 1. Also, note that even if the `Product.SubscriptionInfo.Status`
-        // collection does NOT contain a particular product `Transaction.currentEntitlement(for:)` may still report
-        // that the user has an entitlement. This can happen when upgrading or downgrading subscriptions. Because of this
-        // we always need to search the `Product.SubscriptionInfo.Status` collection for a subscribed product with a
-        // higher-value.
-        
-        guard let product = allSubscriptionProducts(for: group).first else { return nil }
-        guard let statusCollection = try? await product.subscription?.status, !statusCollection.isEmpty else { return nil }
-        
-        
-        return nil
+        return subscriptionProducts.min { $0.subscription?.groupLevel ?? Int.max < $1.subscription?.groupLevel ?? Int.max }
     }
     
     /// Provides information on the purchase of a non-consumable product.
+    ///
     /// - Parameter productId: The `ProductId` of the non-consumable product.
     /// - Returns: Returns `SKPurchaseInformation` containing info on the purchase of a non-consumable product. nil is returned if the product has not been purchased or it's not a non-consumable.
+    ///
     public func purchaseInformation(for productId: ProductId) async -> SKPurchaseInformation? {
         guard let product = product(from: productId), isNonConsumable(productId: productId) else { return nil }
         
@@ -451,9 +446,11 @@ public class SKHelper: Observable {
         return pi
     }
     
-    /// Provides information on the purchase of an auto-renewable subscription product.
+    /// Provides information on the purchase of an auto-renewable subscription productin a format that's suitable for direct display to the user.
+    ///
     /// - Parameter productId: The `ProductId` of the auto-renewable subscription product.
     /// - Returns: Returns `SKSubscriptionInformation` containing info on the purchase of an auto-renewable subscription product. nil is returned if the product has not been purchased or it's not an auto-renewable.
+    ///
     public func subscriptionInformation(for productId: ProductId) async -> SKSubscriptionInformation? {
         guard let product = product(from: productId), isAutoRenewable(productId: productId) else { return nil }
         
@@ -481,24 +478,15 @@ public class SKHelper: Observable {
         // At this point we're dealing with an active subscription that has been verified and is not superceeded
         
         // Get the latest transaction
-        guard let transactionVerificationResult = await product.latestTransaction else {
-            print("subscriptionInformation: Unable to retrieve lastest transaction")
-            return subInfo
-        }
+        guard let transactionVerificationResult = await product.latestTransaction else { return subInfo }
         
         // Unwrap the verification result and make sure it was verified by StoreKit
         let unwrappedVerificationResult = checkVerificationResult(result: transactionVerificationResult)
-        guard unwrappedVerificationResult.verified else {
-            print("subscriptionInformation: transaction not verified")
-            return subInfo
-        }
+        guard unwrappedVerificationResult.verified else { return subInfo }
         
         // Get the subscription status from the transaction object
         let transaction = unwrappedVerificationResult.transaction
-        guard let status = await transaction.subscriptionStatus else {
-            print("subscriptionInformation: couldn't get subscriptionStatus")
-            return subInfo
-        }
+        guard let status = await transaction.subscriptionStatus else { return subInfo }
         
         // Store the subscription's state
         switch status.state {
@@ -513,10 +501,7 @@ public class SKHelper: Observable {
         }
 
         // Get the subscription object
-        guard let subscription = product.subscription else {
-            print("subscriptionInformation: couldn't get subscription")
-            return subInfo
-        }
+        guard let subscription = product.subscription else { return subInfo }
                 
         // Create text that describes the subscription period (e.g. "14 days"
         var periodUnitText: String?
@@ -572,9 +557,10 @@ public class SKHelper: Observable {
         return subInfo
     }
     
-    /// Gets the unique transaction id for the product's most recent transaction.
+    /// Gets the unique `Transaction` id for the product's most recent transaction.
     /// - Parameter productId: The product's unique App Store id.
-    /// - Returns: Returns the unique transaction id for the product's most recent transaction, or nil if the product's never been purchased.
+    /// - Returns: Returns the unique `Transaction` id for the product's most recent transaction, or nil if the product's never been purchased.
+    ///
     public func mostRecentTransactionId(for productId: ProductId) async -> UInt64? {
         if let result = await Transaction.latest(for: productId) {
             let verificationResult = checkVerificationResult(result: result)
@@ -584,9 +570,10 @@ public class SKHelper: Observable {
         return nil
     }
     
-    /// Gets the most recent transaction for the product.
+    /// Gets the most recent `Transaction` for the product.
     /// - Parameter productId: The product's unique App Store id.
-    /// - Returns: Returns the most recent transaction for the product, or nil if the product's never been purchased.
+    /// - Returns: Returns the most recent `Transaction` for the product, or nil if the product's never been purchased.
+    ///
     public func mostRecentTransaction(for productId: ProductId) async -> Transaction? {
         if let result = await Transaction.latest(for: productId) {
             let verificationResult = checkVerificationResult(result: result)
@@ -598,9 +585,10 @@ public class SKHelper: Observable {
     
     // MARK: - Private methods
         
-    /// This is an infinite async sequence (loop). It will continue waiting for transactions until it is explicitly
-    /// canceled by calling the Task.cancel() method. See `transactionListener`.
+    /// This is an infinite async sequence (loop). It will continue waiting for transactions until it is explicitly canceled by calling the `Task.cancel()` method. See `transactionListener`.
+    ///
     /// - Returns: Returns a task for the transaction handling loop.
+    ///
     private func handleTransactions() -> Task<Void, any Error> {
         
         // Note: Previously had this as a detached task. However, with Xcode 16 Beta 5 this produces the error:
@@ -662,8 +650,10 @@ public class SKHelper: Observable {
         }
     }
     
-    /// Handles all purchase status change updates.
+    /// Handles all purchase status change updates related to subscriptions.
+    ///
     /// - Returns: Returns a task for the subscription changes handling loop.
+    ///
     private func handleSubscriptionChanges() -> Task<Void, any Error> {
         return Task { @MainActor [self] in
             for await status in Product.SubscriptionInfo.Status.updates {
@@ -682,7 +672,9 @@ public class SKHelper: Observable {
     }
     
     /// Handles all purchase intents resulting from direct App Store purchases for promoted products.
+    ///
     /// - Returns: Returns a task for the purchase intents handling loop.
+    ///
     private func handlePurchaseIntents() -> Task<Void, any Error> {
         return Task { @MainActor [self] in
             for await purchaseIntent in PurchaseIntent.intents {
@@ -695,9 +687,10 @@ public class SKHelper: Observable {
     
     /// Check if StoreKit was able to automatically verify a transaction by inspecting the verification result.
     ///
-    /// - Parameter result: The transaction VerificationResult to check.
-    /// - Returns: Returns an `SKUnwrappedVerificationResult<T>` where `verified` is true if the transaction was
-    /// successfully verified by StoreKit. When `verified` is false `verificationError` will be non-nil.
+    /// - Parameter result: The transaction `VerificationResult` to check.
+    /// - Returns: Returns an `SKUnwrappedVerificationResult<T>` where `verified` is true if the transaction was successfully verified by StoreKit.
+    /// When `verified` is false `verificationError` will be non-nil.
+    ///
     private func checkVerificationResult<T>(result: VerificationResult<T>) -> SKUnwrappedVerificationResult<T> {
         
         switch result {
@@ -711,10 +704,13 @@ public class SKHelper: Observable {
         }
     }
     
-    /// Update our list of purchased products.
+    /// Update our cache of purchased products.
+    /// 
     /// - Parameters:
     ///   - productId: The `ProductId` to insert/remove.
     ///   - insert: If true the `ProductId` is purchased.
+    ///   - purchased: true if the product is to be flagged as purchased, false otherwise.
+    ///
     private func updatePurchasedProducts(_ productId: ProductId, purchased: Bool) {
         if let product = storeProduct(for: productId) {
             product.hasEntitlement = purchased
@@ -723,7 +719,9 @@ public class SKHelper: Observable {
     }
     
     /// Read the cache of purchased products from storage.
+    ///
     /// - Returns: Returns the list of fallback product ids, or an empty collection if none is available.
+    ///
     private func readPurchasedProducts() -> [ProductId] {
         if let purchaseProductIds = UserDefaults.standard.object(forKey: SKConstants.PurchasedProductsKey) as? [ProductId] {
             return purchaseProductIds
@@ -733,6 +731,7 @@ public class SKHelper: Observable {
     }
     
     /// Saves the cache of purchased product ids. Ids saved will have at least one positive entitlement.
+    ///
     private func savePurchasedProducts() {
         var purchaseProductIds = [ProductId]()
         

@@ -8,16 +8,32 @@
 import SwiftUI
 import StoreKit
 
+/// StoreKit `SKProductView` style.
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKProductViewStyle: ProductViewStyle {
-    @Binding var selectedProduct: String
+    
+    /// A binding to the `ProductId` of the selected product.
+    @Binding var selectedProduct: ProductId
+    
+    /// A binding to a value which determines if a product is selected.
     @Binding var productSelected: Bool
     
-    public init(selectedProduct: Binding<String>, productSelected: Binding<Bool>) {
-        self._selectedProduct = selectedProduct
+    /// Creates a StoreKit `SKProductView` style.
+    ///
+    /// - Parameters:
+    ///   - selectedProductId: A binding to the `ProductId` of the selected `Product`.
+    ///   - productSelected: A binding to a value which determines if the `SKManagePurchaseView` is displayed.
+    ///   
+    public init(selectedProductId: Binding<ProductId>, productSelected: Binding<Bool>) {
+        self._selectedProduct = selectedProductId
         self._productSelected = productSelected
     }
     
+    /// Creates the body of the StoreKit `SKProductView` style.
+    /// 
+    /// - Parameter configuration: The style's configuration.
+    /// - Returns: Returns the body of the custom StoreKit `SKProductView` style.
+    ///
     public func makeBody(configuration: Configuration) -> some View {
         switch configuration.state {
             case .success(let product):

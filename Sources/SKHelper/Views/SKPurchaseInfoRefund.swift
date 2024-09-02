@@ -7,11 +7,21 @@
 
 import SwiftUI
 
+/// A composable view that allows the user to request a refund for a non-consumable.
+/// See `SKManagePurchaseView`, which includes this view.
+///
 internal struct SKPurchaseInfoRefund: View {
+    
+    /// Purchase information passed to us by `SKManagePurchaseView`.
     let purchaseInfo: SKPurchaseInformation
+    
+    /// A binding to a purchase refund request transaction id.
     @Binding var refundRequestTransactionId: UInt64
+    
+    /// A binding that determines if the refund sheet is displayed.
     @Binding var showRefundSheet: Bool
     
+    /// Creates the body of the view.
     var body: some View {
         Divider().padding(.bottom)
         

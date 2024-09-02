@@ -36,3 +36,11 @@ See [License](https://russell-archer.github.io/SKHelper/documentation/skhelper/l
 ## Getting Started
 
 Jump to the [StoreHelper Quick Start](https://russell-archer.github.io/SKHelper/documentation/skhelper/quickstart) guide.
+
+## TODO
+- DONE: complete getHighestValueActiveSubscription()
+- complete subscriptionInformation(): add all previous transactions for a subscription 
+- privacy and license buttons
+- switch from using StoreKit views with ids to products
+- There’s a modifier that returns a view that’s dependent on an in-app purchase - demo usage
+

@@ -12,6 +12,10 @@ import StoreKit
 @MainActor
 public struct SKSubscriptionInformation: Hashable {
     
+    /// Creates a `SKSubscriptionInformation`.
+    ///
+    /// - Parameter product: A StoreKit `Product` object.
+    /// 
     public init(product: Product) {
         self.product        = product
         self.productId      = product.id
@@ -20,6 +24,8 @@ public struct SKSubscriptionInformation: Hashable {
         self.isSuperceeded  = false
         self.productType    = product.type
         self.displayPrice   = product.displayPrice
+        self.groupName      = product.subscription?.groupDisplayName
+        self.groupId        = product.subscription?.subscriptionGroupID
     }
     
     /// The StoreKit `Product` that describes the auto-renewable subscription.
@@ -30,6 +36,12 @@ public struct SKSubscriptionInformation: Hashable {
     
     /// The product's display name.
     public var name: String
+    
+    /// The subscription group display name (localized "reference name"). For example, "vip".
+    public var groupName: String?
+
+    /// The subscription group id (localized "reference name"). For example, "198AC052".
+    public var groupId: String?
     
     /// true if the user has a currently active subscription to the product. If the value of `isSuperceeded` is true then `isSubscribed` will be false.
     public var isSubscribed: Bool

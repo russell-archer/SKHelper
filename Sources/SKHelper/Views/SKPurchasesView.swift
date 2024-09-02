@@ -10,13 +10,23 @@ import StoreKit
 
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKPurchasesView: View {
+    
+    /// The `SKHelper` object.
     @Environment(SKHelper.self) private var store
+    
+    /// Collection of the `ProductId` of all purchased products.
     @State private var purchasedProducts: [ProductId] = []
+    
+    /// The `ProductId` of the currently selected product.
     @State private var selectedProductId = ""
+    
+    /// true if a product has been selected.
     @State private var productSelected = false
     
+    /// Creates a `SKPurchasesView`.
     public init() {}
     
+    /// Creates the body of the view.
     public var body: some View {
         ScrollView {
             LazyVStack {
@@ -40,7 +50,7 @@ public struct SKPurchasesView: View {
                                 .scaledToFit()
                         }
                         .padding(.all, 10)
-                        .productViewStyle(SKProductViewStyle(selectedProduct: $selectedProductId, productSelected: $productSelected))
+                        .productViewStyle(SKProductViewStyle(selectedProductId: $selectedProductId, productSelected: $productSelected))
                         Divider().padding()
                     }
                 }

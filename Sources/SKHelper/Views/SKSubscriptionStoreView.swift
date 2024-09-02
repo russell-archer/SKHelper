@@ -8,12 +8,17 @@
 import SwiftUI
 import StoreKit
 
+/// Uses the StoreKit `SubscriptionStoreView` to create a list of all avaliable subscriptions.
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKSubscriptionStoreView: View {
+    
+    /// The `SKHelper` object.
     @Environment(SKHelper.self) private var store
     
+    /// Creates a `SKSubscriptionStoreView`.
     public init() {}
     
+    /// Creates the body of the view.
     public var body: some View {
         SubscriptionStoreView(productIDs: store.allSubscriptionProductIdsByLevel(for: "vip")) {
             Image(systemName: "cart.fill")

@@ -7,9 +7,15 @@
 
 import SwiftUI
 
+/// A composable view that displays purchase information related to a subscription.
+/// See `SKManagePurchaseView`, which includes this view.
+///
 internal struct SKSubscriptionInfoMain: View {
+    
+    /// Information related to a subscription.
     let subInfo: SKSubscriptionInformation
     
+    /// Creates the body of the view.
     var body: some View {
         
         VStack {

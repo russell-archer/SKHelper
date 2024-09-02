@@ -7,9 +7,15 @@
 
 import SwiftUI
 
+/// A composable view that displays purchase information related to a non-consumable.
+/// See `SKManagePurchaseView`, which includes this view.
+///
 internal struct SKPurchaseInfoMain: View {
+    
+    /// A `SKPurchaseInformation` passed by `SKManagePurchaseView`.
     let purchaseInfo: SKPurchaseInformation
     
+    /// Creates the body of this view.
     var body: some View {
         VStack {
             SKPurchaseInfoFieldView(fieldName: "Product name:", fieldValue: purchaseInfo.name)

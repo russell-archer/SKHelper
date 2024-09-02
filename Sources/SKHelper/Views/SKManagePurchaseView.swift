@@ -8,20 +8,53 @@
 import SwiftUI
 import StoreKit
 
+/// A view that displays detailed information related to a non-consumable or subscription purchase, along with purchase management options.
+///
+/// ## Non-consumables ##
+/// If the purchase is for a non-consumable a button is diplsayed allowing the user to "Manage Purchase" (request a refund).
+/// Tapping this button displays the standard StoreKit App Store Refund Request sheet.
+///
+/// ## Subscriptions ##
+/// If the purchase is for a subscription a button is displayed allowing the user to "Manage Subscription".
+/// Tapping this button displays the standard StoreKit App Store subscription sheet which shows the current subscription,
+/// along with upgrade and downgrade options. The option to cancel the subscription is also displayed.
+///
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKManagePurchaseView: View {
+    /// The `SKHelper` object.
     @Environment(SKHelper.self) private var store
+    
+    /// Purchase information related to a non-consumable.
     @State private var purchaseInfo: SKPurchaseInformation?
+    
+    /// Purchase information related to a subscription.
     @State private var subInfo: SKSubscriptionInformation?
+    
+    /// Determines if the manage purchase sheet is displayed.
     @State private var showManagePurchase = false
+    
+    /// If a refund is requestd this is the transaction id of for that refund.
     @State private var refundRequestTransactionId: UInt64 = UInt64.min
+    
+    /// Determines if the request refund sheet is displayed.
     @State private var showRefundSheet = false
+    
+    /// Determines if results from the refund request process are displayed.
     @State private var showRefundAlert: Bool = false
+    
+    /// Text related to the result of the most recent refund request.
     @State private var refundAlertText: String = ""
+    
+    /// Determines if the manage subscription sheet is displayed.
     @State private var showManageSubscriptionsSheet = false
-    @Binding var selectedProductId: String
+    
+    /// A binding to the currently selected `ProductId`.
+    @Binding var selectedProductId: ProductId
+    
+    /// A binding that determines if the purchase info sheet is displayed.
     @Binding var showPurchaseInfoSheet: Bool
     
+    /// Creates the `SKManagePurchaseView`.
     public var body: some View {
         VStack {
             SKSheetBarView(showSheet: $showPurchaseInfoSheet, title: purchaseInfo?.name ?? "Product Info")

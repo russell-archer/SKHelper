@@ -7,9 +7,15 @@
 
 import SwiftUI
 
+/// A composable view that allows the user to manage a subscription, including cancelling, upgrading or downgrading.
+/// See `SKManagePurchaseView`, which includes this view.
+///
 struct SKSubscriptionInfoManage: View {
+    
+    /// A binding to a value that determines if the manage subscription sheet is displayed.
     @Binding var showManageSubscriptionsSheet: Bool
     
+    /// Creates the body of the view.
     var body: some View {
         #if os(iOS)
         Divider().padding(.bottom)

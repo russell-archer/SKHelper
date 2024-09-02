@@ -7,21 +7,39 @@
 
 import SwiftUI
 
+/// An iOS-specific view that forms a "title bar", with a title and a close button at the top of a sheet.
 #if os(iOS)
 @available(iOS 17.0, *)
 public struct SKSheetBarView: View {
+    
+    /// A values that determines if the close button is displayed.
     @State private var showXmark = false
+    
+    /// A binding to a value that determines if the sheet on which this `SKSheetBarView` sits is displayed.
     @Binding var showSheet: Bool
+    
+    /// The title to be displayed on the bar.
     private let title: String?
+    
+    /// The image to be displayed on the bar.
     private let sysImg: String?
+    
+    /// The padding used by the bar title.
     private let insetsTitle = EdgeInsets(top: 10, leading: 0, bottom: 0, trailing: 0)
-
+    
+    /// Creates the view that forms a "title bar", with a title and a close button at the top of a sheet.
+    ///
+    /// - Parameters:
+    ///   - showSheet: A binding to a value that determines if the sheet is displayed.
+    ///   - title: The title displayed on the bar.
+    ///   - sysImage: The image displayed on the bar.
     public init(showSheet: Binding<Bool>, title: String? = nil, sysImage: String? = nil) {
         self._showSheet = showSheet
         self.title = title
         self.sysImg = sysImage
     }
     
+    /// Creates the body view.
     public var body: some View {
         HStack {
             ZStack {
@@ -43,23 +61,41 @@ public struct SKSheetBarView: View {
 }
 #endif
 
+/// A macOS-specific view that forms a "title bar" with a title and a close button at the top of a sheet.
 #if os(macOS)
 @available(macOS 12.0, *)
 public struct SKSheetBarView: View {
+    /// A values that determines if the close button is displayed.
     @State private var showXmark = false
-    @Binding var showSheet: Bool
-    var title: String?
-    var sysImg: String?
     
+    /// A binding to a value that determines if the sheet on which this `SKSheetBarView` sits is displayed.
+    @Binding var showSheet: Bool
+    
+    /// The title to be displayed on the bar.
+    private let title: String?
+    
+    /// The image to be displayed on the bar.
+    private let sysImg: String?
+    
+    /// The padding used by the bar.
     private var insets = EdgeInsets(top: 13, leading: 20, bottom: 5, trailing: 0)
+    
+    /// The padding used by the bar title.
     private var insetsTitle = EdgeInsets(top: 13, leading: 0, bottom: 5, trailing: 0)
     
+    /// Creates the view that forms a "title bar", with a title and a close button at the top of a sheet.
+    ///
+    /// - Parameters:
+    ///   - showSheet: A binding to a value that determines if the sheet is displayed.
+    ///   - title: The title displayed on the bar.
+    ///   - sysImage: The image displayed on the bar.
     public init(showSheet: Binding<Bool>, title: String? = nil, sysImage: String? = nil) {
         self._showSheet = showSheet
         self.title = title
         self.sysImg = sysImage
     }
     
+    /// Creates the body view.
     public var body: some View {
         HStack {
             ZStack {

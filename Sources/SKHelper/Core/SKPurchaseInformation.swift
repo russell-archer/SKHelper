@@ -11,6 +11,7 @@ import StoreKit
 @available(iOS 17.0, macOS 14.6, *)
 @MainActor
 public struct SKPurchaseInformation: Hashable {
+    
     /// The product's unique id
     public var id: ProductId
     

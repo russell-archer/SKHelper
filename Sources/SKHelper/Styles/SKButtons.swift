@@ -7,8 +7,14 @@
 
 import SwiftUI
 
+/// Cross-platform button styles.
 @MainActor
 public extension View {
+    
+    /// Creates a borderless button style.
+    ///
+    /// - Returns: Returns a cross-platform borderless button style.
+    ///
     @ViewBuilder func SKButtonStyleBorderless() -> some View {
         #if os(iOS) || os(macOS) || os(visionOS)
         buttonStyle(.borderless)
@@ -21,6 +27,15 @@ public extension View {
         #endif
     }
     
+    /// Creates a prominent button style.
+    ///
+    /// - Parameters:
+    ///   - foregroundColor: The button foreground.
+    ///   - backgroundColor: The button background.
+    ///   - pressedColor: The pressed color.
+    ///   - padding: Button padding.
+    /// - Returns: Returns a cross-platform prominent button style.
+    ///
     func SKButtonStyleBorderedProminent(
         foregroundColor: Color = .white,
         backgroundColor: Color = .blue,
@@ -43,6 +58,7 @@ public extension View {
 }
 
 #if os(macOS)
+/// macOS button styles.
 @MainActor
 public struct SKmacOSButtonStyle: ButtonStyle {
     var foregroundColor: Color = .white
@@ -51,6 +67,15 @@ public struct SKmacOSButtonStyle: ButtonStyle {
     var opacity: Double = 1
     var padding: EdgeInsets = EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
     
+    /// Creates a custom macOS button style.
+    ///
+    /// - Parameters:
+    ///   - foregroundColor: The button foreground.
+    ///   - backgroundColor: The button background.
+    ///   - pressedColor: The pressed color.
+    ///   - opacity: The button opacity.
+    ///   - padding: Button padding.
+    ///
     public init(foregroundColor: Color = .white,
                 backgroundColor: Color = .blue,
                 pressedColor: Color = .secondary,
@@ -64,6 +89,11 @@ public struct SKmacOSButtonStyle: ButtonStyle {
         self.padding = padding
     }
     
+    /// Create the body of the macOS button style.
+    /// 
+    /// - Parameter configuration: The button configuration.
+    /// - Returns: Returns the custom button.
+    /// 
     public func makeBody(configuration: Self.Configuration) -> some View {
         configuration.label
             .font(.title2)
@@ -75,45 +105,5 @@ public struct SKmacOSButtonStyle: ButtonStyle {
     }
 }
 
-public extension View {
-    @MainActor func SKmacOSStyle(foregroundColor: Color = .white, backgroundColor: Color = .blue, pressedColor: Color = .secondary, padding: EdgeInsets = EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)) -> some View {
-        self.buttonStyle(SKmacOSButtonStyle(foregroundColor: foregroundColor, backgroundColor: backgroundColor, pressedColor: pressedColor, padding: padding))
-    }
-    
-    @MainActor func SKmacOSTransparentStyle(foregroundColor: Color = .blue, backgroundColor: Color = .white, pressedColor: Color = .secondary) -> some View {
-        self.buttonStyle(SKmacOSButtonStyle(foregroundColor: foregroundColor, backgroundColor: backgroundColor, pressedColor: pressedColor, opacity: 0))
-    }
-}
-
-public extension Button {
-    @MainActor func SKmacOSRoundedStyle() -> some View {
-        self
-            .frame(width: 30, height: 30)
-            .buttonStyle(.plain)
-            .foregroundColor(Color.white)
-            .background(Color.blue)
-            .clipShape(Circle())
-    }
-}
-
-public extension Text {
-    @MainActor func SKmacOSNarrowButtonStyle() -> some View {
-        self
-            .frame(width: 100, height: 40)
-            .buttonStyle(.plain)
-            .foregroundColor(Color.white)
-            .background(Color.blue)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-    
-    @MainActor func SKmacOSNarrowButtonStyle(disabled: Bool = false) -> some View {
-        self
-            .frame(width: 100, height: 40)
-            .buttonStyle(.plain)
-            .foregroundColor(disabled ? Color.secondary : Color.white)
-            .background(disabled ? Color.gray : Color.blue)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-    }
-}
 #endif
 

@@ -7,7 +7,14 @@
 
 import SwiftUI
 
+/// View extension for cross-platform tap gesture.
 extension View {
+    
+    /// Cross-platform tap gesture.
+    /// 
+    /// - Parameter perform: The action to perform.
+    /// - Returns: Returns a suitable tap gesture for the current platform.
+    ///
     @ViewBuilder func SKOnTapGesture(perform: @escaping () -> Void) -> some View {
         #if os(tvOS)
         if #available(tvOS 16.0, *) {
