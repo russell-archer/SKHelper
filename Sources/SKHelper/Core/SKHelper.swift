@@ -454,6 +454,15 @@ public class SKHelper: Observable {
     public func subscriptionInformation(for productId: ProductId) async -> SKSubscriptionInformation? {
         guard let product = product(from: productId), isAutoRenewable(productId: productId) else { return nil }
         
+        // Create a date formatter
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "d MMM y"
+        
+        // Create a localized price formatter
+        let priceFormatter = NumberFormatter()
+        priceFormatter.numberStyle = .currency
+        priceFormatter.locale = product.priceFormatStyle.locale
+        
         var subInfo = SKSubscriptionInformation(product: product)  // Create a struct to hold the subscription data
         
         let subscriptionState = await isSubscribed(productId: product.id)
@@ -479,7 +488,7 @@ public class SKHelper: Observable {
         
         // Get the latest transaction
         guard let transactionVerificationResult = await product.latestTransaction else { return subInfo }
-        
+
         // Unwrap the verification result and make sure it was verified by StoreKit
         let unwrappedVerificationResult = checkVerificationResult(result: transactionVerificationResult)
         guard unwrappedVerificationResult.verified else { return subInfo }
@@ -517,11 +526,7 @@ public class SKHelper: Observable {
         if let periodUnitText { subInfo.renewalPeriod = "Every \(periodUnitText)"}
         else { subInfo.renewalPeriod = "Unknown renewal period"}
         
-        // Get subscription renewal info
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "d MMM y"
-            
-        // Will the current subscription automatically renew?
+        // Get subscription renewal info. Will the current subscription automatically renew?
         if let renewalInfo = try? status.renewalInfo.payloadValue { subInfo.autoRenewOn = renewalInfo.willAutoRenew }
         else { subInfo.autoRenewOn = false }
         
@@ -552,7 +557,30 @@ public class SKHelper: Observable {
         subInfo.revocationReason = transaction.revocationReason
         subInfo.ownershipType = transaction.ownershipType
         
-        // TODO: Add all previous transactions for the product here (add a history to SKSubscriptionInformation)
+        // Add all previous transactions for the subscription
+        for await transactionResult in Transaction.all {
+            // Is this transaction for the product we're looking at?
+            if transactionResult.unsafePayloadValue.productID != productId { continue }
+
+            // Get the verified transaction object
+            let unwrappedTransactionResult = checkVerificationResult(result: transactionResult)
+            if !unwrappedTransactionResult.verified { continue }
+                    
+            // Is this the most recent transaction? If so, ignore as we already have info on that.
+            if unwrappedTransactionResult.transaction.id == transaction.id { continue }
+            
+            // Get transaction info
+            var historicalTransactionInfo = SKSubscriptionHistory(id: String(unwrappedTransactionResult.transaction.id), productId: productId)
+            historicalTransactionInfo.transactionId = unwrappedTransactionResult.transaction.id
+            historicalTransactionInfo.purchaseDate = unwrappedTransactionResult.transaction.purchaseDate
+            historicalTransactionInfo.purchaseDateFormatted = dateFormatter.string(from: unwrappedTransactionResult.transaction.purchaseDate)
+            
+            var displayPrice: String?
+            if let pricePaid = unwrappedTransactionResult.transaction.price { displayPrice = priceFormatter.string(from: pricePaid as NSNumber) }
+            historicalTransactionInfo.displayPrice = displayPrice ?? "Unknown"
+            
+            subInfo.history.append(historicalTransactionInfo)
+        }
         
         return subInfo
     }

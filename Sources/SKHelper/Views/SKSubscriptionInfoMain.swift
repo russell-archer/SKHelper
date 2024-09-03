@@ -42,12 +42,25 @@ internal struct SKSubscriptionInfoMain: View {
             }
             
             Group {
+                Text("Most recent transaction").foregroundColor(.secondary).padding()
                 Divider()
-                Text("Most recent transaction").foregroundColor(.secondary)
-                SKPurchaseInfoFieldView(fieldName: "Date:", fieldValue: subInfo.purchaseDateFormatted ?? "Unknown")
-                SKPurchaseInfoFieldView(fieldName: "ID:", fieldValue: String(subInfo.transactionId ?? UInt64.min))
-                SKPurchaseInfoFieldView(fieldName: "Purchase type:", fieldValue: subInfo.ownershipType == nil ? "Unknown" : (subInfo.ownershipType! == .purchased ? "Personal purchase" : "Family sharing"))
-                SKPurchaseInfoFieldView(fieldName: "Notes:", fieldValue: "\(subInfo.revocationDate == nil ? "-" : "Purchased revoked \(subInfo.revocationDateFormatted ?? "") \(subInfo.revocationReason == .developerIssue ? "(developer issue)" : "(other issue)")")")
+                SKPurchaseInfoFieldViewNarrow(fieldName: "Date:", fieldValue: subInfo.purchaseDateFormatted ?? "Unknown")
+                SKPurchaseInfoFieldViewNarrow(fieldName: "ID:", fieldValue: String(subInfo.transactionId ?? UInt64.min))
+                SKPurchaseInfoFieldViewNarrow(fieldName: "Price:", fieldValue: subInfo.displayPrice ?? "Unknown")
+                SKPurchaseInfoFieldViewNarrow(fieldName: "Purchase type:", fieldValue: subInfo.ownershipType == nil ? "Unknown" : (subInfo.ownershipType! == .purchased ? "Personal purchase" : "Family sharing"))
+                SKPurchaseInfoFieldViewNarrow(fieldName: "Notes:", fieldValue: "\(subInfo.revocationDate == nil ? "-" : "Purchased revoked \(subInfo.revocationDateFormatted ?? "") \(subInfo.revocationReason == .developerIssue ? "(developer issue)" : "(other issue)")")")
+            }
+            
+            if !subInfo.history.isEmpty {
+                Group {
+                    Text("Historical transactions").foregroundColor(.secondary).padding()
+                    ForEach(subInfo.history) { historicalTransaction in
+                        Divider()
+                        SKPurchaseInfoFieldViewNarrow(fieldName: "Date:", fieldValue: historicalTransaction.purchaseDateFormatted ?? "Unknown")
+                        SKPurchaseInfoFieldViewNarrow(fieldName: "ID:", fieldValue: String(historicalTransaction.transactionId ?? UInt64.min))
+                        SKPurchaseInfoFieldViewNarrow(fieldName: "Price:", fieldValue: historicalTransaction.displayPrice ?? "Unknown")
+                    }
+                }
             }
         }
         .padding()

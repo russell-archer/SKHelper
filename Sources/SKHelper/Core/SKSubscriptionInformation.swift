@@ -26,6 +26,7 @@ public struct SKSubscriptionInformation: Hashable {
         self.displayPrice   = product.displayPrice
         self.groupName      = product.subscription?.groupDisplayName
         self.groupId        = product.subscription?.subscriptionGroupID
+        self.history        = [SKSubscriptionHistory]()
     }
     
     /// The StoreKit `Product` that describes the auto-renewable subscription.
@@ -96,4 +97,30 @@ public struct SKSubscriptionInformation: Hashable {
     
     /// Either .purchased or .familyShared.
     public var ownershipType: StoreKit.Transaction.OwnershipType?
+    
+    /// A collection of all historical purchases of this auto-renewable subscription product.
+    public var history: [SKSubscriptionHistory]
+}
+
+/// Information about a historical purchase of an auto-renewable subscription product.
+@available(iOS 17.0, macOS 14.6, *)
+@MainActor
+public struct SKSubscriptionHistory: Hashable, Identifiable {
+    /// Transactionid for most recent purchase.
+    public var id: String
+    
+    /// The product's unique id.
+    public var productId: ProductId
+            
+    /// Localized price paid when the transaction took place.
+    public var displayPrice: String?
+    
+    /// Most recent date of purchase.
+    public var purchaseDate: Date?
+    
+    /// Most recent date of purchase formatted as "d MMM y" (e.g. "28 Dec 2021").
+    public var purchaseDateFormatted: String?
+    
+    /// Transactionid for most recent purchase.
+    public var transactionId: UInt64?
 }
