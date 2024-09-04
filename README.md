@@ -40,7 +40,7 @@ Jump to the [StoreHelper Quick Start](https://russell-archer.github.io/SKHelper/
 ## TODO
 - DONE: complete getHighestValueActiveSubscription()
 - DONE: complete subscriptionInformation(): add all previous transactions for a subscription 
-- privacy and license buttons
-- switch from using StoreKit views with ids to products
-- There’s a modifier that returns a view that’s dependent on an in-app purchase - demo usage
+- DONE: (for subscription store view only - not supported on other view, will need to add manually for StoreView) privacy and terms of service buttons
+- DONE: switch from using StoreKit views with ids to products
+- There’s a modifier that returns a view that’s dependent on an in-app purchase - demo usage (.currentEntitlementTask(for:))
 

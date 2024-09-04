@@ -15,19 +15,22 @@ public extension SKHelper {
     // MARK: - Public product helper properties
     
     /// All `SKProduct` products.
-    var allProducts: [SKProduct] { products }
+    var allSKProducts: [SKProduct] { products }
     
     /// All `SKProduct` products that represent consumables.
-    var allConsumableProducts: [SKProduct] { products.filter { $0.product.type == .consumable }}
+    var allSKConsumableProducts: [SKProduct] { products.filter { $0.product.type == .consumable }}
     
     /// All `SKProduct` products that represent non-consumables.
-    var allNonConsumableProducts: [SKProduct] { products.filter { $0.product.type == .nonConsumable }}
+    var allSKNonConsumableProducts: [SKProduct] { products.filter { $0.product.type == .nonConsumable }}
     
     /// All `SKProduct` products that represent auto-renewable subscriptions.
-    var allSubscriptionProducts: [SKProduct] { products.filter { $0.product.type == .autoRenewable }}
+    var allSKSubscriptionProducts: [SKProduct] { products.filter { $0.product.type == .autoRenewable }}
     
     /// All `SKProduct` products that represent purchased products.
-    var allPurchasedProducts: [SKProduct] { products.filter { $0.hasEntitlement }}
+    var allSKPurchasedProducts: [SKProduct] { products.filter { $0.hasEntitlement }}
+    
+    /// A collection of all localized `Product` returned by the App Store. An empty collection will be returned if products have not been successfully returned fromt he App Store.
+    var allProducts: [Product] { products.map { $0.product }}
     
     /// A collection of all configured `ProductId`.
     var allProductIds: [ProductId] { products.map { $0.id }}
@@ -48,13 +51,13 @@ public extension SKHelper {
     var hasProducts: Bool { !products.isEmpty }
     
     /// This property is true if `SKHelper.products` contains one or more consumable products, false otherwise.
-    var hasConsumableProducts: Bool { !allConsumableProducts.isEmpty }
+    var hasConsumableProducts: Bool { !allSKConsumableProducts.isEmpty }
     
     /// This property is true if `SKHelper.products` contains one or more non-consumable products, false otherwise.
-    var hasNonConsumableProducts: Bool { !allNonConsumableProducts.isEmpty }
+    var hasNonConsumableProducts: Bool { !allSKNonConsumableProducts.isEmpty }
     
     /// This property is true if `SKHelper.products` contains one or more subscription products, false otherwise.
-    var hasSubscriptionProducts: Bool { !allSubscriptionProducts.isEmpty }
+    var hasSubscriptionProducts: Bool { !allSKSubscriptionProducts.isEmpty }
     
     // MARK: - Public helper methods
     
@@ -63,7 +66,7 @@ public extension SKHelper {
     /// - Parameter productId: The `ProductId` to search for in `SKHelper.products`.
     /// - Returns: Returns the first `SKProduct` in `SKHelper.products` whose `id` matches the supplied `ProductId`, or nil if no match is found.
     ///
-    func storeProduct(for productId: ProductId) -> SKProduct? {
+    func skProduct(for productId: ProductId) -> SKProduct? {
         products.first(where: { $0.id == productId })
     }
     
@@ -191,13 +194,13 @@ public extension SKHelper {
         allSubscriptionStoreProducts(for: groupName).sorted { $0.groupLevel < $1.groupLevel}.map { $0.id }
     }
     
-    /// Finds all subscription products in `SKHelper.products` that match the supplied subscription group name.
+    /// Finds a collection of all subscription `Product` in `SKHelper.products` that match the supplied subscription group name. The resulting collection is sorted by subscription group level (value).
     ///
     /// - Parameter groupName: The group name (`groupDisplayName`)  to search for in `SKHelper.products`.
-    /// - Returns: Returns all subscription products in `SKHelper.products` that match the supplied subscription group name.
+    /// - Returns: Returns a collection of all subscription `Product` in `SKHelper.products` that match the supplied subscription group name.
     ///
-    func allSubscriptionProducts(for groupName: String) -> [Product] {
-        allSubscriptionStoreProducts(for: groupName).map { $0.product }
+    func allSubscriptionProductsByLevel(for groupName: String) -> [Product] {
+        allSubscriptionStoreProducts(for: groupName).sorted { $0.groupLevel < $1.groupLevel}.map { $0.product }
     }
 }
 
@@ -298,4 +301,23 @@ public enum SKSubscriptionState {
     
     /// The subscription to this product has been superceeded by a subscription to a higher value product in the same subscription group
     case superceeded
+}
+
+// MARK: - SKEntitlementState
+
+/// The state of an entitlement to a product.
+@available(iOS 17.0, macOS 14.6, *)
+public enum SKEntitlementState {
+    
+    /// No transaction for the product has been found.
+    case noEntitlement
+    
+    /// The transaction for this purchase could not be verified.
+    case notVerified
+    
+    /// The user has a verified entitlement to access the product.
+    case verifiedEntitlement
+    
+    /// Access to the purchase has been revoked by the App Store.
+    case revoked
 }

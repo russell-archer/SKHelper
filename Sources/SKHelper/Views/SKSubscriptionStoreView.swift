@@ -20,23 +20,35 @@ public struct SKSubscriptionStoreView: View {
     
     /// Creates the body of the view.
     public var body: some View {
-        SubscriptionStoreView(productIDs: store.allSubscriptionProductIdsByLevel(for: "vip")) {
-            Image(systemName: "cart.fill")
-                .resizable()
-                .frame(maxWidth: 85, maxHeight: 85)
-                .scaledToFit()
-        }
-        .subscriptionStoreButtonLabel(.action)
-        .subscriptionStoreControlStyle(.prominentPicker)
-        .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
-        .storeButton(.visible, for: .restorePurchases)
-        #if os(iOS)
-        .storeButton(.visible, for: .redeemCode)
-        #endif
-        .subscriptionStoreControlIcon { subscription, info in
-            Image(subscription.id)
-                .resizable()
-                .scaledToFit()
+        if store.hasSubscriptionProducts {
+            SubscriptionStoreView(subscriptions: store.allSubscriptionProductsByLevel(for: "vip")) {
+                Image(systemName: "cart.fill")
+                    .resizable()
+                    .frame(maxWidth: 85, maxHeight: 85)
+                    .scaledToFit()
+            }
+            .subscriptionStoreButtonLabel(.action)
+            .subscriptionStoreControlStyle(.prominentPicker)
+            .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
+            .storeButton(.visible, for: .restorePurchases, .policies)
+            .subscriptionStorePolicyDestination(url: URL(string: "https://russell-archer.github.io/Writerly/privacy/")!, for: .privacyPolicy)
+            .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
+            #if os(iOS)
+            .storeButton(.visible, for: .redeemCode)
+            #endif
+            .subscriptionStoreControlIcon { subscription, info in
+                Image(subscription.id)
+                    .resizable()
+                    .scaledToFit()
+            }
+        } else {
+            
+            VStack {
+                Text("No subscriptions available").font(.subheadline)
+                Button("Refresh Subscriptions") { Task { await store.requestProducts() }}
+                ProgressView()
+            }
+            .padding()
         }
     }
 }

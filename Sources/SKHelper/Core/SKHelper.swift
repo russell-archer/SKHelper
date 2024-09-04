@@ -17,7 +17,7 @@ public class SKHelper: Observable {
     /// Array of `SKProduct`, which includes localized `Product` info retrieved from the App Store and a cached product entitlement.
     public private(set) var products = [SKProduct]()
     
-    /// When set to `true` `SKHelper` will use previously cached values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil.
+    /// When set to true `SKHelper` will use previously cached values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil.
     /// Using cached entitlements can help mitigate issues where `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an
     /// entitlement to use a product.
     public var useCachedEntitlements = true
@@ -38,7 +38,7 @@ public class SKHelper: Observable {
     
     // MARK: - Init/deinit
     
-    /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically start listening for App Store transactions,
+    /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically starts listening for App Store transactions,
     /// purchase intents and subscription changes.
     ///
     public init() {
@@ -46,20 +46,7 @@ public class SKHelper: Observable {
         purchaseIntentListener = handlePurchaseIntents()
         subscriptionListener = handleSubscriptionChanges()
         
-        // Read our list of product ids
-        guard let productIds = SKConfiguration.readProductConfiguration() else { return }
-        
-        // Get the cache of purchased product ids
-        let purchasedProductIds = readPurchasedProducts()
-        
-        // Get localized product info from the App Store and create a collection of `SKProduct`
-        Task { @MainActor in
-            if let localizedProducts = await requestProducts(productIds: Array(productIds)) {
-                localizedProducts.forEach { localizedProduct in
-                    products.append(SKProduct(product: localizedProduct, hasEntitlement: purchasedProductIds.contains(localizedProduct.id)))
-                }
-            }
-        }
+        Task { await requestProducts() }
     }
     
     /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically start listening for App Store transactions,
@@ -67,7 +54,7 @@ public class SKHelper: Observable {
     ///
     /// This initializer also allows you to set the value of `useCachedEntitlements` which, when set to `true` ensures that `SKHelper` will use previously cached
     /// values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil. Using cached entitlements can help mitigate issues where
-    ///  `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an entitlement to use a product.
+    /// `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an entitlement to use a product.
     ///
     public convenience init(useCachedEntitlements: Bool = true) {
         self.init()
@@ -86,19 +73,33 @@ public class SKHelper: Observable {
     
     /// Request localized product info from the App Store for a collection of `ProductId`.
     ///
-    /// - Parameter productIds: The product ids that you want localized information for.
-    /// - Returns: Returns an array of `Product`, or nil if no product information is returned by the App Store.
+    /// Product information returned from the App Store is stored in the `SKHelper.products` property.
     ///
-    public func requestProducts(productIds: [ProductId]) async -> [Product]? {
+    /// - Returns: Returns true if product information was successfully returned by the App Store, false otherwise.
+    ///
+    public func requestProducts() async -> Bool {
         SKLog.event(.requestProductsStart)
         
+        // Read our list of product ids
+        guard let productIds = SKConfiguration.readProductConfiguration() else { return false }
+        
+        // Get the cache of purchased product ids
+        let purchasedProductIds = readPurchasedProducts()
+        
+        // Get localized product info from the App Store
         guard let localizedProducts = try? await Product.products(for: productIds) else {
             SKLog.event(.requestProductsFailure)
-            return nil
+            return false
+        }
+    
+        // Create a collection of `SKProduct`
+        products.removeAll()
+        localizedProducts.forEach { localizedProduct in
+            products.append(SKProduct(product: localizedProduct, hasEntitlement: purchasedProductIds.contains(localizedProduct.id)))
         }
         
         SKLog.event(.requestProductsSuccess)
-        return localizedProducts
+        return true
     }
 
     /// Purchase a `Product` previously returned from the App Store.
@@ -263,7 +264,7 @@ public class SKHelper: Observable {
     /// - Returns: Returns true if user is entitled to use the product, false otherwise.
     ///
     public func isPurchased(productId: ProductId) async throws -> Bool {
-        guard let product = storeProduct(for: productId) else { return false }
+        guard let product = skProduct(for: productId) else { return false }
         guard isNonConsumable(productId: productId) || isAutoRenewable(productId: productId) else { return false }
         
         if isAutoRenewable(productId: productId) { return await isSubscribed(productId: productId) == .subscribed }
@@ -333,7 +334,7 @@ public class SKHelper: Observable {
     ///
     public func isSubscribed(productId: ProductId) async -> SKSubscriptionState {
         guard isAutoRenewable(productId: productId) else { return .notSubscribed }
-        guard let storeProduct = storeProduct(for: productId), let groupName = storeProduct.groupName else { return .notSubscribed }
+        guard let storeProduct = skProduct(for: productId), let groupName = storeProduct.groupName else { return .notSubscribed }
         
         // We're dealing with an auto-renewable product. Does the user have a current entitlement to use it?
         var hasEntitlement = false
@@ -611,6 +612,49 @@ public class SKHelper: Observable {
         return nil
     }
     
+    /// Check if StoreKit was able to automatically verify a transaction by inspecting the verification result.
+    ///
+    /// - Parameter result: The transaction `VerificationResult` to check.
+    /// - Returns: Returns an `SKUnwrappedVerificationResult<T>` where `verified` is true if the transaction was successfully verified by StoreKit.
+    /// When `verified` is false `verificationError` will be non-nil.
+    ///
+    public func checkVerificationResult<T>(result: VerificationResult<T>) -> SKUnwrappedVerificationResult<T> {
+        
+        switch result {
+            case .unverified(let unverifiedTransaction, let error):
+                // StoreKit failed to automatically validate the transaction
+                return SKUnwrappedVerificationResult(transaction: unverifiedTransaction, verified: false, verificationError: error)
+                
+            case .verified(let verifiedTransaction):
+                // StoreKit successfully automatically validated the transaction
+                return SKUnwrappedVerificationResult(transaction: verifiedTransaction, verified: true, verificationError: nil)
+        }
+    }
+    
+    /// Checks the user's current entitlement to a product using the `VerificationResult<Transaction>` object returned by the `currentEntitlementTask(for:)`
+    /// view modifier.
+    ///
+    /// A nil `transaction` parameter means the user has not purchased the product. The transaction is verified and a check is made to ensure the App Store has not
+    /// revoked access to the product.
+    ///
+    /// - Parameter transaction: The `VerificationResult<Transaction>` object returned by the `currentEntitlementTask(for:)` view modifier.
+    /// - Returns: Returns the user's current entitlement to a product. A result of `.verifiedEntitlement` will be returned if the user is entitled to access the product.
+    ///
+    public func hasCurrentEntitlement(for transaction: VerificationResult<Transaction>?) -> SKEntitlementState {
+        // If there's no transaction for the product the user hasn't purchased it
+        guard let transaction else { return .noEntitlement }
+
+        // Check StoreKit was able to verify the transaction
+        let verificationResult = checkVerificationResult(result: transaction)
+        guard verificationResult.verified else { return .notVerified }
+        
+        // We have a verified transaction for the purchase.
+        // As long as access has not been revoked we'll allow the user access to the product.
+        if verificationResult.transaction.revocationDate != nil { return .revoked }
+        
+        return .verifiedEntitlement
+    }
+    
     // MARK: - Private methods
         
     /// This is an infinite async sequence (loop). It will continue waiting for transactions until it is explicitly canceled by calling the `Task.cancel()` method. See `transactionListener`.
@@ -713,25 +757,6 @@ public class SKHelper: Observable {
         }
     }
     
-    /// Check if StoreKit was able to automatically verify a transaction by inspecting the verification result.
-    ///
-    /// - Parameter result: The transaction `VerificationResult` to check.
-    /// - Returns: Returns an `SKUnwrappedVerificationResult<T>` where `verified` is true if the transaction was successfully verified by StoreKit.
-    /// When `verified` is false `verificationError` will be non-nil.
-    ///
-    private func checkVerificationResult<T>(result: VerificationResult<T>) -> SKUnwrappedVerificationResult<T> {
-        
-        switch result {
-            case .unverified(let unverifiedTransaction, let error):
-                // StoreKit failed to automatically validate the transaction
-                return SKUnwrappedVerificationResult(transaction: unverifiedTransaction, verified: false, verificationError: error)
-                
-            case .verified(let verifiedTransaction):
-                // StoreKit successfully automatically validated the transaction
-                return SKUnwrappedVerificationResult(transaction: verifiedTransaction, verified: true, verificationError: nil)
-        }
-    }
-    
     /// Update our cache of purchased products.
     /// 
     /// - Parameters:
@@ -740,7 +765,7 @@ public class SKHelper: Observable {
     ///   - purchased: true if the product is to be flagged as purchased, false otherwise.
     ///
     private func updatePurchasedProducts(_ productId: ProductId, purchased: Bool) {
-        if let product = storeProduct(for: productId) {
+        if let product = skProduct(for: productId) {
             product.hasEntitlement = purchased
             savePurchasedProducts()
         }

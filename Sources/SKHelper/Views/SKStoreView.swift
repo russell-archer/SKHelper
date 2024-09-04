@@ -26,28 +26,38 @@ public struct SKStoreView: View {
     
     /// Creates the body of the view.
     public var body: some View {
-        StoreView(ids: store.allProductIds) { product in
-            VStack {
-                Image(product.id)
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(.circle)
-                    .onTapGesture {
-                        selectedProductId = product.id
-                        productSelected.toggle()
-                    }
+        if store.hasProducts {
+            StoreView(products: store.allProducts) { product in
+                VStack {
+                    Image(product.id)
+                        .resizable()
+                        .scaledToFit()
+                        .clipShape(.circle)
+                        .onTapGesture {
+                            selectedProductId = product.id
+                            productSelected.toggle()
+                        }
+                }
             }
-        }
-        .background(LinearGradient(gradient: Gradient(colors: [.white, .blue]), startPoint: .top, endPoint: .bottom))
-        .productViewStyle(.automatic)
-        #if os(iOS)
-        .storeButton(.visible, for: .restorePurchases, .policies, .redeemCode)
-        #else
-        .storeButton(.visible, for: .restorePurchases, .policies)  // Redeem code requires macOS 15+
-        #endif
-        .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
-        .sheet(isPresented: $productSelected) {
-            SKProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected)
+            .background(LinearGradient(gradient: Gradient(colors: [.white, .blue]), startPoint: .top, endPoint: .bottom))
+            .productViewStyle(.automatic)
+            #if os(iOS)
+            .storeButton(.visible, for: .restorePurchases, .policies, .redeemCode)
+            #else
+            .storeButton(.visible, for: .restorePurchases, .policies)  // Redeem code requires macOS 15+
+            #endif
+            .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
+            .sheet(isPresented: $productSelected) {
+                SKProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected)
+            }
+        } else {
+            
+            VStack {
+                Text("No products available").font(.subheadline)
+                Button("Refresh Products") { Task { await store.requestProducts() }}
+                ProgressView()
+            }
+            .padding()
         }
     }
 }
