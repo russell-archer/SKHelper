@@ -34,12 +34,12 @@ See the `SKHelper` <doc:LICENSE> for details.
 
 ## Requirements
 
-- `StoreHelper` uses Apple's `StoreKit2`, which requires **iOS 17**, **macOS 14+** and **Xcode 16**.
+- `SKHelper` uses Apple's `StoreKit2`, which requires **iOS 17**, **macOS 14+** and **Xcode 16**.
 
 ## Getting Started
 
-- For a quick, step-by-step overview of how to use `StoreHelper` refer to the <doc:quickstart> 
-- For an in-depth treatment of in-app purchases, `StoreKit2` and `StoreHelper` refer to the <doc:guide>
+- For a quick, step-by-step overview of how to use `SKHelper` refer to the <doc:quickstart> 
+- For an in-depth treatment of in-app purchases, `StoreKit2` and `SKHelper` refer to the <doc:guide>
 
 ## Topics
 

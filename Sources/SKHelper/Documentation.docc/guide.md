@@ -5,7 +5,7 @@ supports **iOS 17** and **macOS 14.6+** SwiftUI apps.
 
 @Metadata {
     @PageImage(purpose: icon, source: skhelper-logo)
-    @CallToAction(url: "https://github.com/russell-archer/StoreHelper", purpose: link, label: "View StoreHelper on GitHub")    
+    @CallToAction(url: "https://github.com/russell-archer/SKHelper", purpose: link, label: "View SKHelper on GitHub")    
 }
 
 TODO
