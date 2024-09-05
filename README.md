@@ -6,7 +6,7 @@
 
 # SKHelper
 
-![](./Sources/SKHelper/Documentation.docc/Resources/images/skhelper-logo.png)
+![](./Sources/SKHelper/Resources/images/skhelper-logo.png)
 
 - [SKHelper Documentation Landing Page](https://russell-archer.github.io/SKHelper/documentation/skhelper) - `SKHelper` documentation landing page
 - [SKHelper Quick Start](https://russell-archer.github.io/SKHelper/documentation/skhelper/quickstart) - `SKHelper` quick-start guide 

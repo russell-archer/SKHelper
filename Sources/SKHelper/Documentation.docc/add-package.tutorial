@@ -1,0 +1,23 @@
+@Tutorial(time: 5) {
+    @Intro(title: "Adding the SKHelper package") {
+        In this section we'll see how to add the `SKHelper` package.
+        
+        @Image(source: "skhelper-logo-small.png", alt: "SKHelper Logo.")
+    }
+    
+    @Section(title: "Adding the package like this") {
+        @ContentAndMedia {
+            text1
+        }
+        
+        @Steps {
+            @Step {
+                First, open Xcode then blah.
+            }
+            
+            @Step {
+                Now click a button and run.
+            }
+        }
+    }
+}

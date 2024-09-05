@@ -1,8 +1,7 @@
 # ``SKHelper``
 
 @Metadata {
-    @PageImage(purpose: icon, source: skhelper-logo-small)
-    @CallToAction(url: "https://github.com/russell-archer/SKHelper", purpose: link, label: "View SKHelper on GitHub")    
+    @PageImage(purpose: icon, source: skhelper-logo-small) 
 }
 
 `SKHelper` is a Swift Package Manager (SPM) package that enables developers using **Xcode 16** to easily add in-app purchase 
