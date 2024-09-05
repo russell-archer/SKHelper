@@ -10,6 +10,7 @@ import SwiftUI
 /// A composable view that displays purchase information related to a subscription.
 /// See `SKManagePurchaseView`, which includes this view.
 ///
+@available(iOS 17.0, macOS 14.6, *)
 internal struct SKSubscriptionInfoMain: View {
     
     /// Information related to a subscription.

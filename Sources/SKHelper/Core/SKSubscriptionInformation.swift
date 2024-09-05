@@ -8,8 +8,8 @@
 import StoreKit
 
 /// Information about the purchase of an auto-renewable subscription product.
-@available(iOS 17.0, macOS 14.6, *)
 @MainActor
+@available(iOS 17.0, macOS 14.6, *)
 public struct SKSubscriptionInformation: Hashable {
     
     /// Creates a `SKSubscriptionInformation`.

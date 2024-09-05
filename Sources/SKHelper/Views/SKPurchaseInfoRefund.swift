@@ -10,6 +10,7 @@ import SwiftUI
 /// A composable view that allows the user to request a refund for a non-consumable.
 /// See `SKManagePurchaseView`, which includes this view.
 ///
+@available(iOS 17.0, macOS 14.6, *)
 internal struct SKPurchaseInfoRefund: View {
     
     /// Purchase information passed to us by `SKManagePurchaseView`.

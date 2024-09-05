@@ -36,31 +36,34 @@ public struct SKLog {
     public static func event(_ event: SKNotification) { logEvent(event) }
     
     /// Logs an SKNotification. Note that the text (shortDescription) and the productId for the log entry will be publically available in the Console app.
-    ///
+    /// 
     /// - Parameters:
     ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
+    ///   - transactionId: The id of the transaction.
     ///
     public static func event(_ event: SKNotification, productId: ProductId, transactionId: String? = nil) {
         logEvent(event, productId: productId, transactionId: transactionId)
     }
     
     /// Logs an SKNotification. Note that the text (shortDescription) and the productId for the log entry will be publically available in the Console app.
-    ///
+    /// 
     /// - Parameters:
     ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
     ///   - webOrderLineItemId: A unique ID that identifies subscription purchase events across devices, including subscription renewals.
+    ///   - transactionId: The id of the transaction.
     ///
     public static func event(_ event: SKNotification, productId: ProductId, webOrderLineItemId: String?, transactionId: String? = nil) {
         logEvent(event, productId: productId, webOrderLineItemId: webOrderLineItemId, transactionId: transactionId)
     }
     
     /// Logs a SKNotification as a transaction. Note that the text (shortDescription) and the productId for the log entry will be publically available in the Console app.
-    ///
+    /// 
     /// - Parameters:
     ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
+    ///   - transactionId: The id of the transaction.
     ///
     public static func transaction(_ event: SKNotification, productId: ProductId, transactionId: String? = nil) {
         #if DEBUG
@@ -71,11 +74,12 @@ public struct SKLog {
     }
     
     /// Logs a SKNotification as a transaction. Note that the text (shortDescription) and the productId for the log entry will be publically available in the Console app.
-    ///
+    ///  
     /// - Parameters:
-    ///   - event:      A SKNotification.
     ///   - productId:  A ProductId associated with the event.
-    ///
+    ///   - transactionId: The id of the transaction.
+    ///   - newSubscriptionStatus: The description of the new subscription status.
+    /// 
     public static func subscriptionChanged(productId: ProductId, transactionId: String? = nil, newSubscriptionStatus: String) {
         #if DEBUG
         print("\(SKNotification.subscriptionStausChanged.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)") to \(newSubscriptionStatus)")
@@ -83,20 +87,6 @@ public struct SKLog {
         os_log("%{public}s for product %{public}s", log: storeLog, type: .default, event.shortDescription(), productId)
         #endif
     }
-    
-    /// Logs a StoreException. Note that the text (shortDescription) and the productId for the log entry will be publically available in the Console app.
-    ///
-    /// - Parameters:
-    ///   - exception:  A StoreException.
-    ///   - productId:  A ProductId associated with the event.
-    ///
-//    public static func exception(_ exception: StoreException, productId: ProductId, transactionId: String? = nil) {
-//        #if DEBUG
-//        print("\(exception.shortDescription()). For product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)")")
-//        #else
-//        os_log("%{public}s for product %{public}s", log: storeLog, type: .default, exception.shortDescription(), productId)
-//        #endif
-//    }
     
     /// Logs a message of type `String`.
     ///

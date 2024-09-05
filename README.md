@@ -3,7 +3,9 @@
 # Recent Major Changes
 - 5 Aug, 2024
     - First proof-of-concept public release of `SKHelper` on GitHub
-
+- 5 Sep, 2024
+    - The SKHelper package is now "feature complete" (apart from support for consumables)
+    
 ---
 
 ## Overview of SKHelper
@@ -36,11 +38,3 @@ See [License](https://russell-archer.github.io/SKHelper/documentation/skhelper/l
 ## Getting Started
 
 Jump to the [StoreHelper Quick Start](https://russell-archer.github.io/SKHelper/documentation/skhelper/quickstart) guide.
-
-## TODO
-- DONE: complete getHighestValueActiveSubscription()
-- DONE: complete subscriptionInformation(): add all previous transactions for a subscription 
-- DONE: (for subscription store view only - not supported on other view, will need to add manually for StoreView) privacy and terms of service buttons
-- DONE: switch from using StoreKit views with ids to products
-- There’s a modifier that returns a view that’s dependent on an in-app purchase - demo usage (.currentEntitlementTask(for:))
-

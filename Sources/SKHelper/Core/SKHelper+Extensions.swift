@@ -81,7 +81,7 @@ public extension SKHelper {
     
     /// The products in `SKHelper.products` whose ids match the supplied [`ProductId`].
     ///
-    /// - Parameter productId: The `ProductId` to search for in `SKHelper.products`.
+    /// - Parameter productIds: The collection of [`ProductId`] to search for in `SKHelper.products`.
     /// - Returns: Returns the products in `SKHelper.products` whose ids match the supplied [`ProductId`]. An empty collection is returned if no matches are found.
     ///
     func products(from productIds: [ProductId]) -> [Product] {
@@ -153,7 +153,7 @@ public extension SKHelper {
     
     /// The subscriptions in `SKHelper.products` whose ids match the supplied [`ProductId`].
     ///
-    /// - Parameter productId: The `ProductId` to search for in `SKHelper.products`.
+    /// - Parameter productIds: The collection of `ProductId` to search for in `SKHelper.products`.
     /// - Returns: Returns the subscriptions in `SKHelper.products` whose ids match the supplied [`ProductId`]. An empty collection is returned if no matches are found.
     ///
     func subscriptions(from productIds: [ProductId]) -> [Product.SubscriptionInfo] {

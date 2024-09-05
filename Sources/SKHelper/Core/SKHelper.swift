@@ -8,8 +8,8 @@
 public import StoreKit
 
 /// SKHelper, a lightweight StoreKit helper.
-@available(iOS 17.0, macOS 14.6, *)
 @MainActor
+@available(iOS 17.0, macOS 14.6, *)
 public class SKHelper: Observable {
     
     // MARK: - Public properties
@@ -153,7 +153,7 @@ public class SKHelper: Observable {
     }
     
     /// Call this method when the user completes a purchase workflow via a StoreKit view and your code uses the `.onInAppPurchaseCompletion` view modifier.
-    ///
+    /// 
     /// ## Example usage ##
     /// ```
     /// StoreView(ids: store.allProductIds) { product in
@@ -171,13 +171,14 @@ public class SKHelper: Observable {
     /// ```
     /// This allows `SKHelper` to process and finish the `Transaction` as the use of `.onInAppPurchaseCompletion` prevents transaction updates being
     /// handled in the normal manner by the `SKHelper.handleTransactions` (i.e. the transaction update is never received).
-    ///
+    /// 
     /// ## Note ##
     /// If you do not use the `.onInAppPurchaseCompletion` view modifier in your SwiftUI code there is no requirement to call this method.
-    ///
+    /// 
+    /// - Parameter product: The `Product` being purchased.
     /// - Parameter result: The `Product.PurchaseResult` of the purchase process, or nil if there was an error during the purchase.
     /// - Returns: Returns a tuple consisting of a `Transaction` object that represents the purchase and a `SKPurchaseState` describing the state of the purchase.
-    ///
+    /// 
     public func purchaseCompletion(for product: Product, with result: Product.PurchaseResult?) async -> (transaction: Transaction?, purchaseState: SKPurchaseState) {
         guard let result else {
             purchaseState = .failed
@@ -378,19 +379,19 @@ public class SKHelper: Observable {
     }
     
     /// Return the highest service level auto-renewing subscription the user is subscribed to in the `subscriptionGroup`.
-    /// - Parameter subscriptionGroup: The name of the subscription group.
+    /// - Parameter groupName: The name of the subscription group.
     /// - Returns: Returns the `Product` for the highest service level auto-renewing subscription the user is subscribed to in the `subscriptionGroup`, or nil if the user isn't subscribed to a product in the group.
-    ///
+    /// 
     /// When getting information on the highest service level auto-renewing subscription the user is subscribed to we enumerate the `Product.subscription.status` array that is a property of each `Product` in the group.
     /// This array is empty if the user has never subscribed to a product in this subscription group. If the user is subscribed to a product the `statusCollection.count` should be at least 1.
     /// Each `Product` in a subscription group provides access to the same `Product.SubscriptionInfo.Status` array via its `product.subscription.status` property.
-    ///
+    /// 
     /// Enumeration of the `SubscriptionInfo.Status` array is necessary because a user may have multiple active subscriptions to products in the same subscription group. For example, a user may have
     /// subscribed themselves to the "Gold" product, as well as receiving an automatic subscription to the "Silver" product through family sharing. In this case, we'd need to return information on the "Gold" product.
-    ///
+    /// 
     /// Also, note that even if the `Product.SubscriptionInfo.Status` collection does NOT contain a particular product `Transaction.currentEntitlement(for:)` may still report that the user has an
     /// entitlement. This can happen when upgrading or downgrading subscriptions. Because of this we always need to search the `Product.SubscriptionInfo.Status` collection for a subscribed product with a higher-value.
-    ///
+    /// 
     public func highestValueActiveSubscription(in groupName: String) async -> Product? {
         // The higher the value product, the LOWER the `Product.subscription.groupLevel` value.
         // The highest value product will have a `Product.subscription.groupLevel` value of 1.

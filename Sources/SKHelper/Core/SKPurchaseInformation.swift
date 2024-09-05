@@ -8,8 +8,8 @@
 import StoreKit
 
 /// Information related to the purchase of a non-consumable product.
-@available(iOS 17.0, macOS 14.6, *)
 @MainActor
+@available(iOS 17.0, macOS 14.6, *)
 public struct SKPurchaseInformation: Hashable {
     
     /// The product's unique id
