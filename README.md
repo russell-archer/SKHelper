@@ -1,10 +1,25 @@
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Frussell-archer%2FSKHelper%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/russell-archer/SKHelper)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Frussell-archer%2FSKHelper%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/russell-archer/SKHelper)
+[![](https://img.shields.io/github/license/russell-archer/SKHelper)](https://img.shields.io/github/license/russell-archer/SKHelper)
+
+---
+
 # SKHelper
 
+![](./Sources/SKHelper/Documentation.docc/Resources/images/skhelper-logo.jpg)
+
+- [SKHelper Documentation Landing Page](https://russell-archer.github.io/SKHelper/documentation/skhelper) - `SKHelper` documentation landing page
+- [SKHelper Quick Start](https://russell-archer.github.io/SKHelper/documentation/skhelper/quickstart) - `SKHelper` quick-start guide 
+- [SKHelper In-Depth Guide](https://russell-archer.github.io/SKHelper/documentation/skhelper/guide) - `SKHelper` and `StoreKit2` in-depth guide
+- [SKHelper Demo Project](https://github.com/russell-archer/SKHelperDemo) - Example Xcode `SKHelper` project
+
+---
+
 # Recent Major Changes
+- 5 Sep, 2024
+    - `SKHelper` is now "feature complete" (apart from support for consumables)
 - 5 Aug, 2024
     - First proof-of-concept public release of `SKHelper` on GitHub
-- 5 Sep, 2024
-    - The SKHelper package is now "feature complete" (apart from support for consumables)
     
 ---
 
