@@ -1,7 +1,7 @@
 # ``SKHelper``
 
 @Metadata {
-    @PageImage(purpose: icon, source: skhelper-logo)
+    @PageImage(purpose: icon, source: skhelper-logo-small)
     @CallToAction(url: "https://github.com/russell-archer/SKHelper", purpose: link, label: "View SKHelper on GitHub")    
 }
 

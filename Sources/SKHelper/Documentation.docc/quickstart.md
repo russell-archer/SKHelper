@@ -1,7 +1,7 @@
 # SKHelper Quick Start
 
 @Metadata {
-    @PageImage(purpose: icon, source: skhelper-logo)
+    @PageImage(purpose: icon, source: skhelper-logo-small)
     @CallToAction(url: "https://github.com/russell-archer/SKHelperDemo", purpose: link, label: "View SKHelperDemo on GitHub")
 }
 
