@@ -1,4 +1,4 @@
-# MIT License
+# License
 
 Copyright (c) 2024 Russell Archer
 

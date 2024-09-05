@@ -1,4 +1,4 @@
-# SKHelper
+# ``SKHelper``
 
 @Metadata {
     @PageImage(purpose: icon, source: skhelper-logo)
