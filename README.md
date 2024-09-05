@@ -26,7 +26,7 @@
 ## Overview of SKHelper
 
 `SKHelper` is a Swift Package Manager (SPM) package that enables developers using **Xcode 16** to easily add in-app purchase 
-support to **iOS 16.4+** and **macOS 14.6+** SwiftUI apps. 
+support to **iOS 17+** and **macOS 14.6+** SwiftUI apps. 
 
 `SKHelper` provides the following features:
 
