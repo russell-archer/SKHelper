@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Products</key>
+    <array>
+        <string>com.rarcher.nonconsumable.flowers.large</string>
+        <string>com.rarcher.nonconsumable.flowers.small</string>
+    </array>
+    <key>Subscriptions</key>
+    <array>
+        <dict>
+            <key>Group</key>
+            <string>vip</string>
+            <key>Products</key>
+            <array>
+                <string>com.rarcher.subscription.vip.gold</string>
+                <string>com.rarcher.subscription.vip.silver</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>
+

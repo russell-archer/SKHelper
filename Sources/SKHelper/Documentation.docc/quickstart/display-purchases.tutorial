@@ -1,0 +1,23 @@
+@Tutorial(time: 5) {
+    @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
+    
+    @Intro(title: "Display all purchases") {
+        In this section we add code to display all purchases and allow the user to manage those purchases. 
+        We'll also see how to provide details for current and historical purchases.   
+    }
+    
+    @Section(title: "Display all purchases") {
+        @ContentAndMedia {
+            In this section we'll add code to display all purchases and allow the user to manage those purchases. 
+            We'll also see how to provide details for current and historical purchases.  
+            
+            @Image(source: "quickstart11.png", alt: "SKHelperDemoApp.swift.")
+        }
+        
+        @Steps {
+            @Step {
+                TODO.                
+            }
+        }
+    }
+}

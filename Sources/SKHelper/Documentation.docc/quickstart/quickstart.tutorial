@@ -1,0 +1,60 @@
+@Tutorials(name: "SKHelper Quick Start") {
+    @Intro(title: "SKHelper Quick Start") {
+        This **Quick Start** tutorial provides a step-by-step review of how to use the **SKHelper** package to create a simple SwiftUI app that supports in-app purchases.
+        
+        You'll see just how little code is required to enable users to purchase and manage non-consumable in-app purchases and subscriptions.
+                        
+        Before getting started, make sure you've downloaded and installed Xcode 16, along with the iOS SDK.
+        
+        @Image(source: "skhelper-logo.png", alt: "SKHelper Logo.")
+    }
+    
+    @Chapter(name: "Getting started") {
+        Here we'll see how to create the demo project and add the **SKHelper** package.
+        
+        @Image(source: "quickstart3.png", alt: "Get started.")
+        @TutorialReference(tutorial: "doc:getting-started")
+    }
+
+    @Chapter(name: "Configure products") {
+        See how to configure in-app purchase products and Xcode purchase testing.
+        
+        @Image(source: "quickstart7.png", alt: "Configure products.")
+        @TutorialReference(tutorial: "doc:configure-products")
+    }
+    
+    @Chapter(name: "Display all products") {
+        Add code to display all products and support user purchases.
+        
+        @Image(source: "quickstart11.png", alt: "Display all products.")
+        @TutorialReference(tutorial: "doc:display-products")
+    }
+    
+    @Chapter(name: "Display subscriptions") {
+        Add code to support the display, promotion, purchase and management of subscriptions.
+        
+        @Image(source: "quickstart11.png", alt: "Display subscriptions.")
+        @TutorialReference(tutorial: "doc:display-subscriptions")
+    }
+
+    @Chapter(name: "Display all purchases") {
+        Add code to display all purchases and allow the user to manage those purchases. 
+        We'll also see how to provide details for current and historical purchases.
+        
+        @Image(source: "quickstart11.png", alt: "Display all purchases.")
+        @TutorialReference(tutorial: "doc:display-purchases")
+    }    
+    
+    @Resources {
+        Explore more resources for learning about `SKHelper`.
+        
+        @Documentation(destination: "https://github.com/russell-archer/SKHelper/") {
+            Browse and search **SKHelper**-related documentation and code on GitHub.
+
+            - [Documentation landing page](https://russell-archer.github.io/SKHelper/documentation/skhelper)
+            - [In-depth guide to in-app purchases and **SKHelper**](https://russell-archer.github.io/SKHelper/documentation/skhelper/guide)
+            - [SKHelperDemo Xcode project](https://github.com/russell-archer/SKHelperDemo)
+        }
+    }    
+}
+

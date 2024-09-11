@@ -14,20 +14,20 @@ public extension SKHelper {
     
     // MARK: - Public product helper properties
     
-    /// All `SKProduct` products.
-    var allSKProducts: [SKProduct] { products }
+    /// All `SKHelperProduct` products.
+    var allSKHelperProducts: [SKHelperProduct] { products }
     
-    /// All `SKProduct` products that represent consumables.
-    var allSKConsumableProducts: [SKProduct] { products.filter { $0.product.type == .consumable }}
+    /// All `SKHelperProduct` products that represent consumables.
+    var allSKHelperConsumableProducts: [SKHelperProduct] { products.filter { $0.product.type == .consumable }}
     
-    /// All `SKProduct` products that represent non-consumables.
-    var allSKNonConsumableProducts: [SKProduct] { products.filter { $0.product.type == .nonConsumable }}
+    /// All `SKHelperProduct` products that represent non-consumables.
+    var allSKHelperNonConsumableProducts: [SKHelperProduct] { products.filter { $0.product.type == .nonConsumable }}
     
-    /// All `SKProduct` products that represent auto-renewable subscriptions.
-    var allSKSubscriptionProducts: [SKProduct] { products.filter { $0.product.type == .autoRenewable }}
+    /// All `SKHelperProduct` products that represent auto-renewable subscriptions.
+    var allSKHelperSubscriptionProducts: [SKHelperProduct] { products.filter { $0.product.type == .autoRenewable }}
     
-    /// All `SKProduct` products that represent purchased products.
-    var allSKPurchasedProducts: [SKProduct] { products.filter { $0.hasEntitlement }}
+    /// All `SKHelperProduct` products that represent purchased products.
+    var allSKHelperPurchasedProducts: [SKHelperProduct] { products.filter { $0.hasEntitlement }}
     
     /// A collection of all localized `Product` returned by the App Store. An empty collection will be returned if products have not been successfully returned fromt he App Store.
     var allProducts: [Product] { products.map { $0.product }}
@@ -51,22 +51,22 @@ public extension SKHelper {
     var hasProducts: Bool { !products.isEmpty }
     
     /// This property is true if `SKHelper.products` contains one or more consumable products, false otherwise.
-    var hasConsumableProducts: Bool { !allSKConsumableProducts.isEmpty }
+    var hasConsumableProducts: Bool { !allSKHelperConsumableProducts.isEmpty }
     
     /// This property is true if `SKHelper.products` contains one or more non-consumable products, false otherwise.
-    var hasNonConsumableProducts: Bool { !allSKNonConsumableProducts.isEmpty }
+    var hasNonConsumableProducts: Bool { !allSKHelperNonConsumableProducts.isEmpty }
     
     /// This property is true if `SKHelper.products` contains one or more subscription products, false otherwise.
-    var hasSubscriptionProducts: Bool { !allSKSubscriptionProducts.isEmpty }
+    var hasSubscriptionProducts: Bool { !allSKHelperSubscriptionProducts.isEmpty }
     
     // MARK: - Public helper methods
     
-    /// The first `SKProduct` in `SKHelper.products` whose `id` matches the supplied `ProductId`.
+    /// The first `SKHelperProduct` in `SKHelper.products` whose `id` matches the supplied `ProductId`.
     ///
     /// - Parameter productId: The `ProductId` to search for in `SKHelper.products`.
-    /// - Returns: Returns the first `SKProduct` in `SKHelper.products` whose `id` matches the supplied `ProductId`, or nil if no match is found.
+    /// - Returns: Returns the first `SKHelperProduct` in `SKHelper.products` whose `id` matches the supplied `ProductId`, or nil if no match is found.
     ///
-    func skProduct(for productId: ProductId) -> SKProduct? {
+    func skhelperProduct(for productId: ProductId) -> SKHelperProduct? {
         products.first(where: { $0.id == productId })
     }
     
@@ -77,6 +77,15 @@ public extension SKHelper {
     ///
     func product(from productId: ProductId) -> Product? {
         products.first(where: { $0.id == productId })?.product
+    }
+    
+    /// The display name of the first `Product` in `SKHelper.products` whose `id` matches the supplied `ProductId`.
+    ///
+    /// - Parameter productId: The `ProductId` to search for in `SKHelper.products`.
+    /// - Returns: Returns the display name of the first `Product` in `SKHelper.products` whose `id` matches the supplied `ProductId`., or an empty `String` if no match is found.
+    ///
+    func productDisplayName(from productId: ProductId) -> String {
+        products.first(where: { $0.id == productId })?.product.displayName ?? ""
     }
     
     /// The products in `SKHelper.products` whose ids match the supplied [`ProductId`].
@@ -181,7 +190,7 @@ public extension SKHelper {
     /// - Parameter groupName: The group name (`groupDisplayName`)  to search for in `SKHelper.products`.
     /// - Returns: Returns all subscription products in `SKHelper.products` that match the supplied subscription group name.
     ///
-    func allSubscriptionStoreProducts(for groupName: String) -> [SKProduct] {
+    func allSubscriptionStoreProducts(for groupName: String) -> [SKHelperProduct] {
         products.filter { $0.product.type == .autoRenewable && $0.groupName == groupName }
     }
     
@@ -204,11 +213,11 @@ public extension SKHelper {
     }
 }
 
-// MARK: - SKUnwrappedVerificationResult
+// MARK: - SKHelperUnwrappedVerificationResult
 
 /// Information on the result of unwrapping a transaction `VerificationResult`.
 @available(iOS 17.0, macOS 14.6, *)
-public struct SKUnwrappedVerificationResult<T: Sendable> : Sendable {
+public struct SKHelperUnwrappedVerificationResult<T: Sendable> : Sendable {
     
     /// The verified or unverified transaction.
     public let transaction: T
@@ -220,11 +229,11 @@ public struct SKUnwrappedVerificationResult<T: Sendable> : Sendable {
     public let verificationError: VerificationResult<T>.VerificationError?
 }
 
-// MARK: - SKPurchaseState
+// MARK: - SKHelperPurchaseState
 
 /// The state of a purchase.
 @available(iOS 17.0, macOS 14.6, *)
-public enum SKPurchaseState {
+public enum SKHelperPurchaseState {
     /// A purchase has not yet started.
     case notStarted
     
@@ -284,11 +293,11 @@ public enum SKPurchaseState {
     }
 }
 
-// MARK: - SKSubscriptionState
+// MARK: - SKHelperSubscriptionState
 
 /// The state of a subscription.
 @available(iOS 17.0, macOS 14.6, *)
-public enum SKSubscriptionState {
+public enum SKHelperSubscriptionState {
     
     /// No activate subscription to this product has been found
     case notSubscribed
@@ -303,11 +312,11 @@ public enum SKSubscriptionState {
     case superceeded
 }
 
-// MARK: - SKEntitlementState
+// MARK: - SKHelperEntitlementState
 
 /// The state of an entitlement to a product.
 @available(iOS 17.0, macOS 14.6, *)
-public enum SKEntitlementState {
+public enum SKHelperEntitlementState {
     
     /// No transaction for the product has been found.
     case noEntitlement

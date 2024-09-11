@@ -1,0 +1,53 @@
+@Tutorial(time: 5) {
+    @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
+    
+    @Intro(title: "Getting Started") {
+        This is how to get started with creating a simple **SKHelper** demo app using SwiftUI.
+    }
+    
+    @Section(title: "Adding the SKHelper package") {
+        @ContentAndMedia {
+            Here we'll see how to create the demo project and add the **SKHelper** package.
+        }
+                
+        @Steps {
+            @Step {
+                First, open Xcode and create a new project. For this example we used the **Multiplatform** app template.
+                
+                Name the project "SKHelperDemo".
+                
+                @Image(source: "quickstart1.png", alt: "Create a new project named SKHelperDemo.")
+            }
+            
+            @Step {
+                Once Xcode has created the project select **File > Add Package Dependencies...**.
+                
+                @Image(source: "quickstart2.png", alt: "Add the SKHelperDemo package dependency.")
+            }
+            
+            @Step {
+                In the search field enter the URL of the **SKHelper** package on GitHub and tap **Add Package**.
+                
+                The URL of the **SKHelper** package is: **https://github.com/russell-archer/SKHelper**
+                
+                @Image(source: "quickstart3.png", alt: "Add the SKHelperDemo package from GitHub.")
+            }
+            
+            @Step {
+                Xcode will now retrieve the **SKHelper** package from GitHub.
+                
+                When prompted,tap **Add Package** to add the package to your project.
+                
+                @Image(source: "quickstart4.png", alt: "Confirm adding the SKHelperDemo package to your project.")                
+            }
+            
+            @Step {
+                Select your project's target and navigate to the **Signing & Capabilities** tab.
+                
+                Tap the **+ Capability** button and add the **In-App Purchase** capabilty to your project.
+                
+                @Image(source: "quickstart5.png", alt: "Add the in-app purchase Capabilty to your project.")
+            }
+        }
+    }
+}

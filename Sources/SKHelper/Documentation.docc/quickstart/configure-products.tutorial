@@ -1,0 +1,84 @@
+@Tutorial(time: 5) {
+    @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
+    
+    @Intro(title: "Configure products") {
+        See how to configure in-app purchase products and Xcode purchase testing.
+    }
+    
+    @Section(title: "Configuring Products.plist") {
+        @ContentAndMedia {
+            In this section we'll create the following product configuration files: 
+            
+            - **Products.plist** which provides a collection of product ids
+            - **Products.storekit** which provides localized product information during Xcode StoreKit testing
+            
+            @Image(source: "quickstart7.png", alt: "How Product.plist and Products.storekit are used by SKHelper.")            
+        }
+        
+        @Steps {
+            @Step {
+                When our demo app runs it will need to get *localized* product information from the App Store. This includes
+                things like the product's name and description in the appropriate local language, and prices in the local currency.
+                In order to request localized product information we must provide the App Store with a collection of *Product Ids*.
+                To avoid having to hard-code these ids in the app's source **SKHelper** allows us to store them in an easily modifiable
+                property list (.plist) file. 
+                
+                The diagram shows how product ids are used to request localized product information. In production the App Store will
+                provide the information. During development and testing we can transparently provide the information from the 
+                **Products.storekit** file (more of this shortly).
+                
+                @Image(source: "quickstart7.png", alt: "How Product.plist and Products.storekit are used by SKHelper.")
+            }              
+            
+            @Step {
+                Create a new **Property List** file in your project and name it **Products.plist**.
+                Paste the contents of the example **Products.plist** file shown into your **Products.list** file.
+                
+                @Code(name: "Products.plist", file: "quickstart-products.plist", reset: true) {}
+            }
+            
+            @Step {
+                Now create a new **.storekit** file in your project and name it **Products.storekit**.
+                
+                @Image(source: "quickstart9.png", alt: "Example Products.plist file.")
+            }      
+            
+            @Step {
+                Right-click on **Products.storekit** and select **Open As > Source Code**. 
+                Paste the contents of the example **Products.storekit** file shown into your **Products.list** file.
+                
+                @Code(name: "Products.storekit", file: "quickstart-products.storekit", reset: true) {}
+            }
+            
+            @Step {
+                If you now right-click on **Products.storekit** and select **Open As > StoreKit Configuration** you'll 
+                get a better view of the sort of configuration properties the **.storekit** file provides.
+                
+                @Image(source: "quickstart8.png", alt: "Example StoreKit Configuration file.")
+            }   
+        }
+    }
+        
+    @Section(title: "Configuring product images") {
+        @ContentAndMedia {
+            In this section we'll create the images for each of the products our app will make available for purchase.
+            
+            @Image(source: "quickstart10.png", alt: "Add product images to the asset catalog.")            
+        }
+        
+        @Steps {
+            @Step {
+                In the **SKHelper** package, navigate to the **Samples/Images** folder. Select all the images then right-click them
+                and select **Show in Finder**.
+            }
+            
+            @Step {
+                Drag all the images from Finder into your project's asset catalog.
+                
+                Notice that each image has the same filename as its associated product id.
+                
+                @Image(source: "quickstart10.png", alt: "Add product images to the asset catalog.")  
+            }
+        }   
+    }          
+}
