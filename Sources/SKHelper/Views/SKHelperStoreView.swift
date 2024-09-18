@@ -12,6 +12,7 @@ import StoreKit
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKHelperStoreView<Content: View>: View {
     
+    /// A closure that is passed a `ProductId` and returns a `View` providing product details.
     public typealias ProductDetailsClosure = (ProductId) -> Content
     
     /// The `SKHelper` object.
@@ -24,14 +25,14 @@ public struct SKHelperStoreView<Content: View>: View {
     @State private var productSelected = false
     
     /// A closure which is called to display product details.
-    private var productDetails: ProductDetailsClosure
+    private var productDetails: ProductDetailsClosure?
     
-    /// Creates an `SKHelperStoreView`. When you instantiate this view provide a closure that may be called to display product information. This information will be displayed when the
-    /// user taps on the product's image.
+    /// Creates an `SKHelperStoreView`. When you instantiate this view provide a closure that may be called to display product information.
+    /// This information will be displayed when the user taps on the product's image.
     ///
     /// The `ProductId` of the product to display information for is provided to the closure.
     ///
-    /// ## Example 1 ##
+    /// ## Example ##
     ///
     /// ```
     /// SKHelperStoreView() { productId in
@@ -45,16 +46,13 @@ public struct SKHelperStoreView<Content: View>: View {
     ///     .padding()
     /// }
     /// ```
-    ///
-    /// Note that you can also provide an empty closure if you do not wish to provide custom content.
-    ///
-    /// ## Example 2 ##
-    ///
-    /// ```
-    /// SKHelperStoreView() { _ in }
-    /// ```
     public init(@ViewBuilder productDetails: @escaping ProductDetailsClosure) {
         self.productDetails = productDetails
+    }
+    
+    /// Creates an `SKHelperStoreView`. Default product information will be displayed when the user taps on the product's image.
+    public init() where Content == EmptyView {
+        self.productDetails = nil
     }
 
     /// Creates the body of the view.
@@ -81,7 +79,8 @@ public struct SKHelperStoreView<Content: View>: View {
             #endif
             .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
             .sheet(isPresented: $productSelected) {
-                SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected, productDetails: productDetails)
+                if let productDetails { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected, productDetails: productDetails) }
+                else { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected) }
             }
         } else {
             
@@ -96,8 +95,5 @@ public struct SKHelperStoreView<Content: View>: View {
 }
 
 #Preview {
-    SKHelperStoreView() { selectedProductId in
-        Text("Product details for \(selectedProductId)")
-    }
-    .environment(SKHelper())
+    SKHelperStoreView().environment(SKHelper())
 }

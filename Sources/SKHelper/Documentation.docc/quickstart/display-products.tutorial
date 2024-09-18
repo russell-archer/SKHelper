@@ -9,7 +9,7 @@
         @ContentAndMedia {
             In this section we'll add the code required to display all products and support user purchases.
             
-            @Image(source: "quickstart11.png", alt: "SKHelperDemoApp.swift.")
+            @Image(source: "quickstart14.png", alt: "Display products.")
         }
         
         @Steps {
@@ -74,9 +74,9 @@
             }
             
             @Step {
-                If your build and run the app you'll see how the changes have affected the display of product details.
+                If you build and run the app you'll see how the changes have affected the display of product details.
                 
-                @Image(source: "quickstart16.png", alt: "Show product details with addtional custom information.")       
+                @Image(source: "quickstart16.png", alt: "Show product details with additional custom information.")       
             }            
         }
     }

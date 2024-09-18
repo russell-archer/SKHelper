@@ -9,12 +9,64 @@
         @ContentAndMedia {
             In this section we'll add code to support the display, promotion, purchase and management of subscriptions. 
             
-            @Image(source: "quickstart11.png", alt: "SKHelperDemoApp.swift.")
+            @Image(source: "quickstart17.png", alt: "Display subscriptions.")
         }
         
         @Steps {
             @Step {
-                TODO.                
+                If you look at the **Products.storekit** file you'll see that our two demo subscriptions for the "gold" and "silver" services
+                are collected into a subscription group named **"vip"**.
+                
+                @Image(source: "quickstart18.png", alt: "The VIP subscription group.")
+            }
+            
+            @Step {
+                Add the following code to **ContentView.swift** to enable our demo to show all the subscriptions in the "vip" group.
+                
+                @Code(name: "ContentView.swift", file: "quickstart-contentview3.swift", previousFile: "quickstart-contentview2.swift", reset: false) {}
+                
+                Notice how we use the subscription group name to refer to all subscriptions in the "vip" group.
+            }
+            
+            @Step {
+                Build and run the app and select the **List all subscriptions** option. You should see the "gold" and "silver"
+                subscription list, along with options to subscribe.
+                
+                @Image(source: "quickstart19.png", alt: "The VIP subscription group.")
+            }
+            
+            @Step {
+                We can customize the look of **SKHelperSubscriptionStoreView** by specifying three optional closures.
+            }
+            
+            @Step {
+                **Header**. Content displayed at the top of the subscription list that is common to all subscriptions in the group.
+                
+                @Image(source: "quickstart21.png", alt: "Header customization.")
+            }
+            
+            @Step {
+                **Control**. Content displayed in-line with each subscription in the subscription list.
+                
+                @Image(source: "quickstart22.png", alt: "Control customization.")                
+            }
+            
+            @Step {
+                **Details**. Content displayed in the product details sheet.
+                
+                @Image(source: "quickstart23.png", alt: "Details customization.")                
+            }
+            
+            @Step {
+                Add the following code to **ContentView.swift** to customize the appearance of **SKHelperSubscriptionStoreView**.
+                
+                @Code(name: "ContentView.swift", file: "quickstart-contentview4.swift", reset: false) {}                
+            }
+            
+            @Step {
+                Build and run the app. You can now see how the customizations have changed the look of the subscription list.
+                
+                @Image(source: "quickstart20.png", alt: "The customized VIP subscription group.")
             }
         }
     }

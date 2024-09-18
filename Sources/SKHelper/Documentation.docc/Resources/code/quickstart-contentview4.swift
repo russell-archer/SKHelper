@@ -17,11 +17,8 @@ struct ContentView: View {
                 // Tapping on the product's image shows details for the product.
                 NavigationLink("List all products") {
                     SKHelperStoreView() { productId in
-                        // Add more content to a product's description by placing it in this closure
                         Group {
-                            Image(productId)
-                                .resizable()
-                                .scaledToFit()
+                            Image(productId + ".info").resizable().scaledToFit()
                             Text("Here is some text about why you might want to buy this product.")
                         }
                         .padding()
@@ -30,15 +27,27 @@ struct ContentView: View {
                 
                 // SKHelperSubscriptionStoreView() lists all subscription products for this app.
                 // Trials, upgrades and downgrades are handled automatically.
-                NavigationLink("Lists all subscription") {
-                    SKHelperSubscriptionStoreView()
-                }
-                
-                // SKHelperPurchasesView() lists all products that have been purchased,
-                // including subscriptions. Details of the purchase or subscription are shown when
-                // the "Manage Purchase" button is tapped.
-                NavigationLink("List all purchases") {
-                    SKHelperPurchasesView()
+                NavigationLink("List all subscriptions") {
+                    SKHelperSubscriptionStoreView(
+                        subscriptionGroupName: "vip",
+                        subscriptionHeader: {
+                            VStack {
+                                Image("plant-services").resizable().scaledToFit()
+                                Text("Services to make your plants happy!").font(.headline)
+                            }
+                        },
+                        subscriptionControl: { productId in
+                            VStack {
+                                Image(productId).resizable().scaledToFit()
+                                Text("We'll visit \(productId == "com.rarcher.subscription.vip.gold" ? "weekly" : "monthly") to water your plants.").font(.caption2)
+                            }
+                        },
+                        subscriptionDetails: { productId in
+                            VStack {
+                                Image(productId + ".info").resizable().scaledToFit()
+                                Text("Here is some text about why you might want to buy this product.")
+                            }
+                        })
                 }
             }
         }

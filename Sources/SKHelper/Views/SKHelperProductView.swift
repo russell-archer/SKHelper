@@ -12,6 +12,7 @@ import StoreKit
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKHelperProductView<Content: View>: View {
     
+    /// A closure that is passed a `ProductId` and returns a `View` providing product details.
     public typealias ProductDetailsClosure = (ProductId) -> Content
 
     /// The `SKHelper` object.
@@ -27,9 +28,9 @@ public struct SKHelperProductView<Content: View>: View {
     @Binding var showProductInfoSheet: Bool
     
     /// A closure which is called to display product details.
-    private var productDetails: ProductDetailsClosure
+    private var productDetails: ProductDetailsClosure?
     
-    /// Creates an `SKHelperProductView` which displays product information using a StoreKit `ProductView`.
+    /// Creates an `SKHelperProductView` which displays custom product information using a StoreKit `ProductView`.
     ///
     /// - Parameters:
     ///   - selectedProductId: The `ProductId` of the product for which you want to display details.
@@ -41,12 +42,25 @@ public struct SKHelperProductView<Content: View>: View {
         self._showProductInfoSheet = showProductInfoSheet
         self.productDetails = productDetails
     }
+
+    /// Creates an `SKHelperProductView` which displays default product information using a StoreKit `ProductView`.
+    ///
+    /// - Parameters:
+    ///   - selectedProductId: The `ProductId` of the product for which you want to display details.
+    ///   - showProductInfoSheet: Used to togggle the display of the product information sheet
+    ///
+    public init(selectedProductId: Binding<ProductId>, showProductInfoSheet: Binding<Bool>) where Content == EmptyView {
+        self._selectedProductId = selectedProductId
+        self._showProductInfoSheet = showProductInfoSheet
+        self.productDetails = nil
+    }
     
     /// Creates the body of the view.
+    /// 
     public var body: some View {
         SKHelperSheetBarView(showSheet: $showProductInfoSheet, title: product?.displayName ?? "Product Info")
         ScrollView {
-            productDetails(selectedProductId)
+            productDetails?(selectedProductId)
 
             ProductView(id: selectedProductId) {
                 Image(selectedProductId)

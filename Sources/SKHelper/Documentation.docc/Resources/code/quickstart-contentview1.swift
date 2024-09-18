@@ -16,9 +16,7 @@ struct ContentView: View {
                 // Products that have been purchased will be grayed-out.
                 // Tapping on the product's image shows details for the product.
                 NavigationLink("List all products") {
-                    SKHelperStoreView() { productId in
-                        // Add more content to a product's description by placing it in this closure
-                    }
+                    SKHelperStoreView()
                 }
             }
         }

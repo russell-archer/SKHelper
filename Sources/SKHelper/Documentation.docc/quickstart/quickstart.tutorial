@@ -26,14 +26,14 @@
     @Chapter(name: "Display all products") {
         Add code to display all products and support user purchases.
         
-        @Image(source: "quickstart11.png", alt: "Display all products.")
+        @Image(source: "quickstart14.png", alt: "Display all products.")
         @TutorialReference(tutorial: "doc:display-products")
     }
     
     @Chapter(name: "Display subscriptions") {
         Add code to support the display, promotion, purchase and management of subscriptions.
         
-        @Image(source: "quickstart11.png", alt: "Display subscriptions.")
+        @Image(source: "quickstart17.png", alt: "Display subscriptions.")
         @TutorialReference(tutorial: "doc:display-subscriptions")
     }
 

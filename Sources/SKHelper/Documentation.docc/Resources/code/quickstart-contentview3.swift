@@ -17,11 +17,8 @@ struct ContentView: View {
                 // Tapping on the product's image shows details for the product.
                 NavigationLink("List all products") {
                     SKHelperStoreView() { productId in
-                        // Add more content to a product's description by placing it in this closure
                         Group {
-                            Image(productId)
-                                .resizable()
-                                .scaledToFit()
+                            Image(productId + ".info").resizable().scaledToFit()
                             Text("Here is some text about why you might want to buy this product.")
                         }
                         .padding()
@@ -30,8 +27,8 @@ struct ContentView: View {
                 
                 // SKHelperSubscriptionStoreView() lists all subscription products for this app.
                 // Trials, upgrades and downgrades are handled automatically.
-                NavigationLink("Lists all subscription") {
-                    SKHelperSubscriptionStoreView()
+                NavigationLink("List all subscriptions") {
+                    SKHelperSubscriptionStoreView(subscriptionGroupName: "vip")
                 }
             }
         }
