@@ -433,7 +433,7 @@ public class SKHelper: Observable {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "d MMM y"
         
-        pi.isPurchased = (try? await isPurchased(productId: product.id)) ?? false
+        pi.isPurchased = await isPurchased(productId: product.id)
         guard pi.isPurchased else { return pi }
         guard let transaction = await mostRecentTransaction(for: product.id) else { return pi }
 
