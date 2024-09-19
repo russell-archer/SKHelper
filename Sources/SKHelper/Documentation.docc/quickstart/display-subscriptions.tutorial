@@ -2,12 +2,14 @@
     @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
     
     @Intro(title: "Display subscriptions") {
-        In this section we add code to support the display, promotion, purchase and management of subscriptions.     
+        Add code to support the display, promotion, purchase and management of subscriptions.     
     }
     
     @Section(title: "Display subscriptions") {
         @ContentAndMedia {
             In this section we'll add code to support the display, promotion, purchase and management of subscriptions. 
+            
+            We'll see how our demo supports user refunds and subscription upgrades, downgrades and cancellations.
             
             @Image(source: "quickstart17.png", alt: "Display subscriptions.")
         }
@@ -21,18 +23,16 @@
             }
             
             @Step {
-                Add the following code to **ContentView.swift** to enable our demo to show all the subscriptions in the "vip" group.
+                Add the following code to **ContentView.swift** to enable our demo to show all the subscriptions from *all* subscription groups.
                 
                 @Code(name: "ContentView.swift", file: "quickstart-contentview3.swift", previousFile: "quickstart-contentview2.swift", reset: false) {}
-                
-                Notice how we use the subscription group name to refer to all subscriptions in the "vip" group.
             }
             
             @Step {
                 Build and run the app and select the **List all subscriptions** option. You should see the "gold" and "silver"
                 subscription list, along with options to subscribe.
                 
-                @Image(source: "quickstart19.png", alt: "The VIP subscription group.")
+                @Image(source: "quickstart19.png", alt: "Display all subscriptions.")
             }
             
             @Step {

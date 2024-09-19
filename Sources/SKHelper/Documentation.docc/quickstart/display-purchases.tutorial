@@ -2,22 +2,70 @@
     @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
     
     @Intro(title: "Display all purchases") {
-        In this section we add code to display all purchases and allow the user to manage those purchases. 
-        We'll also see how to provide details for current and historical purchases.   
+        Add code to display all purchases and allow the user to manage those purchases.  
     }
     
     @Section(title: "Display all purchases") {
         @ContentAndMedia {
-            In this section we'll add code to display all purchases and allow the user to manage those purchases. 
-            We'll also see how to provide details for current and historical purchases.  
+            In this section we add code to display all purchases and allow the user to manage those purchases. 
+            We'll also see how to access transaction details for current and historical purchases.   
             
-            @Image(source: "quickstart11.png", alt: "SKHelperDemoApp.swift.")
+            @Image(source: "quickstart24.png", alt: "List all purchases.")
         }
         
         @Steps {
             @Step {
-                TODO.                
+                Add the following code at the end of **ContentView.swift** to enable our demo to show all purchases the user has made.
+                
+                @Code(name: "ContentView.swift", file: "quickstart-contentview5.swift", previousFile: "quickstart-contentview4.swift", reset: false) {}              
             }
+            
+            @Step {
+                Now build and run the app. Navigate to the **List all products** view and purchase either a small or large bunch of flowers.
+                
+                Note that we're making use of Xcode StoreKit Testing - you won't be charged for any purchase.
+            }
+            
+            @Step {
+                Next, navigate to the **List all subscriptions** view and subscribe to either the Gold or Silver subscription service.
+            }            
+            
+            @Step {
+                Navigate to the **List all purchases** view. You should see that both your purchases have been recognized.
+                
+                @Image(source: "quickstart24.png", alt: "List all purchases.")
+            }
+            
+            @Step {
+                Locate the purchase of the small or large bunch of flowers and tap **Manage Purchase**. A sheet will be displayed
+                giving information about the purchase.
+                
+                @Image(source: "quickstart25.png", alt: "Purchase info.")
+            }
+            
+            @Step {
+                Now tap the **Manage Purchase** button at the bottom of the information sheet. You'll be given an option to request a refund from
+                the App Store.
+                
+                @Image(source: "quickstart26.png", alt: "Manage purchase.")
+            }
+            
+            @Step {
+                Close the information sheet. Now locate the purchase of the subscription product and tap **Manage Purchase**. A sheet will be displayed
+                giving information about the subscription.
+                
+                @Image(source: "quickstart27.png", alt: "Subscription info.")
+                
+                The information displayed will include when the subscription will renew (or expire, if the subscription has been cancelled), details
+                about the most recent transaction as well as all historic transactions related to the subscription.
+            }
+            
+            @Step {
+                Tap the **Manage Subscription** button at the bottom of the information sheet. You'll be given an options to upgrade or downgrade
+                your subscription, as well as the ability to cancel it.
+                
+                @Image(source: "quickstart28.png", alt: "Manage subscription.")
+            }   
         }
     }
 }

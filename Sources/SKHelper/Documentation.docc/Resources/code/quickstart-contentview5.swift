@@ -10,10 +10,9 @@ struct ContentView: View {
                 :
                 :
                 
-                // SKHelperSubscriptionStoreView() lists all subscription products for this app.
-                // Trials, upgrades and downgrades are handled automatically.
-                NavigationLink("List all subscriptions") {
-                    SKHelperSubscriptionStoreView()
+                // Show all purchases the user has made.
+                NavigationLink("List all purchases") {
+                    SKHelperPurchasesView()
                 }
             }
         }

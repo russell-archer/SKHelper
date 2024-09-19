@@ -10,40 +10,46 @@
     }
     
     @Chapter(name: "Getting started") {
-        Here we'll see how to create the demo project and add the **SKHelper** package.
+        Create the demo project and add the **SKHelper** package.
         
         @Image(source: "quickstart3.png", alt: "Get started.")
         @TutorialReference(tutorial: "doc:getting-started")
     }
 
     @Chapter(name: "Configure products") {
-        See how to configure in-app purchase products and Xcode purchase testing.
+        Configure in-app purchase products and Xcode purchase testing.
         
         @Image(source: "quickstart7.png", alt: "Configure products.")
         @TutorialReference(tutorial: "doc:configure-products")
     }
     
     @Chapter(name: "Display all products") {
-        Add code to display all products and support user purchases.
+        Display all products and support user purchases.
         
         @Image(source: "quickstart14.png", alt: "Display all products.")
         @TutorialReference(tutorial: "doc:display-products")
     }
     
     @Chapter(name: "Display subscriptions") {
-        Add code to support the display, promotion, purchase and management of subscriptions.
+        Support the display, promotion, purchase and management of subscriptions.
         
         @Image(source: "quickstart17.png", alt: "Display subscriptions.")
         @TutorialReference(tutorial: "doc:display-subscriptions")
     }
 
     @Chapter(name: "Display all purchases") {
-        Add code to display all purchases and allow the user to manage those purchases. 
-        We'll also see how to provide details for current and historical purchases.
+        Display all purchases and allow the user to manage those purchases. 
         
-        @Image(source: "quickstart11.png", alt: "Display all purchases.")
+        @Image(source: "quickstart24.png", alt: "Display all purchases.")
         @TutorialReference(tutorial: "doc:display-purchases")
     }    
+    
+    @Chapter(name: "Check a purchase") {
+        Check for purchases and grant or deny access to purchase-dependent resources.
+        
+        @Image(source: "quickstart29.png", alt: "Check a purchase.")
+        @TutorialReference(tutorial: "doc:check-purchase")
+    }  
     
     @Resources {
         Explore more resources for learning about `SKHelper`.

@@ -12,6 +12,8 @@
             - **Products.plist** which provides a collection of product ids
             - **Products.storekit** which provides localized product information during Xcode StoreKit testing
             
+            We'll also add product images to the demo project.
+            
             @Image(source: "quickstart7.png", alt: "How Product.plist and Products.storekit are used by SKHelper.")            
         }
         

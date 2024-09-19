@@ -264,7 +264,7 @@ public class SKHelper: Observable {
     /// - Parameter productId: The `ProductId` to check.
     /// - Returns: Returns true if user is entitled to use the product, false otherwise.
     ///
-    public func isPurchased(productId: ProductId) async throws -> Bool {
+    public func isPurchased(productId: ProductId) async -> Bool {
         guard let product = skhelperProduct(for: productId) else { return false }
         guard isNonConsumable(productId: productId) || isAutoRenewable(productId: productId) else { return false }
         

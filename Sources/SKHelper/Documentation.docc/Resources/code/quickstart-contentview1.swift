@@ -1,8 +1,3 @@
-//
-//  ContentView.swift
-//  SKHelperDemo
-//
-
 import SwiftUI
 import SKHelper
 

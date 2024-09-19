@@ -2,12 +2,13 @@
     @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
     
     @Intro(title: "Getting Started") {
-        This is how to get started with creating a simple **SKHelper** demo app using SwiftUI.
+        How to get started with **SKHelper** by creating a simple demo app using SwiftUI.
     }
     
     @Section(title: "Adding the SKHelper package") {
         @ContentAndMedia {
-            Here we'll see how to create the demo project and add the **SKHelper** package.
+            We review how to create the demo project, add the **SKHelper** package from **GitHub** and add the
+            in-app purchase capability.
         }
                 
         @Steps {

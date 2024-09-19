@@ -2,12 +2,14 @@
     @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
     
     @Intro(title: "Display all products") {
-        In this section we add code to display all products and support user purchases.       
+        Add code to display all products and support user purchases.       
     }
     
     @Section(title: "Display all products") {
         @ContentAndMedia {
             In this section we'll add the code required to display all products and support user purchases.
+            
+            We also see how to customize the display of product information.
             
             @Image(source: "quickstart14.png", alt: "Display products.")
         }

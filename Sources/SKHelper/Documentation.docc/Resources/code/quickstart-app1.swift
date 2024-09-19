@@ -1,8 +1,3 @@
-//
-//  SKHelperDemoApp.swift
-//  SKHelperDemo
-//
-
 import SwiftUI
 import SKHelper
 

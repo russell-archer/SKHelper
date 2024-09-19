@@ -1,0 +1,73 @@
+@Tutorial(time: 5) {
+    @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
+    
+    @Intro(title: "Check a purchase") {
+        Add code to check if the user has purchased a specific product. 
+    }
+    
+    @Section(title: "Check a purchase") {
+        @ContentAndMedia {
+            In this section add code to check if the user has purchased a specific product. We also review how to grant or deny access to a 
+            purchase-dependent resource.  
+            
+            @Image(source: "quickstart29.png", alt: "Check a purchase.")
+        }
+        
+        @Steps {
+            @Step {
+                Add the following code at the end of **ContentView.swift** to enable our demo to display a new purchase-dependent 
+                View that we'll create in the next step.
+                
+                @Code(name: "ContentView.swift", file: "quickstart-contentview6.swift", previousFile: "quickstart-contentview5.swift", reset: false) {}              
+            }
+            
+            @Step {
+                Create a new SwiftUI and name it **SmallFlowersView**. Replace the contents of the file with the following code.
+
+                @Code(name: "SmallFlowersView.swift", file: "quickstart-flowers1.swift", reset: true) {}              
+            }
+            
+            @Step {
+                Notice how check the purchase status of the small flowers product in a `.task { ... }` before the view is displayed.
+                We then use the purchase status to grant or deny the user access to the purchase-related resource.
+                
+                @Code(name: "SmallFlowersView.swift", file: "quickstart-flowers2.swift", reset: true) {}              
+            }
+            
+            @Step {
+                Build and run the app. For the purposes of this demo we'll assume you haven't yet purchased the small flowers product.
+                Navigate to the **SmallFlowersView** via the **Access Small Flowers** link.
+            }
+            
+            @Step {
+                You should see that you've not been granted access to the product.
+                
+                @Image(source: "quickstart29.png", alt: "Check a purchase.")
+            }
+            
+            @Step {
+                Tap the **Review Small Flowers Info** button. You should now see the **SKHelperStoreView** displaying information about the
+                small flowers product. 
+                
+                @Image(source: "quickstart30.png", alt: "Check a purchase.")
+                
+                Note that by default **SKHelperStoreView** will display a list of all available products. However, in this case we pass the
+                `ProductId` of the small flowers product which overrides the default behavior.
+            }
+            
+            @Step {
+                Purchase the small flowers product via the price button displayed on **SKHelperStoreView**. Tap the **Back** button
+                to navigate back to the **SmallFlowersView**. You should now see that you have been granted access.
+                
+                @Image(source: "quickstart31.png", alt: "Check a purchase.")                
+            }
+
+            This concludes the **Quick Start** tutorial, but we've only scratched the surface of what you can do with **StoreKit** and **SKHelper**.
+            Explore more resources for learning about `SKHelper`.
+
+            - [Documentation landing page](https://russell-archer.github.io/SKHelper/documentation/skhelper)
+            - [In-depth guide to in-app purchases and **SKHelper**](https://russell-archer.github.io/SKHelper/documentation/skhelper/guide)
+            - [SKHelperDemo Xcode project](https://github.com/russell-archer/SKHelperDemo)
+        }
+    }
+}

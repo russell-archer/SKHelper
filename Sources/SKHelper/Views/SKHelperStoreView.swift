@@ -27,8 +27,14 @@ public struct SKHelperStoreView<Content: View>: View {
     /// A closure which is called to display product details.
     private var productDetails: ProductDetailsClosure?
     
-    /// Creates an `SKHelperStoreView`. When you instantiate this view provide a closure that may be called to display product information.
-    /// This information will be displayed when the user taps on the product's image.
+    /// Collection of `ProductId` to display. If nil all available products will be displayed.
+    private var productIds: [ProductId]?
+    
+    /// Provides a collection of `Product` to display in the StoreView.
+    private var products: [Product] { productIds == nil ? store.allProducts : store.products(from: productIds!) }
+    
+    /// Creates an `SKHelperStoreView` showing all available products. When you instantiate this view provide a closure that may be
+    /// called to display product information. This information will be displayed when the user taps on the product's image.
     ///
     /// The `ProductId` of the product to display information for is provided to the closure.
     ///
@@ -46,19 +52,39 @@ public struct SKHelperStoreView<Content: View>: View {
     ///     .padding()
     /// }
     /// ```
+    ///
     public init(@ViewBuilder productDetails: @escaping ProductDetailsClosure) {
         self.productDetails = productDetails
     }
     
-    /// Creates an `SKHelperStoreView`. Default product information will be displayed when the user taps on the product's image.
-    public init() where Content == EmptyView {
-        self.productDetails = nil
+    /// Creates an `SKHelperStoreView` showing products that match the provided `[ProductId]`.
+    /// When you instantiate this view provide a closure that may be called to display product information. This information will be
+    /// displayed when the user taps on the product's image.
+    ///
+    /// The `ProductId` of the product to display information for is provided to the closure.
+    ///
+    public init(productIds: [ProductId], @ViewBuilder productDetails: @escaping ProductDetailsClosure) {
+        self.productIds = productIds
+        self.productDetails = productDetails
+    }
+    
+    /// Creates an `SKHelperStoreView` showing products that match the provided `[ProductId]`.
+    /// Default product information will be displayed when the user taps on the product's image.
+    ///
+    public init(productIds: [ProductId]) where Content == EmptyView {
+        self.productIds = productIds
     }
 
+    /// Creates an `SKHelperStoreView` showing all available products.
+    /// Default product information will be displayed when the user taps on the product's image.
+    ///
+    public init() where Content == EmptyView {}
+    
     /// Creates the body of the view.
     public var body: some View {
+        
         if store.hasProducts {
-            StoreView(products: store.allProducts) { product in
+            StoreView(products: products) { product in
                 VStack {
                     Image(product.id)
                         .resizable()
@@ -85,7 +111,7 @@ public struct SKHelperStoreView<Content: View>: View {
         } else {
             
             VStack {
-                Text("No products available").font(.subheadline)
+                Text("No products available").font(.subheadline).padding()
                 Button("Refresh Products") { Task { await store.requestProducts() }}
                 ProgressView()
             }

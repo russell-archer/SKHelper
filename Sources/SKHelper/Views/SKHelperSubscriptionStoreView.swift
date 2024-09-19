@@ -30,7 +30,8 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     /// true if a subscription has been selected.
     @State private var subscriptionSelected = false
     
-    @State private var subscriptionGroupName: String
+    /// The name of the subscription group from which to display subscriptions. If nil then we display all subscriptions in all groups.
+    private var subscriptionGroupName: String?
     
     /// A closure which is called to display a view forming an overall header for the collection of subscriptions.
     private var subscriptionHeader: SubscriptionHeaderClosure?
@@ -41,9 +42,19 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     /// A closure which is called to display subscription details when the user taps the subscription's image.
     private var subscriptionDetails: SubscriptionDetailsClosure?
     
+    /// Gets either all subscriptions in all groups, or subscriptions in a specific group if `subscriptionGroupName` was provided to init.
+    private var subscriptions: [Product] {
+        subscriptionGroupName == nil ? store.allSubscriptions : store.allSubscriptionProductsByLevel(for: subscriptionGroupName!)
+    }
+    
     /// Creates a `SKHelperSubscriptionStoreView`.
+    /// - Parameters:
+    ///   - subscriptionGroupName: The group name from which subscriptions will be displayed. If nil then all subscriptions in all groups will be displayed.
+    ///   - subscriptionHeader: A closure that customizes the header displayed. If nil then no header is displayed.
+    ///   - subscriptionControl: A closure that customizes the in-line control content displayed. If nil then no customization is displayed.
+    ///   - subscriptionDetails: A closure that customizes the subscription details content displayed. If nil then no customization is displayed.
     public init(
-        subscriptionGroupName: String,
+        subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure,
         @ViewBuilder subscriptionControl: @escaping SubscriptionControlClosure,
         @ViewBuilder subscriptionDetails: @escaping SubscriptionDetailsClosure) {
@@ -58,7 +69,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     public var body: some View {
         if store.hasSubscriptionProducts {
             ScrollView {
-                SubscriptionStoreView(subscriptions: store.allSubscriptionProductsByLevel(for: subscriptionGroupName)) {
+                SubscriptionStoreView(subscriptions: subscriptions) {
                     VStack { subscriptionHeader?() }.padding()
                 }
                 .subscriptionStoreButtonLabel(.action)

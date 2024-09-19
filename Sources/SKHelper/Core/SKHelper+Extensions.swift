@@ -44,6 +44,17 @@ public extension SKHelper {
     /// A collection of all configured `ProductId` that represent auto-renewable subscriptions.
     var allSubscriptionProductIds: [ProductId] { products.filter { $0.product.type == .autoRenewable }.map { $0.id }}
     
+    /// A collection of all configured `Product` that represent auto-renewable subscriptions in all subscription groups.
+    var allSubscriptions: [Product] { products.filter { $0.product.type == .autoRenewable }.map { $0.product }}
+    
+    /// Finds all subscription group names (`groupDisplayName`) in `SKHelper.products`.
+    /// An empty collection is returned if there are no auto-renewable subscription products.
+    var allSubscriptionGroupNames: [String] { Array(Set(products.filter { $0.product.type == .autoRenewable }.map { $0.groupName ?? "" }.filter { !$0.isEmpty }))}
+    
+    /// Finds all subscription group ids (`subscriptionGroupID`) in `SKHelper.products`.
+    /// An empty collection is returned if there are no auto-renewable subscription products.
+    var allSubscriptionGroupIds: [String] { Array(Set(products.filter { $0.product.type == .autoRenewable }.map { $0.groupId ?? "" }.filter { !$0.isEmpty }))}
+    
     /// All `ProductId` that represent purchased products.
     var allPurchasedProductIds: [ProductId] { products.filter { $0.hasEntitlement }.map { $0.id }}
     
@@ -167,22 +178,6 @@ public extension SKHelper {
     ///
     func subscriptions(from productIds: [ProductId]) -> [Product.SubscriptionInfo] {
         productIds.compactMap { subscription(from: $0) }
-    }
-    
-    /// Finds all subscription group names (`groupDisplayName`) in `SKHelper.products`.
-    ///
-    /// - Returns: Returns all subscription group names (`groupDisplayName`) in `SKHelper.products`. An empty collection is returned if there are no auto-renewable subscription products.
-    ///
-    func allSubscriptionGroupNames() -> [String] {
-        Array(Set(products.filter { $0.product.type == .autoRenewable }.map { $0.groupName ?? "" }.filter { !$0.isEmpty }))
-    }
-    
-    /// Finds all subscription group ids (`subscriptionGroupID`) in `SKHelper.products`.
-    ///
-    /// - Returns: Returns all subscription group ids (`subscriptionGroupID`) in `SKHelper.products`. An empty collection is returned if there are no auto-renewable subscription products.
-    ///
-    func allSubscriptionGroupIds() -> [String] {
-        Array(Set(products.filter { $0.product.type == .autoRenewable }.map { $0.groupId ?? "" }.filter { !$0.isEmpty }))
     }
     
     /// Finds all subscription products in `SKHelper.products` that match the supplied subscription group name.
