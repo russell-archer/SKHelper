@@ -9,7 +9,7 @@
 ![](./Sources/SKHelper/Resources/images/skhelper-logo.png)
 
 - [SKHelper Documentation Landing Page](https://russell-archer.github.io/SKHelper/documentation/skhelper) - `SKHelper` documentation landing page
-- [SKHelper Quick Start](https://russell-archer.github.io/SKHelper/documentation/skhelper/quickstart) - `SKHelper` quick-start guide 
+- [SKHelper Quick Start](https://russell-archer.github.io/SKHelper/tutorials/quickstart) - `SKHelper` quick-start guide 
 - [SKHelper In-Depth Guide](https://russell-archer.github.io/SKHelper/documentation/skhelper/guide) - `SKHelper` and `StoreKit2` in-depth guide
 - [SKHelper Demo Project](https://github.com/russell-archer/SKHelperDemo) - Example Xcode `SKHelper` project
 
@@ -52,4 +52,4 @@ See [License](https://russell-archer.github.io/SKHelper/documentation/skhelper/l
 
 ## Getting Started
 
-Jump to the [SKHelper Quick Start](https://russell-archer.github.io/SKHelper/documentation/skhelper/quickstart) guide.
+Jump to the [SKHelper Quick Start](https://russell-archer.github.io/SKHelper/tutorials/quickstart) guide.
