@@ -45,8 +45,8 @@ public struct SKHelperPurchasesView: View {
                         ProductView(id: productId) {
                             Image(productId)
                                 .resizable()
+                                .frame(maxWidth: 250, maxHeight: 250)
                                 .clipShape(.circle)
-                                .shadow(color: .secondary, radius: 5, x: 10, y: 10)
                                 .scaledToFit()
                         }
                         .padding(.all, 10)
@@ -58,7 +58,6 @@ public struct SKHelperPurchasesView: View {
         }
         .task { purchasedProducts = store.allPurchasedProductIds }
         .onChange(of: store.allPurchasedProductIds) { purchasedProducts = store.allPurchasedProductIds }
-        .background(LinearGradient(gradient: Gradient(colors: [.white, .blue]), startPoint: .top, endPoint: .bottom))
         .sheet(isPresented: $productSelected) { SKHelperManagePurchaseView(selectedProductId: $selectedProductId, showPurchaseInfoSheet: $productSelected) }
     }
 }

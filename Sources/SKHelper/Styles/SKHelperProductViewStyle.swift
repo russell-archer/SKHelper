@@ -69,7 +69,6 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
                         
                     }
                 }
-                .background(.blue, in: .rect(cornerRadius: 20))
                 
             default: ProductView(configuration)
         }

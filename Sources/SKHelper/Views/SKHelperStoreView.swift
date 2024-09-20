@@ -96,7 +96,6 @@ public struct SKHelperStoreView<Content: View>: View {
                         }
                 }
             }
-            .background(LinearGradient(gradient: Gradient(colors: [.white, .blue]), startPoint: .top, endPoint: .bottom))
             .productViewStyle(.automatic)
             #if os(iOS)
             .storeButton(.visible, for: .restorePurchases, .policies, .redeemCode)
