@@ -56,7 +56,7 @@ modified and redistributed, including as part of commercial software.
 See [License](https://russell-archer.github.io/SKHelper/documentation/skhelper/license) for details.
 
 ## Requirements
-`SKHelper` uses the newest features of Apple's `StoreKit2` and which requires **iOS 16.4+**, **macOS 14.6+** and **Xcode 16**.
+`SKHelper` uses the newest features of Apple's `StoreKit2` and which requires **iOS 17+**, **macOS 14.6+** and **Xcode 16**.
 
 ## Getting Started
 
