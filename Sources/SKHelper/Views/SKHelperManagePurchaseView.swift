@@ -79,19 +79,20 @@ public struct SKHelperManagePurchaseView: View {
                     .scaledToFit()
                 
                 if let consumablePurchaseInfo {
-                    SKHelperConsumablePurchaseInfoMain(purchaseInfo: consumablePurchaseInfo)
+                    
+                    SKHelperPurchaseInfoMain(purchaseInfo: consumablePurchaseInfo, productType: .consumable)
                     
                 } else if let nonConsumablePurchaseInfo {
                     
-                    SKHelperNonConsumablePurchaseInfoMain(purchaseInfo: nonConsumablePurchaseInfo)
-                    SKHelperNonConsumablePurchaseInfoRefund(purchaseInfo: nonConsumablePurchaseInfo, refundRequestTransactionId: $refundRequestTransactionId, showRefundSheet: $showRefundSheet)
+                    SKHelperPurchaseInfoMain(purchaseInfo: [nonConsumablePurchaseInfo], productType: .nonConsumable)
+                    SKHelperPurchaseInfoManage(purchaseInfo: nonConsumablePurchaseInfo, refundRequestTransactionId: $refundRequestTransactionId, showRefundSheet: $showRefundSheet)
                     
                 } else if let subscriptionPurchaseInfo {
                     
                     SKHelperSubscriptionInfoMain(subInfo: subscriptionPurchaseInfo)
                     SKHelperSubscriptionInfoManage(showManageSubscriptionsSheet: $showManageSubscriptionsSheet)
-                }
-                else {
+                    
+                } else {
                     
                     VStack {
                         Text("Getting transaction info...").font(.subheadline)

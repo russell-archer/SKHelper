@@ -21,10 +21,11 @@ internal struct SKHelperSubscriptionInfoMain: View {
         
         VStack {
             Group {
-                SKHelperPurchaseInfoFieldView(fieldName: "Product name:", fieldValue: subInfo.name)
+                SKHelperPurchaseInfoFieldView(fieldName: "Product name:", fieldValue: subInfo.name + " (subscription)")
                 SKHelperPurchaseInfoFieldView(fieldName: "Product ID:", fieldValue: subInfo.productId)
                 SKHelperPurchaseInfoFieldView(fieldName: "Price:", fieldValue: subInfo.displayPrice ?? "Unknown")
                 SKHelperPurchaseInfoFieldView(fieldName: "Upgrade:", fieldValue: subInfo.upgraded == nil ? "Unknown" : (subInfo.upgraded! ? "Yes" : "No"))
+                
                 if let willAutoRenew = subInfo.autoRenewOn {
                     if willAutoRenew {
                         SKHelperPurchaseInfoFieldView(fieldName: "Status:", fieldValue: subInfo.subscribedtext ?? "Unknown")
@@ -45,11 +46,11 @@ internal struct SKHelperSubscriptionInfoMain: View {
             Group {
                 Text("Most recent transaction").foregroundColor(.secondary).padding()
                 Divider()
-                SKHelperPurchaseInfoFieldViewNarrow(fieldName: "Date:", fieldValue: subInfo.purchaseDateFormatted ?? "Unknown")
-                SKHelperPurchaseInfoFieldViewNarrow(fieldName: "ID:", fieldValue: String(subInfo.transactionId ?? UInt64.min))
-                SKHelperPurchaseInfoFieldViewNarrow(fieldName: "Price:", fieldValue: subInfo.displayPrice ?? "Unknown")
-                SKHelperPurchaseInfoFieldViewNarrow(fieldName: "Purchase type:", fieldValue: subInfo.ownershipType == nil ? "Unknown" : (subInfo.ownershipType! == .purchased ? "Personal purchase" : "Family sharing"))
-                SKHelperPurchaseInfoFieldViewNarrow(fieldName: "Notes:", fieldValue: "\(subInfo.revocationDate == nil ? "-" : "Purchased revoked \(subInfo.revocationDateFormatted ?? "") \(subInfo.revocationReason == .developerIssue ? "(developer issue)" : "(other issue)")")")
+                SKHelperPurchaseInfoFieldView(fieldName: "Date:", fieldValue: subInfo.purchaseDateFormatted ?? "Unknown")
+                SKHelperPurchaseInfoFieldView(fieldName: "ID:", fieldValue: String(subInfo.transactionId ?? UInt64.min))
+                SKHelperPurchaseInfoFieldView(fieldName: "Price:", fieldValue: subInfo.displayPrice ?? "Unknown")
+                SKHelperPurchaseInfoFieldView(fieldName: "Purchase type:", fieldValue: purchaseType(info: subInfo))
+                SKHelperPurchaseInfoFieldView(fieldName: "Notes:", fieldValue: notes(info: subInfo))
             }
             
             if !subInfo.history.isEmpty {
@@ -57,13 +58,30 @@ internal struct SKHelperSubscriptionInfoMain: View {
                     Text("Historical transactions").foregroundColor(.secondary).padding()
                     ForEach(subInfo.history) { historicalTransaction in
                         Divider()
-                        SKHelperPurchaseInfoFieldViewNarrow(fieldName: "Date:", fieldValue: historicalTransaction.purchaseDateFormatted ?? "Unknown")
-                        SKHelperPurchaseInfoFieldViewNarrow(fieldName: "ID:", fieldValue: String(historicalTransaction.transactionId ?? UInt64.min))
-                        SKHelperPurchaseInfoFieldViewNarrow(fieldName: "Price:", fieldValue: historicalTransaction.displayPrice ?? "Unknown")
+                        SKHelperPurchaseInfoFieldView(fieldName: "Date:", fieldValue: historicalTransaction.purchaseDateFormatted ?? "Unknown")
+                        SKHelperPurchaseInfoFieldView(fieldName: "ID:", fieldValue: String(historicalTransaction.transactionId ?? UInt64.min))
+                        SKHelperPurchaseInfoFieldView(fieldName: "Price:", fieldValue: historicalTransaction.displayPrice ?? "Unknown")
                     }
                 }
             }
         }
         .padding()
+    }
+    
+    private func purchaseType(info: SKHelperSubscriptionInfo) -> String {
+        if let ownershipType = info.ownershipType {
+            var value = ownershipType == .purchased ? "Personal purchase" : "Family sharing"
+            return "\(value) (subscription)"
+        }
+        
+        return "Unknown (subscription)"
+    }
+    
+    private func notes(info: SKHelperSubscriptionInfo) -> String {
+        if let revocationDate = info.revocationDate {
+            return "Purchased revoked \(info.revocationDateFormatted ?? "") \(info.revocationReason == .developerIssue ? "(developer issue)" : "(other)")"
+        }
+        
+        return "-"
     }
 }
