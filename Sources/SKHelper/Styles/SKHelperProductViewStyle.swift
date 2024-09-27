@@ -95,8 +95,8 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
         
         if let latestTransaction {
             switch latestTransaction {
-                case .unverified(let _, let _): value = false
-                case .verified(let _): value = true
+                case .unverified(_, _): value = false
+                case .verified(_): value = true
             }
         }
         

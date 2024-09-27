@@ -44,7 +44,7 @@ internal struct SKHelperPurchaseInfoMain: View {
     
     private func purchaseType(info: SKHelperPurchaseInfo) -> String {
         if let ownershipType = info.ownershipType {
-            var value = ownershipType == .purchased ? "Personal purchase" : "Family sharing"
+            let value = ownershipType == .purchased ? "Personal purchase" : "Family sharing"
             return "\(value) (\(productType.localizedDescription))"
         }
         
@@ -52,7 +52,7 @@ internal struct SKHelperPurchaseInfoMain: View {
     }
     
     private func notes(info: SKHelperPurchaseInfo) -> String {
-        if let revocationDate = info.revocationDate {
+        if info.revocationDate != nil {
             return "Purchased revoked \(info.revocationDateFormatted ?? "") \(info.revocationReason == .developerIssue ? "(developer issue)" : "(other)")"
         }
         

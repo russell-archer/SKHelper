@@ -741,7 +741,7 @@ public class SKHelper: Observable {
     /// Clears all in-memory and persisted cached entitlements.
     ///
     public func clearCachedEntitlements() {
-        products.map { $0.hasEntitlement = false }
+        products.forEach { $0.hasEntitlement = false }
         UserDefaults.standard.set([ProductId](), forKey: SKHelperConstants.PurchasedProductsKey)
     }
     

@@ -70,7 +70,7 @@ internal struct SKHelperSubscriptionInfoMain: View {
     
     private func purchaseType(info: SKHelperSubscriptionInfo) -> String {
         if let ownershipType = info.ownershipType {
-            var value = ownershipType == .purchased ? "Personal purchase" : "Family sharing"
+            let value = ownershipType == .purchased ? "Personal purchase" : "Family sharing"
             return "\(value) (subscription)"
         }
         
@@ -78,7 +78,7 @@ internal struct SKHelperSubscriptionInfoMain: View {
     }
     
     private func notes(info: SKHelperSubscriptionInfo) -> String {
-        if let revocationDate = info.revocationDate {
+        if info.revocationDate != nil {
             return "Purchased revoked \(info.revocationDateFormatted ?? "") \(info.revocationReason == .developerIssue ? "(developer issue)" : "(other)")"
         }
         
