@@ -1,5 +1,5 @@
 //
-//  SKHelperPurchaseInfoRefund.swift
+//  SKHelperNonConsumablePurchaseInfoRefund.swift
 //  SKHelper
 //
 //  Created by Russell Archer on 22/08/2024.
@@ -11,7 +11,7 @@ import SwiftUI
 /// See `SKHelperManagePurchaseView`, which includes this view.
 ///
 @available(iOS 17.0, macOS 14.6, *)
-internal struct SKHelperPurchaseInfoRefund: View {
+internal struct SKHelperNonConsumablePurchaseInfoRefund: View {
     
     /// Purchase information passed to us by `SKHelperManagePurchaseView`.
     let purchaseInfo: SKHelperPurchaseInfo

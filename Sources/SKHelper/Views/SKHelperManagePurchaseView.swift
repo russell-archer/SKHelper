@@ -8,7 +8,10 @@
 import SwiftUI
 import StoreKit
 
-/// A view that displays detailed information related to a non-consumable or subscription purchase, along with purchase management options.
+/// A view that displays detailed information related to a consumable, non-consumable or subscription purchase, along with purchase management options.
+///
+/// ## Consumables ##
+/// If the purchase is for a consumable we show all historical purchases for that product.
 ///
 /// ## Non-consumables ##
 /// If the purchase is for a non-consumable a button is diplsayed allowing the user to "Manage Purchase" (request a refund).
@@ -24,11 +27,19 @@ public struct SKHelperManagePurchaseView: View {
     /// The `SKHelper` object.
     @Environment(SKHelper.self) private var store
     
+    /// The type of product we're showing info for.
+    @State private var productType: Product.ProductType = .consumable
+    
+    @State private var viewTitle = "Product Info"
+    
     /// Purchase information related to a non-consumable.
-    @State private var purchaseInfo: SKHelperPurchaseInfo?
+    @State private var consumablePurchaseInfo: [SKHelperPurchaseInfo]?
+    
+    /// Purchase information related to a non-consumable.
+    @State private var nonConsumablePurchaseInfo: SKHelperPurchaseInfo?
     
     /// Purchase information related to a subscription.
-    @State private var subInfo: SKHelperSubscriptionInfo?
+    @State private var subscriptionPurchaseInfo: SKHelperSubscriptionInfo?
     
     /// Determines if the manage purchase sheet is displayed.
     @State private var showManagePurchase = false
@@ -57,7 +68,7 @@ public struct SKHelperManagePurchaseView: View {
     /// Creates the `SKHelperManagePurchaseView`.
     public var body: some View {
         VStack {
-            SKHelperSheetBarView(showSheet: $showPurchaseInfoSheet, title: purchaseInfo?.name ?? "Product Info")
+            SKHelperSheetBarView(showSheet: $showPurchaseInfoSheet, title: viewTitle)
 
             ScrollView {
 
@@ -67,12 +78,17 @@ public struct SKHelperManagePurchaseView: View {
                     .frame(maxWidth: 85, maxHeight: 85)
                     .scaledToFit()
                 
-                if let purchaseInfo {
-                    SKHelperPurchaseInfoMain(purchaseInfo: purchaseInfo)
-                    SKHelperPurchaseInfoRefund(purchaseInfo: purchaseInfo, refundRequestTransactionId: $refundRequestTransactionId, showRefundSheet: $showRefundSheet)
+                if let consumablePurchaseInfo {
+                    SKHelperConsumablePurchaseInfoMain(purchaseInfo: consumablePurchaseInfo)
                     
-                } else if let subInfo {
-                    SKHelperSubscriptionInfoMain(subInfo: subInfo)
+                } else if let nonConsumablePurchaseInfo {
+                    
+                    SKHelperNonConsumablePurchaseInfoMain(purchaseInfo: nonConsumablePurchaseInfo)
+                    SKHelperNonConsumablePurchaseInfoRefund(purchaseInfo: nonConsumablePurchaseInfo, refundRequestTransactionId: $refundRequestTransactionId, showRefundSheet: $showRefundSheet)
+                    
+                } else if let subscriptionPurchaseInfo {
+                    
+                    SKHelperSubscriptionInfoMain(subInfo: subscriptionPurchaseInfo)
                     SKHelperSubscriptionInfoManage(showManageSubscriptionsSheet: $showManageSubscriptionsSheet)
                 }
                 else {
@@ -85,13 +101,7 @@ public struct SKHelperManagePurchaseView: View {
                 }
             }
         }
-        .task {
-            if store.isNonConsumable(productId: selectedProductId) {
-                purchaseInfo = await store.purchaseInformation(for: selectedProductId)
-            } else if store.isAutoRenewable(productId: selectedProductId) {
-                subInfo = await store.subscriptionInformation(for: selectedProductId)
-            }
-        }
+        .task { await getPurchaseInfo() }
         .refundRequestSheet(for: refundRequestTransactionId, isPresented: $showRefundSheet) { result in
             var requestWasCancelled = false
             switch(result) {
@@ -113,6 +123,27 @@ public struct SKHelperManagePurchaseView: View {
         .frame(minWidth: 650, idealWidth: 650, maxWidth: 650, minHeight: 650, idealHeight: 650, maxHeight: 650)
         .fixedSize(horizontal: true, vertical: true)
         #endif
+    }
+    
+    private func getPurchaseInfo() async {
+        if store.isConsumable(productId: selectedProductId) {
+            
+            consumablePurchaseInfo = await store.consumablePurchaseInformation(for: selectedProductId)
+            productType = .consumable
+            viewTitle = consumablePurchaseInfo?.first?.name ?? "Purchase Info"
+            
+        } else if store.isNonConsumable(productId: selectedProductId) {
+            
+            nonConsumablePurchaseInfo = await store.nonConsumablePurchaseInformation(for: selectedProductId)
+            productType = .nonConsumable
+            viewTitle = nonConsumablePurchaseInfo?.name ?? "Purchase Info"
+            
+        } else if store.isAutoRenewableSubscription(productId: selectedProductId) {
+            
+            subscriptionPurchaseInfo = await store.subscriptionInformation(for: selectedProductId)
+            productType = .autoRenewable
+            viewTitle = consumablePurchaseInfo?.first?.name ?? "Subscription Info"
+        }
     }
 }
 

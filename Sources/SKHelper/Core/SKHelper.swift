@@ -72,11 +72,11 @@ public class SKHelper: Observable {
     // MARK: - Public methods
     
     /// Request localized product info from the App Store for a collection of `ProductId`.
-    ///
+    ///  
     /// Product information returned from the App Store is stored in the `SKHelper.products` property.
-    ///
+    ///  
     /// - Returns: Returns true if product information was successfully returned by the App Store, false otherwise.
-    ///
+    ///  
     public func requestProducts() async -> Bool {
         SKHelperLog.event(.requestProductsStart)
         
@@ -92,6 +92,12 @@ public class SKHelper: Observable {
             return false
         }
     
+        // Make sure we don't have to deal with non-renewable subscriptions
+        guard !hasNonRenewableSubscriptionProducts else {
+            SKHelperLog.event(.nonRenewableSubscriptionsNotSupported)
+            return false
+        }
+        
         // Create a collection of `SKHelperProduct`
         products.removeAll()
         localizedProducts.forEach { localizedProduct in
@@ -154,13 +160,10 @@ public class SKHelper: Observable {
     
     /// Call this method when the user completes a purchase workflow via a StoreKit view and your code uses the `.onInAppPurchaseCompletion` view modifier.
     /// 
-    /// ## Example usage ##
+    /// ## .onInAppPurchaseCompletion with StoreView() ##
     /// ```
     /// StoreView(ids: store.allProductIds) { product in
     ///     Image(product.id).resizable()
-    /// }
-    /// .onInAppPurchaseStart { product in
-    ///     store.purchaseDidStart(product: product)
     /// }
     /// .onInAppPurchaseCompletion { product, result in
     ///     let verifiedResult = await store.purchaseCompletion(for: product, with: try? result.get())
@@ -169,6 +172,20 @@ public class SKHelper: Observable {
     ///     }
     /// }
     /// ```
+    ///
+    /// ## .onInAppPurchaseCompletion with SKHelperStoreView() ##
+    /// ```
+    /// SKHelperStoreView() { productId in
+    ///     Image(product.id).resizable()
+    /// }
+    /// .onInAppPurchaseCompletion { product, result in
+    ///     let verifiedResult = await store.purchaseCompletion(for: product, with: try? result.get())
+    ///     if verifiedResult.purchaseState == .purchased, let transaction = verifiedResult.transaction {
+    ///         print("You now have access to \(product.id) with transaction id \(transaction.id).")
+    ///     }
+    /// }
+    /// ```
+    ///
     /// This allows `SKHelper` to process and finish the `Transaction` as the use of `.onInAppPurchaseCompletion` prevents transaction updates being
     /// handled in the normal manner by the `SKHelper.handleTransactions` (i.e. the transaction update is never received).
     /// 
@@ -208,6 +225,8 @@ public class SKHelper: Observable {
                 }
 
                 let validatedTransaction = checkResult.transaction  // The transaction was successfully validated
+                
+                // Finish the transaction for all cases, including access revoked, subscription expired, subscription upgraded and successful purchase
                 await validatedTransaction.finish()  // Tell the App Store we delivered the purchased content to the user
 
                 updatePurchasedProducts(validatedTransaction.productID, purchased: true)
@@ -237,9 +256,10 @@ public class SKHelper: Observable {
     /// Checks the current entitlement for `productId` and returns true if the user is entitled to use the product,
     /// false otherwise.
     ///
-    /// ## Note ##
-    /// This method is intended for non-comsumable products. If `productId` identifies an auto-renewable subscription
-    /// then `isSubscribed(productId)` is called.
+    /// This method is intended for consumable and non-comsumable products. If `productId` identifies an auto-renewable
+    /// subscription then we redirect the call to `isSubscribed(productId)`.
+    ///
+    /// ## Notes on non-consumable products ##
     ///
     /// Note that the process of determining if a product is purchased can be unreliable. Calls to
     /// `Transaction.currentEntitlement(for:)` mostly produce the correct result. However, in both the Xcode testing
@@ -258,28 +278,49 @@ public class SKHelper: Observable {
     /// for the user's entitlement to use each product.
     ///
     /// When checking the purchased state of a product we return true if `Transaction.currentEntitlement(for:)` returns
-    /// non-nil. If the result is nil then we return true if the value of `SKHelperProduct.hasEntitlement` is true,
-    /// otherwise we return false.
+    /// non-nil. If the result is nil then if `useCachedEntitlements` is true we return the value of `SKHelperProduct.hasEntitlement`.
+    ///
+    /// ## Notes on consumable products ##
+    ///
+    /// Consumables don't have entitlements, so `Transaction.currentEntitlement(for:)` returns nil.
+    /// However, the following do return transactions for both finished and unfinished consumables in iOS18+ and macOS15+
+    /// (you also need to add `SKIncludeConsumableInAppPurchaseHistory = YES` to your app's info.plist file):
+    ///
+    ///  - `all` sequence in `Transaction`  - returns the user's complete transaction history
+    ///  - `latest(for:)` in `Transaction`  - returns the user's most recent transaction for a specific product
+    ///  - `latestTransaction` in `Product` - returns the user's most recent transaction for a specific product
+    ///
+    ///  The user may purchase multiple instances of the same consumable product. However, `SKHelper` must call `finish()` on each consumable
+    ///  transaction as they happen, otherwise StoreKit prevents us from purchasing another instance (actually, the purchase appears to
+    ///  work, but StoreKit just resends the most recent transaction for that product and the user is not charged for a new purchase).
+    ///
+    ///  Note that we can't tell if a consumable has "expired", the host app must do this according to its own internal logic.
+    ///
+    ///  As far as telling if a consumable has been purchased, all we can do is see if there has been at least one historical purchase
+    ///  using `Product.product.latestTransaction`. We could use the `Transaction.all` sequence to see how many purchases of the consumable
+    ///  there have been, but that isn't particularly useful.
     ///
     /// - Parameter productId: The `ProductId` to check.
     /// - Returns: Returns true if user is entitled to use the product, false otherwise.
     ///
     public func isPurchased(productId: ProductId) async -> Bool {
+        if isAutoRenewableSubscription(productId: productId) { return await isSubscribed(productId: productId) == .subscribed }
         guard let product = skhelperProduct(for: productId) else { return false }
-        guard isNonConsumable(productId: productId) || isAutoRenewable(productId: productId) else { return false }
+                
+        var latestTransaction: VerificationResult<Transaction>?
+        if product.product.type == .consumable { latestTransaction = await product.product.latestTransaction }
+        else { latestTransaction = await Transaction.currentEntitlement(for: productId) }
         
-        if isAutoRenewable(productId: productId) { return await isSubscribed(productId: productId) == .subscribed }
-        
-        // We're dealing with a non-consumable product. Does the user have a current entitlement to use it?
-        if let currentEntitlement = await Transaction.currentEntitlement(for: productId) {
-            // The user has an entitlement. See if it has been verified by the App Store
-            let verified = checkVerificationResult(result: currentEntitlement).verified
+        if let latestTransaction {
+            // We've found a transaction. See if it has been verified by StoreKit
+            let verified = checkVerificationResult(result: latestTransaction).verified
             if !verified { SKHelperLog.transaction(.transactionValidationFailure, productId: productId) }
             updatePurchasedProducts(productId, purchased: verified)  // Updates `SKHelperProduct.hasEntitlement`
             return verified
         }
         
-        // The user appears NOT to have have an entitlement. See if we've previously cached an entitlement.
+        // The user appears NOT to have have an entitlement, or any previous transactions (in the case of consumables).
+        // See if we've previously cached an entitlement.
         return useCachedEntitlements ? product.hasEntitlement : false
     }
     
@@ -289,8 +330,8 @@ public class SKHelper: Observable {
     /// checks are positive then true is returned, false otherwise.
     ///
     /// ## Note ##
-    /// This method is intended only for **auto-renewable subscriptions**. If `productId` identifies any other type of product then an
-    /// exception of type `StoreException.productTypeNotSupported` is thrown.
+    /// This method is intended only for **auto-renewable subscriptions**. If `productId` identifies any other type of product
+    /// then `.notSubscribed` is returned.
     ///
     /// Note that the process of determining if a product is purchased can be unreliable. Calls to
     /// `Transaction.currentEntitlement(for:)` mostly produce the correct result. However, in both the Xcode testing
@@ -311,7 +352,7 @@ public class SKHelper: Observable {
     /// When checking the purchased state of a subscription product we:
     ///
     /// - check the return of `Transaction.currentEntitlement(for:)`
-    /// - check `SKHelperProduct.hasEntitlement` for the product if the return from `Transaction.currentEntitlement(for:)` is nil
+    /// - check `SKHelperProduct.hasEntitlement` if `Transaction.currentEntitlement(for:)` is nil and `useCachedEntitlements` is true
     /// - check if the product is the highest value product subscribed to in the subscription group
     ///
     /// ## Important ##
@@ -334,7 +375,7 @@ public class SKHelper: Observable {
     /// - Returns `SKHelperSubscriptionState.superceeded` if the subscription to this product has been superceeded by a subscription with a higher value product in the same subscription group.
     ///
     public func isSubscribed(productId: ProductId) async -> SKHelperSubscriptionState {
-        guard isAutoRenewable(productId: productId) else { return .notSubscribed }
+        guard isAutoRenewableSubscription(productId: productId) else { return .notSubscribed }
         guard let storeProduct = skhelperProduct(for: productId), let groupName = storeProduct.groupName else { return .notSubscribed }
         
         // We're dealing with an auto-renewable product. Does the user have a current entitlement to use it?
@@ -423,15 +464,16 @@ public class SKHelper: Observable {
     
     /// Provides information on the purchase of a non-consumable product.
     ///
-    /// - Parameter productId: The `ProductId` of the non-consumable product.
-    /// - Returns: Returns `SKHelperPurchaseInfo` containing info on the purchase of a non-consumable product. nil is returned if the product has not been purchased or it's not a non-consumable.
+    /// - Parameter productId: The `ProductId` of a non-consumable product.
+    /// - Returns: Returns `SKHelperPurchaseInfo` containing info on the purchase of a cnon-consumable product.
+    /// nil is returned if the product has not been purchased or it's not a non-consumable.
     ///
-    public func purchaseInformation(for productId: ProductId) async -> SKHelperPurchaseInfo? {
-        guard let product = product(from: productId), isNonConsumable(productId: productId) else { return nil }
+    public func nonConsumablePurchaseInformation(for productId: ProductId) async -> SKHelperPurchaseInfo? {
+        guard isNonConsumable(productId: productId), let product = product(from: productId) else { return nil }
         
         var pi = SKHelperPurchaseInfo(id: product.id, name: product.displayName, isPurchased: false, productType: product.type, purchasePrice: product.displayPrice)
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "d MMM y"
+        dateFormatter.dateFormat = "d MMM y, h:mm a"
         
         pi.isPurchased = await isPurchased(productId: product.id)
         guard pi.isPurchased else { return pi }
@@ -448,17 +490,57 @@ public class SKHelper: Observable {
         return pi
     }
     
+    /// Provides information on the purchase of a consumable product.
+    ///
+    /// - Parameter productId: The `ProductId` of the consumable or non-consumable product.
+    /// - Returns: Returns `[SKHelperPurchaseInfo]` containing info on all the purchases of a consumable product.
+    /// nil is returned if the product has not been purchased or it's not a consumable.
+    ///
+    public func consumablePurchaseInformation(for productId: ProductId) async -> [SKHelperPurchaseInfo]? {
+        guard isConsumable(productId: productId), let product = product(from: productId) else { return nil }
+        var purchaseInfo = [SKHelperPurchaseInfo]()
+        
+        func createPurchaseInfo(transaction: Transaction) async -> SKHelperPurchaseInfo {
+            var pi = SKHelperPurchaseInfo(id: product.id, name: product.displayName, isPurchased: false, productType: product.type, purchasePrice: product.displayPrice)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "d MMM y, h:mm a"
+            
+            pi.isPurchased = await isPurchased(productId: product.id)
+            guard pi.isPurchased else { return pi }
+            
+            pi.transactionId = transaction.id
+            pi.purchaseDate = transaction.purchaseDate
+            pi.purchaseDateFormatted = dateFormatter.string(from: transaction.purchaseDate)
+            pi.revocationDate = transaction.revocationDate
+            pi.revocationDateFormatted = transaction.revocationDate == nil ? nil : dateFormatter.string(from: transaction.revocationDate!)
+            pi.revocationReason = transaction.revocationReason
+            pi.ownershipType = transaction.ownershipType
+            
+            return pi
+        }
+        
+        for await transactionResult in Transaction.all {
+            if transactionResult.unsafePayloadValue.productID != productId { continue }
+            let unwrappedTransactionResult = checkVerificationResult(result: transactionResult)
+            if !unwrappedTransactionResult.verified { continue }  // We couldn't verify this transaction
+            await purchaseInfo.append(createPurchaseInfo(transaction: unwrappedTransactionResult.transaction))
+        }
+
+        return purchaseInfo
+    }
+    
     /// Provides information on the purchase of an auto-renewable subscription productin a format that's suitable for direct display to the user.
     ///
     /// - Parameter productId: The `ProductId` of the auto-renewable subscription product.
-    /// - Returns: Returns `SKHelperSubscriptionInfo` containing info on the purchase of an auto-renewable subscription product. nil is returned if the product has not been purchased or it's not an auto-renewable.
+    /// - Returns: Returns `SKHelperSubscriptionInfo` containing info on the purchase of an auto-renewable subscription product.
+    /// nil is returned if the product has not been purchased or it's not an auto-renewable.
     ///
     public func subscriptionInformation(for productId: ProductId) async -> SKHelperSubscriptionInfo? {
-        guard let product = product(from: productId), isAutoRenewable(productId: productId) else { return nil }
+        guard isAutoRenewableSubscription(productId: productId), let product = product(from: productId) else { return nil }
         
         // Create a date formatter
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "d MMM y"
+        dateFormatter.dateFormat = "d MMM y, h:mm a"
         
         // Create a localized price formatter
         let priceFormatter = NumberFormatter()
@@ -656,6 +738,13 @@ public class SKHelper: Observable {
         return .verifiedEntitlement
     }
     
+    /// Clears all in-memory and persisted cached entitlements.
+    ///
+    public func clearCachedEntitlements() {
+        products.map { $0.hasEntitlement = false }
+        UserDefaults.standard.set([ProductId](), forKey: SKHelperConstants.PurchasedProductsKey)
+    }
+    
     // MARK: - Private methods
         
     /// This is an infinite async sequence (loop). It will continue waiting for transactions until it is explicitly canceled by calling the `Task.cancel()` method. See `transactionListener`.
@@ -679,12 +768,13 @@ public class SKHelper: Observable {
                 }
                 
                 let transaction = checkResult.transaction  // The transaction was validated by StoreKit
-                guard transaction.productType == .autoRenewable || transaction.productType == .nonConsumable else {
+                guard transaction.productType != .nonRenewable else {
                     SKHelperLog.event("Product type \(transaction.productType.localizedDescription) is not supported.")
                     return
                 }
-                
-                await transaction.finish()  // Finish the transaction for all cases, including access revoked, subscription expired, subscription upgraded and successful purchase
+                                
+                // Finish the transaction for all cases, including access revoked, subscription expired, subscription upgraded and successful purchase
+                await transaction.finish()
                 
                 if transaction.revocationDate != nil {
                     // The user's access to the product has been revoked by the App Store (e.g. a refund, etc.)

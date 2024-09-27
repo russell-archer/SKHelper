@@ -10,7 +10,7 @@ import StoreKit
 /// Information related to the purchase of a non-consumable product.
 @MainActor
 @available(iOS 17.0, macOS 14.6, *)
-public struct SKHelperPurchaseInfo: Hashable {
+public struct SKHelperPurchaseInfo: Hashable, Identifiable {
     
     /// The product's unique id
     public var id: ProductId

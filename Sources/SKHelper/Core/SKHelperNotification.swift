@@ -110,45 +110,53 @@ public enum SKHelperNotification: Error, Equatable {
     /// The status of a subscription has changed.
     case subscriptionStausChanged
     
+    /// `SKHelper` supports consumable and non-consumable products and auto-renewable subscriptions. Non-renewable subscriptions are not supported.
+    case nonRenewableSubscriptionsNotSupported
+    
+    /// The wrong product type was provided.
+    case wrongProductType
+    
     /// A short description of the notification.
     ///
     /// - Returns: Returns a short description of the notification.
     ///
     public func shortDescription() -> String {
         switch self {
-            case .configurationNotFound:                return "Configuration file not found in the main bundle"
-            case .configurationEmpty:                   return "Configuration file does not contain any product definitions"
-            case .configurationSuccess:                 return "Configuration success"
-            case .configurationFailure:                 return "Configuration failure"
-            case .purchaseUserCannotMakePayments:       return "Purchase failed because the user cannot make payments"
-            case .purchaseAlreadyInProgress:            return "Purchase already in progress"
-            case .purchaseInProgress:                   return "Purchase in progress"
-            case .purchasePending:                      return "Purchase in progress. Awaiting authorization"
-            case .purchaseCancelled:                    return "Purchase cancelled"
-            case .purchaseSuccess:                      return "Purchase success"
-            case .purchaseFailure:                      return "Purchase failure"
-            case .transactionReceived:                  return "Transaction received"
-            case .transactionValidationSuccess:         return "Transaction validation success"
-            case .transactionValidationFailure:         return "Transaction validation failure"
-            case .transactionValidationFailureWarning:  return "Transaction validation failed when checking entitlement (warning)"
-            case .transactionFailure:                   return "Transaction failure"
-            case .transactionSuccess:                   return "Transaction success"
-            case .transactionSubscribed:                return "Transaction for subscription was a success"
-            case .transactionRevoked:                   return "Transaction was revoked (refunded) by the App Store"
-            case .transactionRefundRequested:           return "Transaction refund successfully requested"
-            case .transactionRefundFailed:              return "Transaction refund request failed"
-            case .transactionExpired:                   return "Transaction for subscription has expired"
-            case .transactionUpgraded:                  return "Transaction superceeded by higher-value subscription"
-            case .transactionInGracePeriod:             return "Subscription is in a billing grace period"
-            case .transactionInBillingRetryPeriod:      return "Subscription is in a billing retry period"
-            case .transactionFinished:                  return "Transaction finished"
-            case .productIsPurchased:                   return "Product purchased"
-            case .productIsNotPurchased:                return "Product not purchased"
-            case .requestProductsStart:                 return "Starting request for localized product information from the App Store"
-            case .requestProductsFailure:               return "Localized product information could not be retrieved from the App Store"
-            case .requestProductsSuccess:               return "Localized product information successfully retrieved from the App Store"
-            case .purchaseIntentRecieved:               return "Purchase intent received"
-            case .subscriptionStausChanged:             return "Subscription status changed"
+            case .configurationNotFound:                    return "Configuration file not found in the main bundle"
+            case .configurationEmpty:                       return "Configuration file does not contain any product definitions"
+            case .configurationSuccess:                     return "Configuration success"
+            case .configurationFailure:                     return "Configuration failure"
+            case .purchaseUserCannotMakePayments:           return "Purchase failed because the user cannot make payments"
+            case .purchaseAlreadyInProgress:                return "Purchase already in progress"
+            case .purchaseInProgress:                       return "Purchase in progress"
+            case .purchasePending:                          return "Purchase in progress. Awaiting authorization"
+            case .purchaseCancelled:                        return "Purchase cancelled"
+            case .purchaseSuccess:                          return "Purchase success"
+            case .purchaseFailure:                          return "Purchase failure"
+            case .transactionReceived:                      return "Transaction received"
+            case .transactionValidationSuccess:             return "Transaction validation success"
+            case .transactionValidationFailure:             return "Transaction validation failure"
+            case .transactionValidationFailureWarning:      return "Transaction validation failed when checking entitlement (warning)"
+            case .transactionFailure:                       return "Transaction failure"
+            case .transactionSuccess:                       return "Transaction success"
+            case .transactionSubscribed:                    return "Transaction for subscription was a success"
+            case .transactionRevoked:                       return "Transaction was revoked (refunded) by the App Store"
+            case .transactionRefundRequested:               return "Transaction refund successfully requested"
+            case .transactionRefundFailed:                  return "Transaction refund request failed"
+            case .transactionExpired:                       return "Transaction for subscription has expired"
+            case .transactionUpgraded:                      return "Transaction superceeded by higher-value subscription"
+            case .transactionInGracePeriod:                 return "Subscription is in a billing grace period"
+            case .transactionInBillingRetryPeriod:          return "Subscription is in a billing retry period"
+            case .transactionFinished:                      return "Transaction finished"
+            case .productIsPurchased:                       return "Product purchased"
+            case .productIsNotPurchased:                    return "Product not purchased"
+            case .requestProductsStart:                     return "Starting request for localized product information from the App Store"
+            case .requestProductsFailure:                   return "Localized product information could not be retrieved from the App Store"
+            case .requestProductsSuccess:                   return "Localized product information successfully retrieved from the App Store"
+            case .purchaseIntentRecieved:                   return "Purchase intent received"
+            case .subscriptionStausChanged:                 return "Subscription status changed"
+            case .nonRenewableSubscriptionsNotSupported:    return "Non-renewable subscriptions are not supported"
+            case .wrongProductType:                         return "Wrong product type"
         }
     }
 }

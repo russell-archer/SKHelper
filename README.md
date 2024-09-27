@@ -6,9 +6,14 @@
 
 # SKHelper
 
-`SKHelper` is a new (September, 2024), lightweight Swift package that enables developers to easily add in-app purchase and subscription functionaility to their SwiftUI-based apps. 
+`SKHelper` is a new (September, 2024), lightweight Swift package that enables developers to easily add in-app purchase and subscription functionaility to their 
+**SwiftUI**-based apps. 
 
-Designed to be an easier-to-use refactoring of my [StoreHelper](https://github.com/russell-archer/StoreHelper) package, it makes use of Apple's **StoreKit Views** to provide a standard and easily customizable UI.
+Designed to be an easier-to-use refactoring of my [StoreHelper](https://github.com/russell-archer/StoreHelper) package, it makes use of Apple's **StoreKit Views** 
+to provide a standard and easily customizable UI.
+
+- Note that `SKHelper` requires **Xcode 16, iOS 17+** and **macOS 14.6+**
+- Support for **consumable** transactions requires **iOS 18+** and **macOS 15+**.
 
 Check out the [Quick Start Tutorial](https://russell-archer.github.io/SKHelper/tutorials/quickstart) to get a fast overview of how things work.
 
@@ -22,6 +27,10 @@ Check out the [Quick Start Tutorial](https://russell-archer.github.io/SKHelper/t
 ---
 
 # Recent Major Changes
+- 27 Sep, 2024
+    - Improved support for consumables 
+- 23 Sep, 2024
+    - Added support for consumable products. Note that supporting consumable transactions requires iOS18+ and macOS15+
 - 20 Sep, 2024
     - DocC documentation complete, including Quick Start tutorial (detailed Guide currently incomplete)
 - 5 Sep, 2024

@@ -24,7 +24,10 @@ public extension SKHelper {
     var allSKHelperNonConsumableProducts: [SKHelperProduct] { products.filter { $0.product.type == .nonConsumable }}
     
     /// All `SKHelperProduct` products that represent auto-renewable subscriptions.
-    var allSKHelperSubscriptionProducts: [SKHelperProduct] { products.filter { $0.product.type == .autoRenewable }}
+    var allSKHelperAutoRenewableSubscriptionProducts: [SKHelperProduct] { products.filter { $0.product.type == .autoRenewable }}
+    
+    /// All `SKHelperProduct` products that represent non-renewable subscriptions.
+    var allSKHelperNonRenewableSubscriptionProducts: [SKHelperProduct] { products.filter { $0.product.type == .nonRenewable }}
     
     /// All `SKHelperProduct` products that represent purchased products.
     var allSKHelperPurchasedProducts: [SKHelperProduct] { products.filter { $0.hasEntitlement }}
@@ -42,10 +45,13 @@ public extension SKHelper {
     var allNonConsumableProductIds: [ProductId] { products.filter { $0.product.type == .nonConsumable }.map { $0.id }}
     
     /// A collection of all configured `ProductId` that represent auto-renewable subscriptions.
-    var allSubscriptionProductIds: [ProductId] { products.filter { $0.product.type == .autoRenewable }.map { $0.id }}
+    var allAutoRenewableSubscriptionProductIds: [ProductId] { products.filter { $0.product.type == .autoRenewable }.map { $0.id }}
+    
+    /// A collection of all configured `ProductId` that represent auto-renewable subscriptions.
+    var allNonRenewabaleSubscriptionProductIds: [ProductId] { products.filter { $0.product.type == .nonRenewable }.map { $0.id }}
     
     /// A collection of all configured `Product` that represent auto-renewable subscriptions in all subscription groups.
-    var allSubscriptions: [Product] { products.filter { $0.product.type == .autoRenewable }.map { $0.product }}
+    var allAutoRenewableSubscriptions: [Product] { products.filter { $0.product.type == .autoRenewable }.map { $0.product }}
     
     /// Finds all subscription group names (`groupDisplayName`) in `SKHelper.products`.
     /// An empty collection is returned if there are no auto-renewable subscription products.
@@ -67,8 +73,11 @@ public extension SKHelper {
     /// This property is true if `SKHelper.products` contains one or more non-consumable products, false otherwise.
     var hasNonConsumableProducts: Bool { !allSKHelperNonConsumableProducts.isEmpty }
     
-    /// This property is true if `SKHelper.products` contains one or more subscription products, false otherwise.
-    var hasSubscriptionProducts: Bool { !allSKHelperSubscriptionProducts.isEmpty }
+    /// This property is true if `SKHelper.products` contains one or more auto-renewable subscription products, false otherwise.
+    var hasAutoRenewableSubscriptionProducts: Bool { !allSKHelperAutoRenewableSubscriptionProducts.isEmpty }
+    
+    /// This property is true if `SKHelper.products` contains one or more non-renewable subscription products, false otherwise.
+    var hasNonRenewableSubscriptionProducts: Bool { !allSKHelperNonRenewableSubscriptionProducts.isEmpty }
     
     // MARK: - Public helper methods
     
@@ -113,8 +122,17 @@ public extension SKHelper {
     /// - Parameter productId: The `ProductId` to search for in `SKHelper.products`.
     /// - Returns: Returns true if an auto-renewable subscription in `SKHelper.products` matches the supplied `ProductId`, false otherwise.
     ///
-    func isAutoRenewable(productId: ProductId) -> Bool {
-        allSubscriptionProductIds.contains(productId)
+    func isAutoRenewableSubscription(productId: ProductId) -> Bool {
+        allAutoRenewableSubscriptionProductIds.contains(productId)
+    }
+    
+    /// Finds the first non-renewable subscription in `SKHelper.products` whose `id` matches the supplied `ProductId`.
+    ///
+    /// - Parameter productId: The `ProductId` to search for in `SKHelper.products`.
+    /// - Returns: Returns true if a non-renewable subscription in `SKHelper.products` matches the supplied `ProductId`, false otherwise.
+    ///
+    func isNonRenewableSubscription(productId: ProductId) -> Bool {
+        allAutoRenewableSubscriptionProductIds.contains(productId)
     }
     
     /// Finds the first non-consumable product in `SKHelper.products` whose `id` matches the supplied `ProductId`.
@@ -180,31 +198,50 @@ public extension SKHelper {
         productIds.compactMap { subscription(from: $0) }
     }
     
-    /// Finds all subscription products in `SKHelper.products` that match the supplied subscription group name.
+    /// Finds all auto-renewable subscription products in `SKHelper.products` that match the supplied subscription group name.
     ///
     /// - Parameter groupName: The group name (`groupDisplayName`)  to search for in `SKHelper.products`.
-    /// - Returns: Returns all subscription products in `SKHelper.products` that match the supplied subscription group name.
+    /// - Returns: Returns all auto-renewable subscription products in `SKHelper.products` that match the supplied subscription group name.
     ///
-    func allSubscriptionStoreProducts(for groupName: String) -> [SKHelperProduct] {
+    func allAutoRenewableSubscriptionStoreProducts(for groupName: String) -> [SKHelperProduct] {
         products.filter { $0.product.type == .autoRenewable && $0.groupName == groupName }
     }
     
-    /// Finds all subscription products in `SKHelper.products` that match the supplied subscription group name. The resulting collection is sorted by subscription group level (value).
+    /// Finds all auto-renewable subscription products in `SKHelper.products` that match the supplied subscription group name.
+    /// The resulting collection is sorted by subscription group level (value).
     ///
     /// - Parameter groupName: The group name (`groupDisplayName`)  to search for in `SKHelper.products`.
-    /// - Returns: Returns the `ProductId` of all subscription products in `SKHelper.products` that match the supplied subscription group name.
+    /// - Returns: Returns the `ProductId` of all auto-renewable subscription products in `SKHelper.products` that match the supplied subscription group name.
     ///
-    func allSubscriptionProductIdsByLevel(for groupName: String) -> [ProductId] {
-        allSubscriptionStoreProducts(for: groupName).sorted { $0.groupLevel < $1.groupLevel}.map { $0.id }
+    func allAutoRenewableSubscriptionProductIdsByLevel(for groupName: String) -> [ProductId] {
+        allAutoRenewableSubscriptionStoreProducts(for: groupName).sorted { $0.groupLevel < $1.groupLevel}.map { $0.id }
     }
     
-    /// Finds a collection of all subscription `Product` in `SKHelper.products` that match the supplied subscription group name. The resulting collection is sorted by subscription group level (value).
+    /// Finds a collection of all auto-renewable subscription `Product` in `SKHelper.products` that match the supplied subscription group name.
+    /// The resulting collection is sorted by subscription group level (value).
     ///
     /// - Parameter groupName: The group name (`groupDisplayName`)  to search for in `SKHelper.products`.
-    /// - Returns: Returns a collection of all subscription `Product` in `SKHelper.products` that match the supplied subscription group name.
+    /// - Returns: Returns a collection of all auto-renewable subscription `Product` in `SKHelper.products` that match the supplied subscription group name.
     ///
-    func allSubscriptionProductsByLevel(for groupName: String) -> [Product] {
-        allSubscriptionStoreProducts(for: groupName).sorted { $0.groupLevel < $1.groupLevel}.map { $0.product }
+    func allAutoRenewableSubscriptionProductsByLevel(for groupName: String) -> [Product] {
+        allAutoRenewableSubscriptionStoreProducts(for: groupName).sorted { $0.groupLevel < $1.groupLevel}.map { $0.product }
+    }
+    
+    /// The `Transaction` associated with a unique id. Searches the user's complete transaction history.
+    /// - Parameter transactionId: The transaction's unique id.
+    /// - Returns: Returns the `Transaction` associated with the unique id, or nil if the transaction cannot be found or can't be verified.
+    ///
+    func transaction(for transactionId: UInt64) async -> Transaction? {
+        for await transactionResult in Transaction.all {
+            if transactionResult.unsafePayloadValue.id != transactionId { continue }
+
+            // Get the verified transaction object
+            let unwrappedTransactionResult = checkVerificationResult(result: transactionResult)
+            if !unwrappedTransactionResult.verified { return nil }  // We couldn't verify this transaction
+            return unwrappedTransactionResult.transaction
+        }
+        
+        return nil
     }
 }
 

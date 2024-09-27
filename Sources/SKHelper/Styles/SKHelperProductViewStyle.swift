@@ -12,6 +12,12 @@ import StoreKit
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKHelperProductViewStyle: ProductViewStyle {
     
+    /// The purchase state of the product.
+    @State private var purchased = false
+    
+    /// Caption shown on the "Manage" button.
+    @State private var buttonCaption = "Manage Purchase"
+    
     /// A binding to the `ProductId` of the selected product.
     @Binding var selectedProduct: ProductId
     
@@ -38,39 +44,62 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
         switch configuration.state {
             case .success(let product):
                 VStack(alignment: .center) {
-                    configuration.icon
-                        .padding()
-                    
+                    configuration.icon.padding()
                     Text(product.displayName).font(.title)
-                    
-                    if configuration.hasCurrentEntitlement {
-                        
-                        Button(action: {
-                            selectedProduct = product.id
-                            productSelected.toggle()
-                            
-                        }, label: {
-                            HStack {
-                                Image(systemName: "creditcard.circle")
-                                Text("Manage Purchase")
-                            }
-                        })
-                        .tint(.blue)
-                        .padding()
-                        
-                        
-                    } else {
-                        
-                        Button(product.displayPrice) {
-                            configuration.purchase()
-                        }
-                        .tint(.blue)
-                        .padding()
-                        
-                    }
+                    if purchased { managePurchaseButton(product: product) }
+                    else { purchaseButton(product: product, configuration: configuration) }
                 }
+                .task { purchased = await isPurchased(product: product, configuration: configuration) }
                 
             default: ProductView(configuration)
         }
+    }
+    
+    private func managePurchaseButton(product: Product) -> some View {
+        Button(action: {
+            selectedProduct = product.id
+            productSelected.toggle()
+            
+        }, label: {
+            HStack {
+                Image(systemName: "creditcard.circle")
+                Text(buttonCaption)
+            }
+        })
+        .tint(.blue)
+        .padding()
+        .task {
+            buttonCaption = switch product.type {
+                case .consumable: "Manage Purchase"
+                case .nonConsumable: "Manage Purchase"
+                case .autoRenewable: "Manage Subscription"
+                default: ""
+            }
+        }
+    }
+    
+    private func purchaseButton(product: Product, configuration: Configuration) -> some View {
+        Button(product.displayPrice) {
+            configuration.purchase()
+        }
+        .tint(.blue)
+        .padding()
+    }
+    
+    private func isPurchased(product: Product, configuration: Configuration) async -> Bool {
+        var value = false
+        var latestTransaction: VerificationResult<StoreKit.Transaction>?
+        
+        if product.type == .consumable { latestTransaction = await product.latestTransaction }
+        else if product.type == .nonConsumable || product.type == .autoRenewable { latestTransaction = await product.currentEntitlement }
+        
+        if let latestTransaction {
+            switch latestTransaction {
+                case .unverified(let _, let _): value = false
+                case .verified(let _): value = true
+            }
+        }
+        
+        return value
     }
 }

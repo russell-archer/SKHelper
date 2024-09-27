@@ -44,7 +44,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     
     /// Gets either all subscriptions in all groups, or subscriptions in a specific group if `subscriptionGroupName` was provided to init.
     private var subscriptions: [Product] {
-        subscriptionGroupName == nil ? store.allSubscriptions : store.allSubscriptionProductsByLevel(for: subscriptionGroupName!)
+        subscriptionGroupName == nil ? store.allAutoRenewableSubscriptions : store.allAutoRenewableSubscriptionProductsByLevel(for: subscriptionGroupName!)
     }
     
     /// Creates a `SKHelperSubscriptionStoreView`.
@@ -67,7 +67,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     
     /// Creates the body of the view.
     public var body: some View {
-        if store.hasSubscriptionProducts {
+        if store.hasAutoRenewableSubscriptionProducts {
             ScrollView {
                 SubscriptionStoreView(subscriptions: subscriptions) {
                     VStack { subscriptionHeader?() }.padding()
