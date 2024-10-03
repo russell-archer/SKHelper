@@ -36,6 +36,9 @@ public class SKHelper: Observable {
     /// The current internal state of `SKHelper`.
     private var purchaseState: SKHelperPurchaseState = .unknown
     
+    /// A closure which is called when a subscription changes status.
+    private var subscriptionStatusChange: SubscriptionStatusChangeClosure?
+    
     // MARK: - Init/deinit
     
     /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically starts listening for App Store transactions,
@@ -45,6 +48,16 @@ public class SKHelper: Observable {
         transactionListener = handleTransactions()
         purchaseIntentListener = handlePurchaseIntents()
         subscriptionListener = handleSubscriptionChanges()
+        subscriptionStatusChange = nil
+        
+        Task { await requestProducts() }
+    }
+    
+    public init(onSubscriptionStatusChange: @escaping SubscriptionStatusChangeClosure) {
+        transactionListener = handleTransactions()
+        purchaseIntentListener = handlePurchaseIntents()
+        subscriptionListener = handleSubscriptionChanges()
+        subscriptionStatusChange = onSubscriptionStatusChange
         
         Task { await requestProducts() }
     }
@@ -823,7 +836,13 @@ public class SKHelper: Observable {
                 guard let renewalInfo = try? status.renewalInfo.payloadValue, let transaction = try? status.transaction.payloadValue else { return }
                 
                 await transaction.finish()  // Finish the transaction here because sometimes we don't get an update via `Transaction.updates`
-                SKHelperLog.subscriptionChanged(productId: transaction.productID, transactionId: String(transaction.id), newSubscriptionStatus: status.state.localizedDescription)
+                
+                let transactionId = String(transaction.id)
+                let hasExpired = renewalInfo.expirationReason != nil
+                
+                subscriptionStatusChange?(transaction.productID, transactionId, status.state, hasExpired)  // Broadcast the subscription change if anybody's listening
+                SKHelperLog.subscriptionChanged(productId: transaction.productID, transactionId: transactionId, newSubscriptionStatus: status.state.localizedDescription)
+                
                 if let expired = renewalInfo.expirationReason, let expirationDate = transaction.expirationDate {
                     SKHelperLog.transaction(.transactionExpired, productId: transaction.productID, transactionId: String(transaction.id))
                     SKHelperLog.event("Subscription for \(transaction.productID) expired on \(expirationDate) because \(expired.localizedDescription).")

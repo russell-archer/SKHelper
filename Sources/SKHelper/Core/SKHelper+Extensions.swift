@@ -8,6 +8,8 @@
 public import StoreKit
 
 public typealias ProductId = String
+public typealias TransactionId = String
+public typealias SubscriptionStatusChangeClosure = (_ productId: ProductId, _ transactionId: TransactionId, _ renewalState: Product.SubscriptionInfo.RenewalState, _ hasExpired: Bool) -> Void
 
 @available(iOS 17.0, macOS 14.6, *)
 public extension SKHelper {
