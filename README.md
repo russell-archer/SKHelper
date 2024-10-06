@@ -27,6 +27,8 @@ Check out the [Quick Start Tutorial](https://russell-archer.github.io/SKHelper/t
 ---
 
 # Recent Major Changes
+- 6 Oct, 2024
+    - Fixed logging bug with release build; added `onSubscriptionChange(onChange:)` View modifier
 - 27 Sep, 2024
     - Improved support for consumables 
 - 23 Sep, 2024
