@@ -21,6 +21,9 @@ public class SKHelper: Observable {
     /// Using cached entitlements can help mitigate issues where `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an
     /// entitlement to use a product.
     public var useCachedEntitlements = true
+    
+    /// A closure which is called when a subscription changes status.
+    public var subscriptionStatusChange: SubscriptionStatusChangeClosure?
 
     // MARK: - Private properties
     
@@ -35,9 +38,6 @@ public class SKHelper: Observable {
     
     /// The current internal state of `SKHelper`.
     private var purchaseState: SKHelperPurchaseState = .unknown
-    
-    /// A closure which is called when a subscription changes status.
-    private var subscriptionStatusChange: SubscriptionStatusChangeClosure?
     
     // MARK: - Init/deinit
     

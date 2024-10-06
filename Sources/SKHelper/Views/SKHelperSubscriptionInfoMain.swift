@@ -32,7 +32,7 @@ internal struct SKHelperSubscriptionInfoMain: View {
                         SKHelperPurchaseInfoFieldView(fieldName: "Auto-renews:", fieldValue: "Yes")
                         SKHelperPurchaseInfoFieldView(fieldName: "Renews:", fieldValue: subInfo.renewalPeriod ?? "Unknown")
                         SKHelperPurchaseInfoFieldView(fieldName: "Renewal date:", fieldValue: subInfo.renewalDate ?? "Unknown")
-                        SKHelperPurchaseInfoFieldView(fieldName: "Renews in:", fieldValue: subInfo.renewsIn ?? "Unknown")
+                        SKHelperPurchaseInfoFieldView(fieldName: "Renews:", fieldValue: subInfo.renewsIn ?? "Unknown")
                     } else {
                         SKHelperPurchaseInfoFieldView(fieldName: "Status:", fieldValue: "Cancelled")
                         SKHelperPurchaseInfoFieldView(fieldName: "Auto-renews:", fieldValue: "No")

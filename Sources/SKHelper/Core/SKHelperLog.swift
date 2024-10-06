@@ -69,7 +69,7 @@ public struct SKHelperLog {
         #if DEBUG
         print("\(event.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)")")
         #else
-        os_log("%{public}s for product %{public}s", log: storeLog, type: .default, event.shortDescription(), productId)
+        os_log("%{public}s for product %{public}s", log: skhelperLog, type: .default, event.shortDescription(), productId)
         #endif
     }
     
@@ -84,7 +84,7 @@ public struct SKHelperLog {
         #if DEBUG
         print("\(SKHelperNotification.subscriptionStausChanged.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)") to \(newSubscriptionStatus)")
         #else
-        os_log("%{public}s for product %{public}s", log: storeLog, type: .default, event.shortDescription(), productId)
+        os_log("%{public}s for product %{public}s", log: skhelperLog, type: .default, SKHelperNotification.subscriptionStausChanged.shortDescription(), productId)
         #endif
     }
     
@@ -96,7 +96,7 @@ public struct SKHelperLog {
         #if DEBUG
         print(message)
         #else
-        os_log("%s", log: storeLog, type: .info, message)
+        os_log("%s", log: skhelperLog, type: .info, message)
         #endif
     }
     
@@ -108,8 +108,7 @@ public struct SKHelperLog {
         #if DEBUG
         print(event.shortDescription())
         #else
-        if event.isNotificationPurchaseState() { return }
-        os_log("%{public}s", log: storeLog, type: .default, event.shortDescription())
+        os_log("%{public}s", log: skhelperLog, type: .default, event.shortDescription())
         #endif
     }
     
@@ -124,8 +123,7 @@ public struct SKHelperLog {
         #if DEBUG
         print("\(event.shortDescription()) for product \(productId) \(transactionId == nil ? "" : "with transaction id \(transactionId!)")")
         #else
-        if event.isNotificationPurchaseState() { return }
-        os_log("%{public}s for product %{public}s", log: storeLog, type: .default, event.shortDescription(), productId)
+        os_log("%{public}s for product %{public}s", log: skhelperLog, type: .default, event.shortDescription(), productId)
         #endif
     }
     
@@ -141,9 +139,8 @@ public struct SKHelperLog {
         #if DEBUG
         print("\(event.shortDescription()) for product \(productId) with webOrderLineItemId \(webOrderLineItemId ?? "none") \(transactionId == nil ? "" : "and transaction id \(transactionId!)")")
         #else
-        if event.isNotificationPurchaseState() { return }
         os_log("%{public}s for product %{public}s with webOrderLineItemId %{public}s",
-               log: storeLog,
+               log: skhelperLog,
                type: .default,
                event.shortDescription(),
                productId,
