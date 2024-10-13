@@ -24,6 +24,9 @@ public struct SKHelperStoreView<Content: View>: View {
     /// true if a product has been selected.
     @State private var productSelected = false
     
+    /// True if the store has products.
+    @State private var hasProducts = false
+    
     /// A closure which is called to display product details.
     private var productDetails: ProductDetailsClosure?
     
@@ -107,6 +110,7 @@ public struct SKHelperStoreView<Content: View>: View {
                 if let productDetails { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected, productDetails: productDetails) }
                 else { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected) }
             }
+            .onChange(of: store.hasProducts) { hasProducts = store.hasProducts }
         } else {
             
             VStack {

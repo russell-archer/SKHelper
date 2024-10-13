@@ -409,7 +409,7 @@ public extension View {
     ///         print("The status of subscription \(productId) changed to \(renewalState.localizedDescription)")
     ///     }
     /// ```
-    public func onSubscriptionChange(onChange: SubscriptionStatusChangeClosure? = nil) -> some View {
+    func onSubscriptionChange(onChange: SubscriptionStatusChangeClosure? = nil) -> some View {
         modifier(OnSubscriptionChange(onChange: onChange))
     }
 }
