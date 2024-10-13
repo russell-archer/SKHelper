@@ -9,7 +9,7 @@ public import StoreKit
 /// `SKHelperProduct` holds localized product information, along with a cached value for the user's entitlement to use the product.
 @MainActor
 @available(iOS 17.0, macOS 14.6, *)
-public class SKHelperProduct: Identifiable {
+public class SKHelperProduct: Identifiable, Equatable {
     
     /// The unique `ProductId` for the `Product`.
     public let id: ProductId
@@ -44,4 +44,6 @@ public class SKHelperProduct: Identifiable {
         self.groupId = product.subscription?.subscriptionGroupID
         self.groupLevel = product.subscription?.groupLevel ?? Int.max
     }
+    
+    nonisolated public static func == (lhs: SKHelperProduct, rhs: SKHelperProduct) -> Bool { lhs.id == rhs.id }
 }

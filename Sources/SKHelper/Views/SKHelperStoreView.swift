@@ -86,7 +86,7 @@ public struct SKHelperStoreView<Content: View>: View {
     /// Creates the body of the view.
     public var body: some View {
         
-        if store.hasProducts {
+        if hasProducts {
             StoreView(products: products) { product in
                 VStack {
                     Image(product.id)
@@ -110,7 +110,7 @@ public struct SKHelperStoreView<Content: View>: View {
                 if let productDetails { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected, productDetails: productDetails) }
                 else { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected) }
             }
-            .onChange(of: store.hasProducts) { hasProducts = store.hasProducts }
+            .onChange(of: store.products) { hasProducts = store.hasProducts }
         } else {
             
             VStack {
