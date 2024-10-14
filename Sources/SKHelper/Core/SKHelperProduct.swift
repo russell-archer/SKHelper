@@ -26,6 +26,9 @@ public class SKHelperProduct: Identifiable, Equatable {
     /// The group level of the subscription, or Int.max if this is not a subscription. Subscriptions with a lower group level indicate a higher level of service.
     /// For example, if someone subscribes to a subscription with a group level lower than their current subscription, this would be an upgrade.
     public let groupLevel: Int
+        
+    /// The sort order for this product when shown in a list with other types of product.
+    public let sortOrder: Int
     
     /// A cached entitlement to use the product.
     public var hasEntitlement: Bool
@@ -43,6 +46,13 @@ public class SKHelperProduct: Identifiable, Equatable {
         self.groupName = product.subscription?.groupDisplayName
         self.groupId = product.subscription?.subscriptionGroupID
         self.groupLevel = product.subscription?.groupLevel ?? Int.max
+        
+        switch product.type {
+            case .nonConsumable: self.sortOrder = 0
+            case .consumable:    self.sortOrder = 1
+            case .autoRenewable: self.sortOrder = 2
+            default :            self.sortOrder = 3
+        }
     }
     
     nonisolated public static func == (lhs: SKHelperProduct, rhs: SKHelperProduct) -> Bool { lhs.id == rhs.id }

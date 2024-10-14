@@ -36,7 +36,7 @@ public extension SKHelper {
     var allSKHelperPurchasedProducts: [SKHelperProduct] { products.filter { $0.hasEntitlement }}
     
     /// A collection of all localized `Product` returned by the App Store. An empty collection will be returned if products have not been successfully returned fromt he App Store.
-    var allProducts: [Product] { products.map { $0.product }}
+    var allProducts: [Product] { products.sorted { $0.sortOrder < $1.sortOrder }.map { $0.product }}
     
     /// A collection of all configured `ProductId`.
     var allProductIds: [ProductId] { products.map { $0.id }}
