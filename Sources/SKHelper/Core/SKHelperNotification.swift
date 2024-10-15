@@ -26,6 +26,9 @@ public enum SKHelperNotification: Error, Equatable {
     /// A custom configuration plug-in to replace `SKHelperConstants` is in use.
     case configurationCustomUsed
     
+    /// Cached entitlements will be used.
+    case configurationCacheEntitlementsUsed
+    
     /// The user cannot make App Store payments.
     case purchaseUserCannotMakePayments
     
@@ -130,6 +133,7 @@ public enum SKHelperNotification: Error, Equatable {
             case .configurationSuccess:                     return "Configuration success"
             case .configurationFailure:                     return "Configuration failure"
             case .configurationCustomUsed:                  return "Custom configuration will be used"
+            case .configurationCacheEntitlementsUsed:       return "Cached entitlements will be used in addition to StoreKit entitlements"
             case .purchaseUserCannotMakePayments:           return "Purchase failed because the user cannot make payments"
             case .purchaseAlreadyInProgress:                return "Purchase already in progress"
             case .purchaseInProgress:                       return "Purchase in progress"

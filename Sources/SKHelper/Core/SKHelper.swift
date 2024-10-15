@@ -39,39 +39,30 @@ public class SKHelper: Observable {
     /// The current internal state of `SKHelper`.
     private var purchaseState: SKHelperPurchaseState = .unknown
     
+    /// Optional custom configuration property list filename. If nil, default values are used. See `SKHelperConstants` for available values.
+    private var customConfiguration: String?
+    
     // MARK: - Init/deinit
-    
-    /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically starts listening for App Store transactions,
-    /// purchase intents and subscription changes.
-    ///
-    public init() {
-        transactionListener = handleTransactions()
-        purchaseIntentListener = handlePurchaseIntents()
-        subscriptionListener = handleSubscriptionChanges()
-        subscriptionStatusChange = nil
-        
-        Task { await requestProducts() }
-    }
-    
-    public init(onSubscriptionStatusChange: @escaping SubscriptionStatusChangeClosure) {
-        transactionListener = handleTransactions()
-        purchaseIntentListener = handlePurchaseIntents()
-        subscriptionListener = handleSubscriptionChanges()
-        subscriptionStatusChange = onSubscriptionStatusChange
-        
-        Task { await requestProducts() }
-    }
     
     /// Gets a collection of `ProductId`, cached purchased state and localized `Product` information. Also automatically start listening for App Store transactions,
     /// purchase intents and subscription changes.
+    /// - Parameters:
+    ///   - useCachedEntitlements: When set to `true` `SKHelper` will use previously cached values for product entitlements.
+    ///   - customConfiguration: The name of a property list file contain custom configuration values. See `SKHelperConstants` for available values.
+    ///   - onSubscriptionStatusChange: A closure that will be called when the state of any subscription changes.
     ///
-    /// This initializer also allows you to set the value of `useCachedEntitlements` which, when set to `true` ensures that `SKHelper` will use previously cached
-    /// values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil. Using cached entitlements can help mitigate issues where
-    /// `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an entitlement to use a product.
-    ///
-    public convenience init(useCachedEntitlements: Bool = true) {
-        self.init()
+    public init(useCachedEntitlements: Bool = true, customConfiguration: String? = nil, onSubscriptionStatusChange: SubscriptionStatusChangeClosure? = nil) {
+        self.transactionListener = handleTransactions()
+        self.purchaseIntentListener = handlePurchaseIntents()
+        self.subscriptionListener = handleSubscriptionChanges()
+        self.subscriptionStatusChange = onSubscriptionStatusChange
         self.useCachedEntitlements = useCachedEntitlements
+        self.customConfiguration = customConfiguration
+        
+        if useCachedEntitlements { SKHelperLog.event(.configurationCacheEntitlementsUsed) }
+        if let customConfiguration { SKHelperLog.event(.configurationCustomUsed) }
+        
+        Task { await requestProducts() }
     }
     
     /// Stop listening for App Store transactions, purchase intents and subscription changes.
@@ -903,6 +894,16 @@ public class SKHelper: Observable {
         }
         
         UserDefaults.standard.set(purchaseProductIds, forKey: SKHelperConstants.PurchasedProductsKey)
+    }
+    
+    /// Gets a constant configuration value, either from `SKHelperConstants` or the custom configuration file (if used).
+    /// - Parameter key: The key for the required value.
+    /// - Returns: Returns the requested configuration value, either from `SKHelperConstants` or the custom configuration file (if used).
+    /// If the key can't be found nil is returned.
+    ///
+    private func configurationValue(for key: SKHelperConstantKey) -> String? {
+        if let customConfiguration { return SKHelperConfiguration.value(for: key.rawValue, in: customConfiguration) }
+        return SKHelperConstants.value(for: key)
     }
 }
 

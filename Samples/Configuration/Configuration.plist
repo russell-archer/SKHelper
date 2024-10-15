@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+ The avaiable keys are as follows:
+
+    storeConfiguration
+    productsConfiguration
+    subscriptionsConfiguration
+    subscriptionGroupConfiguration
+    requestRefundUrl
+    contactUsUrl
+
+-->
+<plist version="1.0">
+<dict>
+    <!-- Returns the name of the .plist configuration file that holds a list of `ProductId`. Default = "Products". -->
+    <key>storeConfiguration</key>
+    <string>Products</string>
+    
+    <!-- The name of the section of the Products.plist file that contains product ids. Default = "Products". -->
+    <key>productsConfiguration</key>
+    <string>Products</string>
+    
+    <!-- The name of the optional section of the Products.plist file that contains subscription product ids. Default = "Subscriptions". -->
+    <key>subscriptionsConfiguration</key>
+    <string>Subscriptions</string>
+    
+    <!-- The name of the optional section of the Products.plist file that contains a subscription group. Default = "Group". -->
+    <key>subscriptionGroupConfiguration</key>
+    <string>Group</string>
+    
+    <!-- A URL which users on macOS can use to request a refund for an IAP. Default = "https://reportaproblem.apple.com/". -->
+    <key>requestRefundUrl</key>
+    <string>https://reportaproblem.apple.com/</string>
+    
+    <!-- A URL which can be used to contact the app's developers. Default = "https://reportaproblem.apple.com/". -->
+    <key>contactUsUrl</key>
+    <string>https://reportaproblem.apple.com/</string>
+</dict>
+</plist>
+
