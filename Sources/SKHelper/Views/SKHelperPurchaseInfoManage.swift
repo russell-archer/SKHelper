@@ -43,7 +43,7 @@ internal struct SKHelperPurchaseInfoManage: View {
         #else
         
         Button(action: {
-            if let refundUrl = URL(string: SKHelperConstants.requestRefundUrl) {
+            if let refundUrl = URL(string: SKHelperConstants.RequestRefundUrl) {
                 NSWorkspace.shared.open(refundUrl)
             }
         }) {

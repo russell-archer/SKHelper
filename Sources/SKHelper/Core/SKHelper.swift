@@ -60,7 +60,7 @@ public class SKHelper: Observable {
         self.customConfiguration = customConfiguration
         
         if useCachedEntitlements { SKHelperLog.event(.configurationCacheEntitlementsUsed) }
-        if let customConfiguration { SKHelperLog.event(.configurationCustomUsed) }
+        if customConfiguration != nil { SKHelperLog.event(.configurationCustomUsed) }
         
         Task { await requestProducts() }
     }

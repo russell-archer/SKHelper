@@ -58,7 +58,5 @@ public struct SKHelperConstants: Sendable {
             case .requestRefundUrl:                 return SKHelperConstants.RequestRefundUrl
             case .contactUsUrl:                     return SKHelperConstants.ContactUsUrl
         }
-        
-        return nil
     }
 }
