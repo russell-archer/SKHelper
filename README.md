@@ -27,8 +27,11 @@ Check out the [Quick Start Tutorial](https://russell-archer.github.io/SKHelper/t
 ---
 
 # Recent Major Changes
+- 28 Oct, 2024
+    - Removed `SubscriptionStatusChangeClosure` from `SKHelper` initializer. Functionality now provided by `onSubscriptionChange(onChange:)` view modifier
+    - Added new `onTransaction(update:)` view modifier to enable transaction updates notifications
 - 6 Oct, 2024
-    - Fixed logging bug with release build; added `onSubscriptionChange(onChange:)` View modifier
+    - Fixed logging bug with release build; added `onSubscriptionChange(onChange:)` view modifier
 - 27 Sep, 2024
     - Improved support for consumables 
 - 23 Sep, 2024

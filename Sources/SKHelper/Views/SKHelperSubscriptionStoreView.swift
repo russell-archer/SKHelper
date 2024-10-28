@@ -7,6 +7,7 @@
 
 import SwiftUI
 import StoreKit
+import Combine
 
 /// Uses the StoreKit `SubscriptionStoreView` to create a list of all avaliable subscriptions.
 @available(iOS 17.0, macOS 14.6, *)
@@ -30,6 +31,12 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     /// true if a subscription has been selected.
     @State private var subscriptionSelected = false
     
+    /// True if the store has products.
+    @State private var hasProducts = false
+    
+    /// Used to cancel the refresh products task.
+    @State private var refreshProductsTask: (any Cancellable)?
+    
     /// The name of the subscription group from which to display subscriptions. If nil then we display all subscriptions in all groups.
     private var subscriptionGroupName: String?
     
@@ -46,6 +53,9 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     private var subscriptions: [Product] {
         subscriptionGroupName == nil ? store.allAutoRenewableSubscriptions : store.allAutoRenewableSubscriptionProductsByLevel(for: subscriptionGroupName!)
     }
+    
+    /// Used to check multiple times for product availability.
+    private let refreshProducts = Timer.publish(every: 1, on: .main, in: .common)
     
     /// Creates a `SKHelperSubscriptionStoreView`.
     /// - Parameters:
@@ -67,7 +77,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     
     /// Creates the body of the view.
     public var body: some View {
-        if store.hasAutoRenewableSubscriptionProducts {
+        if hasProducts {
             ScrollView {
                 SubscriptionStoreView(subscriptions: subscriptions) {
                     VStack { subscriptionHeader?() }.padding()
@@ -105,6 +115,11 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 ProgressView()
             }
             .padding()
+            .task { refreshProductsTask = refreshProducts.connect() }
+            .onReceive(refreshProducts) { _ in
+                hasProducts = store.hasAutoRenewableSubscriptionProducts
+                if hasProducts, let refreshProductsTask { refreshProductsTask.cancel() }
+            }
         }
     }
 }

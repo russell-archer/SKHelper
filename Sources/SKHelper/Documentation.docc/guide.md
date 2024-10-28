@@ -16,21 +16,21 @@ Updated: October 16, 2024 11:53 PM
 - [What does this document provide?](#What-does-this-document-provide)
 - [Do I really need SKHelper?](#Do-I-really-need-SKHelper)
 - [The SKHelperDemo App](#The-SKHelperDemo-App)
-    - [What are we building?](#What-are-we-building)
-    - [Prerequisites](#Prerequisites)
-    - [Get Started](#Get-Started)
-    - [Configuring products](#Configuring-products)
-        - [Localized product information](#Localized-product–information)
-        - [The Products.plist file](#The-Products.plist-file)
-        - [Product types](#Product-types)
-        - [The StoreKit Configuration file](#The-StoreKit-Configuration-file)
-    - [Why do we have two product lists?!](#Why-do-we-have-two-product-lists)
-    - [Enable StoreKit Testing](#Enable-StoreKit–Testing)
-    - [Configure product images](#Configure-product-images)
-    - [Displaying a list of products](#Displaying-a-list-of-products)
-        - [Testing non-U.S. localizations](#Testing-non-U.S.-localizations)
-    - [Customizing the appearance of the product list](#Customizing-the-appearance-of-the-product-list)
-    - [How does SKHelperStoreView work?](#How-does-SKHelperStoreView-work)
+- [What are we building?](#What-are-we-building)
+- [Prerequisites](#Prerequisites)
+- [Get Started](#Get-Started)
+- [Configuring products](#Configuring-products)
+- [Localized product information](#Localized-product–information)
+- [The Products.plist file](#The-Products.plist-file)
+- [Product types](#Product-types)
+- [The StoreKit Configuration file](#The-StoreKit-Configuration-file)
+- [Why do we have two product lists?!](#Why-do-we-have-two-product-lists)
+- [Enable StoreKit Testing](#Enable-StoreKit–Testing)
+- [Configure product images](#Configure-product-images)
+- [Displaying a list of products](#Displaying-a-list-of-products)
+- [Testing non-U.S. localizations](#Testing-non-U.S.-localizations)
+- [Customizing the appearance of the product list](#Customizing-the-appearance-of-the-product-list)
+- [How does SKHelperStoreView work?](#How-does-SKHelperStoreView-work)
 
 ---
 
@@ -117,15 +117,15 @@ However, even if you develop your own in-app purchase code there are still a few
 
 The best way to get familiar with `StoreKit` and `SKHelper` is to create a simple, but full-featured (from an in-app purchase perspective) demo app. You may be surprised how little code is required to implement in-app purchases: `SKHelper` and `StoreKit` handle all the heavy-lifting!
 
-### What are we building?
+## What are we building?
 
 In this guide we’ll be developing a demo app (**SKHelperDemo**) for an on-line florist that sells a range of flowers and other related services like home visits to water and care for house plants. We’ll develop the app for both macOS and iOS, using a single multi-platform Xcode project.
 
-### Prerequisites
+## Prerequisites
 
 Before getting started you’ll need to download **Xcode 16**, along with the **iOS 18 SDK and simulator**.
 
-### Get Started
+## Get Started
 
 To get started, create a new **multi-platform** Xcode project and name it **SKHelperDemo:**
 
@@ -149,13 +149,13 @@ We now need to add the necessary in-app purchase capabilities to our project. Se
 
 ![](guide4.png)
 
-### Configuring products
+## Configuring products
 
 Before we do anything else we need to define the products we’ll be selling. Ultimately, this will need to be done in **App Store Connect**. However, Xcode provides us with an local, on-device way of experimenting with in-app purchases.
 
 **StoreKit Testing**, introduced in Xcode 12, is a test environment allows you to do early testing of in-app purchases in the simulator, without having to set anything up in App Store Connect. You define your products locally in a **StoreKit Configuration** file. Furthermore, you can view and delete transactions, issue refunds, cancel subscriptions, and a whole lot more. There’s also a new **StoreKitTest** framework that enables you to do automated testing of IAPs. 
 
-#### Localized product information
+## Localized product information
 
 Each product that we will sell in our app is identified by a unique `ProductId`. You can either hard-code these ids into your app, or store them in an easily-modifiable property list file. In our demo app we’ll use the property list approach.
 
@@ -173,7 +173,7 @@ The following diagram shows the arrangement for requesting localized product inf
 4. In production, a call is made to the App Store to get localized product info. If the project is configured to use StoreKit testing localized product information is returned from the `Products.storekit` configuration file
 5. The resulting localized product information is stored in the `SKHelper.products` property
 
-#### The Products.plist file
+## The Products.plist file
 
 Create a new **Property List** file in your project and name it **Products.plist**. Paste the contents of the example **Products.plist** file shown into your **Products.list** file. 
 
@@ -228,7 +228,7 @@ Also note that we’ve adopted a **naming convention** for our product ids:
 
 This isn’t strictly necessary, so product ids like “large-flowers” and “gold” are also perfectly acceptable as product ids only need to be unique within each particular app.
 
-#### Product types
+## Product types
 
 At this point we need to discuss product *types*. `SKHelper` supports three types of product.
 
@@ -250,7 +250,7 @@ Note that subscriptions are offered as part of a **group** of subscription produ
 
 > 👉 Note that SKHelper does not support the older type of *non*-renewable subscription, the use of which is discouraged by Apple.
 
-#### The StoreKit Configuration file
+## The StoreKit Configuration file
 
 We can now create the StoreKit configuration file that will be used to provide localized product data during initial development and testing.
 
@@ -292,12 +292,17 @@ Notice under the **APP** section in the left pane you can configure various test
 
 We’ll come back to alter some of these settings later. For now, create two new non-consumable in-app purchases with the following details:
 
-| **Reference Name** | **Product ID** | **Price (see note below)** | **English (U.S.) 
-Display Name** | **English (U.S.) 
-Description** |
-| --- | --- | --- | --- | --- |
-| Flowers Large | `com.rarcher.nonconsumable.flowers.large` | 1.99 | Large Flowers | A beautiful large bunch of seasonal flowers. |
-| Flowers Small | `com.rarcher.nonconsumable.flowers.small` | 0.99 | Small Flowers | A beautiful small bunch of seasonal flowers. |
+- Reference Name: Flowers Large
+- Product ID:`com.rarcher.nonconsumable.flowers.large`
+- Price (see note below): 1.99
+- Display Name (English U.S.): Large Flowers
+- Description (English U.S.): A beautiful large bunch of seasonal flowers.
+
+- Reference Name: Flowers Small
+- Product ID:`com.rarcher.nonconsumable.flowers.small`
+- Price (see note below): 0.99
+- Display Name (English U.S.): Small Flowers
+- Description (English U.S.): A beautiful small bunch of seasonal flowers.
 
 > 👉 These price values are a hard-coded test price for the product. Before deploying to the App Store, you’ll configure real prices for your app’s in-app purchases and subscriptions in App Store Connect. In production your app will request localized price (and other) information from the App Store.
 
@@ -320,16 +325,16 @@ Next, provide a **Reference Name** of “**Silver”** and **Product ID** of `co
 You’ll see that the StoreKit configuration file provides a range of offers and promotions. Ignore those for now and add the following details: 
 
 - Price: 29.99
-- Display Name (English U.S.): **Silver Service**
-- Description (English U.S.): **Personal care for your plants**.
+- Display Name (English U.S.): Silver Service
+- Description (English U.S.): Personal care for your plants.
 
 Now create a new “Gold” subscription with the following details:
 
 - Reference Name: Gold
 - Product ID: `com.rarcher.subscription.vip.gold`
 - Price: 39.99
-- Display Name (English U.S.): **Gold Service**
-- Description (English U.S.): **A touch of luxury for you plants.**
+- Display Name (English U.S.): Gold Service
+- Description (English U.S.): A touch of luxury for you plants.
 
 Finally, let’s create an introductory offer for the Gold product.
 
@@ -341,7 +346,7 @@ If you now select the “vip” group in the left pane you’ll be able to confi
 
 ![](guide17.png)
 
-### Why do we have two product lists?!
+## Why do we have two product lists?!
 
 At this point you may very reasonably be wondering why we have a **Products.storekit** configuration file *and* a **Products.plist** file. Couldn’t we just make do with one, because data (product ids) is duplicated in the two files? 
 
@@ -349,7 +354,7 @@ There is a fundamental principle in software development that may be summarized 
 
 So, because we’ve defined our products in the StoreKit configuration file, it seems obvious that we should use **that** as the repository for our product id data. Retrieving configuration data at runtime from the `.storekit` file isn’t difficult (it’s `JSON`). However, the `.storekit`configuration file is intended for use *when testing* and it’s really **not** a good idea to use it for production too. This is why the `.storekit` file is not included in any of your targets by default. It would be all too easy to allow “test products” to somehow make it into the release build! So, in this case it’s better to violate the DRY principle, rather than risk something far worse!
 
-### Enable StoreKit Testing
+## Enable StoreKit Testing
 
 Before moving on to other topics, we’ll need to *enable* StoreKit testing in Xcode, as it’s disabled by default.
 
@@ -357,7 +362,7 @@ Select **Product > Scheme > Edit Scheme**. Now select **Run** and the **Opti
 
 ![](quickstart12.png)
 
-### Configure product images
+## Configure product images
 
 In the **SKHelper** package, navigate to the **Samples/Images** folder. Select the images that have filenames that start with “com” then right-click them and select **Show in Finder**. 
 
@@ -373,7 +378,7 @@ Switch back to Finder and use the files with names that start with “SKHelperDe
 
 ![](guide18.png)
 
-### Displaying a list of products
+## Displaying a list of products
 
 Having configured our products, let’s see how easy it is to display a list of them using `SKHelper`.
 
@@ -435,7 +440,7 @@ Notice that:
 
 ![](guide20.png)
 
-#### Testing non-U.S. localizations
+## Testing non-U.S. localizations
 
 When you run the app you’ll see that prices are in US dollars. This is because, by default in the StoreKit test environment, the App Store **Storefront** is **United States (USD)** and the localization is **English (US)**. To support testing other locales you can change this. 
 
@@ -443,7 +448,7 @@ Make sure the `Products.storekit` file is open, then select **Editor > Defaul
 
 ![](guide21.png)
 
-### Customizing the appearance of the product list
+## Customizing the appearance of the product list
 
 As you can see, you get so much functionality for just two lines of code! However, there are many ways in which you can customize how `SKHelperStoreView` behaves. For example, we can modify the display of product details like this:
 
@@ -472,6 +477,8 @@ struct ContentView: View {
 
 In a production app you would need to use the `productId` parameter passed to the closure to provide different details for each product. For example, you might create a string catalog which provides product details text. The key for each string in the catalog could be the `ProductId` of the specific product.
 
-### How does SKHelperStoreView work?
+## Purchasing products
 
-TODO - work in progress
+There are two main ways of purchasing products (here we're '):
+
+1. Using 

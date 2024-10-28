@@ -122,6 +122,9 @@ public enum SKHelperNotification: Error, Equatable {
     /// The wrong product type was provided.
     case wrongProductType
     
+    /// SKHelper doesn't support the older non-renewable subscription type
+    case unsupportedProductType
+    
     /// A short description of the notification.
     ///
     /// - Returns: Returns a short description of the notification.
@@ -165,6 +168,7 @@ public enum SKHelperNotification: Error, Equatable {
             case .subscriptionStausChanged:                 return "Subscription status changed"
             case .nonRenewableSubscriptionsNotSupported:    return "Non-renewable subscriptions are not supported"
             case .wrongProductType:                         return "Wrong product type"
+            case .unsupportedProductType:                   return "Non-renewable subscriptions are not supported"
         }
     }
 }

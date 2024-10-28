@@ -7,6 +7,35 @@
 
 public import StoreKit
 
+/// The unique id that identifies a product.
+public typealias ProductId = String
+
+/// The unique id that identifies a transaction.
+public typealias TransactionId = String
+
+/// Notification handler for subscription status changes.
+public typealias SubscriptionStatusChangeClosure = (_ productId: ProductId, _ transactionId: TransactionId, _ renewalState: Product.SubscriptionInfo.RenewalState, _ hasExpired: Bool) -> Void
+
+/// Notification handler for transaction updates.
+///
+/// You will receive notifications when:
+///
+/// - a purchase successfully completes
+/// - a purchase fails
+/// - a purchase is cancelled by the user
+/// - a transaction is revoked by the App Store (i.e. because of a refund)
+/// - a transaction is upgraded to a higher-value product by the App Store
+/// - a transaction is pending authorization from a parent or guardian
+///
+/// Use this means of receiving transaction notifications in preference to the SwiftUI `onInAppPurchaseCompletion(perform:)` view modifier.
+///
+/// - Parameters:
+///     - productId: The ``ProductId`` of the product to which the update pertains.
+///     - reason: The ``SKHelperTransactionUpdateReason`` the update was rasied.
+///     - transaction: The StoreKit `Transaction` associated with the update.
+///
+public typealias TransactionUpdateClosure = (_ productId: ProductId, _ reason: SKHelperTransactionUpdateReason, _ transaction: StoreKit.Transaction?) -> Void
+
 /// SKHelper, a lightweight StoreKit helper.
 @MainActor
 @available(iOS 17.0, macOS 14.6, *)
@@ -24,6 +53,21 @@ public class SKHelper: Observable {
     
     /// A closure which is called when a subscription changes status.
     public var subscriptionStatusChange: SubscriptionStatusChangeClosure?
+    
+    /// Allows you to provide a ``TransactionUpdateClosure`` closure, which is called when a purchase transaction or transaction update is received.
+    ///
+    /// You will receive notifications when:
+    ///
+    /// - a purchase successfully completes
+    /// - a purchase fails
+    /// - a purchase is cancelled by the user
+    /// - a transaction is revoked by the App Store (normally because of a refund)
+    /// - a transaction is upgraded to a higher-value product by the App Store
+    /// - a transaction is pending authorization (ask-to-buy support)
+    ///
+    /// Use this means of receiving transaction notifications in preference to the SwiftUI `onInAppPurchaseCompletion(perform:)` view modifier.
+    /// 
+    public var transactionUpdateListener: TransactionUpdateClosure?
 
     // MARK: - Private properties
     
@@ -49,13 +93,11 @@ public class SKHelper: Observable {
     /// - Parameters:
     ///   - useCachedEntitlements: When set to `true` `SKHelper` will use previously cached values for product entitlements.
     ///   - customConfiguration: The name of a property list file contain custom configuration values. See `SKHelperConstants` for available values.
-    ///   - onSubscriptionStatusChange: A closure that will be called when the state of any subscription changes.
     ///
-    public init(useCachedEntitlements: Bool = true, customConfiguration: String? = nil, onSubscriptionStatusChange: SubscriptionStatusChangeClosure? = nil) {
-        self.transactionListener = handleTransactions()
+    public init(useCachedEntitlements: Bool = true, customConfiguration: String? = nil) {
+        self.transactionListener = handleTransactionUpdates()
         self.purchaseIntentListener = handlePurchaseIntents()
         self.subscriptionListener = handleSubscriptionChanges()
-        self.subscriptionStatusChange = onSubscriptionStatusChange
         self.useCachedEntitlements = useCachedEntitlements
         self.customConfiguration = customConfiguration
         
@@ -137,124 +179,6 @@ public class SKHelper: Observable {
         let result = try? await product.purchase(options: options)  // Purchase the product
         
         return await purchaseCompletion(for: product, with: result)
-    }
-    
-    /// Call this method when the user starts a purchase via a StoreKit view and your code uses the `.onInAppPurchaseStart` view modifier.
-    /// This allows SKHelper to prevent other purchases which may interfer with the process.
-    ///
-    /// ## Note ##
-    /// If you do not use the `.onInAppPurchaseStart` view modifier in your SwiftUI code there is no requirement to call this method.
-    ///
-    /// - Parameter product: The `Product` the user has started the purchase workflow for.
-    ///
-    public func purchaseDidStart(product: Product) {
-        guard AppStore.canMakePayments else {
-            SKHelperLog.event(.purchaseUserCannotMakePayments)
-            return
-        }
-        
-        guard purchaseState != .inProgress else {
-            SKHelperLog.event(.purchaseAlreadyInProgress, productId: product.id)
-            return
-        }
-        
-        purchaseState = .inProgress
-        SKHelperLog.event(.purchaseInProgress, productId: product.id)
-    }
-    
-    /// Call this method when the user completes a purchase workflow via a StoreKit view and your code uses the `.onInAppPurchaseCompletion` view modifier.
-    /// 
-    /// ## .onInAppPurchaseCompletion with StoreView() ##
-    /// ```
-    /// StoreView(ids: store.allProductIds) { product in
-    ///     Image(product.id).resizable()
-    /// }
-    /// .onInAppPurchaseCompletion { product, result in
-    ///     let verifiedResult = await store.purchaseCompletion(for: product, with: try? result.get())
-    ///     if verifiedResult.purchaseState == .purchased {
-    ///         print("You now have access to \(product.id)")
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ## .onInAppPurchaseCompletion with SKHelperStoreView() ##
-    /// ```
-    /// SKHelperStoreView() { productId in
-    ///     Image(product.id).resizable()
-    /// }
-    /// .onInAppPurchaseCompletion { product, result in
-    ///     let verifiedResult = await store.purchaseCompletion(for: product, with: try? result.get())
-    ///     if verifiedResult.purchaseState == .purchased, let transaction = verifiedResult.transaction {
-    ///         print("You now have access to \(product.id) with transaction id \(transaction.id).")
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// This allows `SKHelper` to process and finish the `Transaction` as the use of `.onInAppPurchaseCompletion` prevents transaction updates being
-    /// handled in the normal manner by the `SKHelper.handleTransactions` (i.e. the transaction update is never received).
-    /// 
-    /// ## Note ##
-    /// If you do not use the `.onInAppPurchaseCompletion` view modifier in your SwiftUI code there is no requirement to call this method.
-    /// 
-    /// - Parameter product: The `Product` being purchased.
-    /// - Parameter result: The `Product.PurchaseResult` of the purchase process, or nil if there was an error during the purchase.
-    /// - Returns: Returns a tuple consisting of a `Transaction` object that represents the purchase and a `SKHelperPurchaseState` describing the state of the purchase.
-    /// 
-    public func purchaseCompletion(for product: Product, with result: Product.PurchaseResult?) async -> (transaction: Transaction?, purchaseState: SKHelperPurchaseState) {
-        guard let result else {
-            purchaseState = .failed
-            SKHelperLog.event(.purchaseFailure, productId: product.id)
-            return (nil, .failed)
-        }
-        
-        // Every time an app receives a transaction from StoreKit, the transaction has already passed through a
-        // verification process to confirm whether the payload is signed by the App Store for my app for this device.
-        // That is, StoreKit automatically does transaction (receipt) verification for you.
-
-        // We now have a PurchaseResult value. See if the purchase suceeded, failed, was cancelled or is pending.
-        switch result {
-            case .success(let verificationResult):
-
-                // The purchase seems to have succeeded. StoreKit has already automatically attempted to validate
-                // the transaction, returning the result of this validation wrapped in a `VerificationResult`.
-                // We now need to check the `VerificationResult<Transaction>` to see if the transaction passed the
-                // App Store's validation process. This is equivalent to receipt validation in StoreKit1.
-
-                // Did the transaction pass StoreKit’s automatic validation?
-                let checkResult = checkVerificationResult(result: verificationResult)
-                if !checkResult.verified {
-                    purchaseState = .failedVerification
-                    SKHelperLog.transaction(.transactionValidationFailure, productId: checkResult.transaction.productID, transactionId: String(checkResult.transaction.id))
-                    return (checkResult.transaction, .failedVerification)
-                }
-
-                let validatedTransaction = checkResult.transaction  // The transaction was successfully validated
-                
-                // Finish the transaction for all cases, including access revoked, subscription expired, subscription upgraded and successful purchase
-                await validatedTransaction.finish()  // Tell the App Store we delivered the purchased content to the user
-
-                updatePurchasedProducts(validatedTransaction.productID, purchased: true)
-
-                // Let the caller know the purchase succeeded and that the user should be given access to the product
-                purchaseState = .purchased
-                SKHelperLog.event(.purchaseSuccess, productId: product.id, transactionId: String(validatedTransaction.id))
-                return (transaction: validatedTransaction, purchaseState: .purchased)
-
-            case .userCancelled:
-                purchaseState = .cancelled
-                SKHelperLog.event(.purchaseCancelled, productId: product.id)
-                return (transaction: nil, .cancelled)
-
-            case .pending:
-                purchaseState = .pending
-                SKHelperLog.event(.purchasePending, productId: product.id)
-                return (transaction: nil, .pending)
-
-            default:
-                purchaseState = .unknown
-                SKHelperLog.event(.purchaseFailure, productId: product.id)
-                return (transaction: nil, .unknown)
-        }
     }
     
     /// Checks the current entitlement for `productId` and returns true if the user is entitled to use the product,
@@ -749,13 +673,92 @@ public class SKHelper: Observable {
         UserDefaults.standard.set([ProductId](), forKey: SKHelperConstants.PurchasedProductsKey)
     }
     
+    // MARK: - Internal methods
+    
+    /// Completes a purchase workflow.
+    ///
+    /// - Parameter product: The `Product` being purchased.
+    /// - Parameter result: The `Product.PurchaseResult` of the purchase process, or nil if there was an error during the purchase.
+    /// - Returns: Returns a tuple consisting of a `Transaction` object that represents the purchase and a `SKHelperPurchaseState` describing the state of the purchase.
+    ///
+    internal func purchaseCompletion(for product: Product, with result: Product.PurchaseResult?) async -> (transaction: Transaction?, purchaseState: SKHelperPurchaseState) {
+        guard let result else {
+            purchaseState = .failed
+            SKHelperLog.event(.purchaseFailure, productId: product.id)
+            transactionUpdateListener?(product.id, .failure, nil)
+            return (nil, .failed)
+        }
+        
+        // Every time an app receives a transaction from StoreKit, the transaction has already passed through a
+        // verification process to confirm whether the payload is signed by the App Store for my app for this device.
+        // That is, StoreKit automatically does transaction (receipt) verification for you.
+
+        // We now have a PurchaseResult value. See if the purchase suceeded, failed, was cancelled or is pending.
+        switch result {
+            case .success(let verificationResult):
+                // The purchase seems to have succeeded. StoreKit has already automatically attempted to validate
+                // the transaction, returning the result of this validation wrapped in a `VerificationResult`.
+                // We now need to check the `VerificationResult<Transaction>` to see if the transaction passed the
+                // App Store's validation process. This is equivalent to receipt validation in StoreKit1.
+
+                // Did the transaction pass StoreKit’s automatic validation?
+                let checkResult = checkVerificationResult(result: verificationResult)
+                if !checkResult.verified {
+                    purchaseState = .failedVerification
+                    SKHelperLog.transaction(.transactionValidationFailure, productId: checkResult.transaction.productID, transactionId: String(checkResult.transaction.id))
+                    transactionUpdateListener?(product.id, .failure, nil)
+                    return (checkResult.transaction, .failedVerification)
+                }
+
+                let validatedTransaction = checkResult.transaction  // The transaction was successfully validated
+                
+                // Finish the transaction for all cases, including access revoked, subscription expired, subscription upgraded and successful purchase
+                await validatedTransaction.finish()  // Tell the App Store we delivered the purchased content to the user
+
+                updatePurchasedProducts(validatedTransaction.productID, purchased: true)
+
+                // Let the caller know the purchase succeeded and that the user should be given access to the product
+                purchaseState = .purchased
+                SKHelperLog.event(.purchaseSuccess, productId: product.id, transactionId: String(validatedTransaction.id))
+                transactionUpdateListener?(product.id, .success, validatedTransaction)
+                return (transaction: validatedTransaction, purchaseState: .purchased)
+
+            case .userCancelled:
+                purchaseState = .cancelled
+                SKHelperLog.event(.purchaseCancelled, productId: product.id)
+                transactionUpdateListener?(product.id, .cancelled, nil)
+                return (transaction: nil, .cancelled)
+
+            case .pending:
+                purchaseState = .pending
+                SKHelperLog.event(.purchasePending, productId: product.id)
+                transactionUpdateListener?(product.id, .pending, nil)
+                return (transaction: nil, .pending)
+
+            default:
+                purchaseState = .unknown
+                SKHelperLog.event(.purchaseFailure, productId: product.id)
+                transactionUpdateListener?(product.id, .failure, nil)
+                return (transaction: nil, .unknown)
+        }
+    }
+    
     // MARK: - Private methods
         
-    /// This is an infinite async sequence (loop). It will continue waiting for transactions until it is explicitly canceled by calling the `Task.cancel()` method. See `transactionListener`.
+    /// This is an infinite async sequence (loop). It will continue waiting for transactions until it is explicitly canceled by calling the `Task.cancel()` method.
+    /// See `transactionListener`.
+    ///
+    /// ## Note on Apple documentation ##
+    /// Apple's documentation on `Transaction.updates` incorrectly states that:
+    ///
+    /// "The asynchronous sequence that emits a transaction when the system creates or updates transactions that occur outside the app or on other devices."
+    ///
+    /// - This methods receives transactions resulting from transactions arising from actions WITHIN the app, as well as external to the app.
+    /// - This method does NOT receive transactions related to direct App Store purchases via purchase intents. See `handlePurchaseIntents()`.
     ///
     /// - Returns: Returns a task for the transaction handling loop.
     ///
-    private func handleTransactions() -> Task<Void, any Error> {
+    private func handleTransactionUpdates() -> Task<Void, any Error> {
         
         // Note: Previously had this as a detached task. However, with Xcode 16 Beta 5 this produces the error:
         // "Main actor-isolated value of type '() async -> Void' passed as a strongly transferred parameter; later accesses could race"
@@ -767,31 +770,42 @@ public class SKHelper: Observable {
                 let checkResult = checkVerificationResult(result: verificationResult)
                 guard checkResult.verified else {
                     // StoreKit's attempts to validate the transaction failed
-                    SKHelperLog.transaction(.transactionFailure, productId: checkResult.transaction.productID, transactionId: String(checkResult.transaction.id))
+                    purchaseState = .failedVerification
+                    SKHelperLog.transaction(.transactionValidationFailure, productId: checkResult.transaction.productID, transactionId: String(checkResult.transaction.id))
+                    transactionUpdateListener?(checkResult.transaction.productID, .failure, checkResult.transaction)
                     return
                 }
                 
                 let transaction = checkResult.transaction  // The transaction was validated by StoreKit
                 guard transaction.productType != .nonRenewable else {
-                    SKHelperLog.event("Product type \(transaction.productType.localizedDescription) is not supported.")
+                    purchaseState = .unsupportedProduct
+                    SKHelperLog.transaction(.unsupportedProductType, productId: transaction.productID, transactionId: String(transaction.id))
+                    transactionUpdateListener?(transaction.productID, .failure, transaction)
                     return
                 }
                                 
-                // Finish the transaction for all cases, including access revoked, subscription expired, subscription upgraded and successful purchase
+                // Finish the transaction for all cases, including access revoked, subscription expired, subscription upgraded and successful purchase.
+                // Note that cancelled and pending purchases are handled directly by StoreView, so this handler
+                // doesn't see notifications related to those purchase states. If a purchase is made via
+                // the SKHelper purchase() method the purchaseCompletion(for:with:) handles the success, cancelled and pending states.
                 await transaction.finish()
                 
                 if transaction.revocationDate != nil {
                     // The user's access to the product has been revoked by the App Store (e.g. a refund, etc.)
                     // See transaction.revocationReason for more details if required
+                    purchaseState = .revoked
                     SKHelperLog.transaction(.transactionRevoked, productId: transaction.productID, transactionId: String(transaction.id))
                     updatePurchasedProducts(transaction.productID, purchased: false)
+                    transactionUpdateListener?(transaction.productID, .revoked, transaction)
                     return
                 }
                 
                 if transaction.isUpgraded {
-                    // Transaction superceeded by an active, higher-value subscription
+                    // Transaction superseded by an active, higher-value subscription
+                    purchaseState = .upgraded
                     SKHelperLog.transaction(.transactionUpgraded, productId: transaction.productID, transactionId: String(transaction.id))
                     updatePurchasedProducts(transaction.productID, purchased: false)  // Not subscribed because it's been superceeded
+                    transactionUpdateListener?(transaction.productID, .upgraded, transaction)
                     
                     /*
                      
@@ -806,13 +820,15 @@ public class SKHelper: Observable {
                      */
                     
                     transactionListener?.cancel()  // See StoreKit bug comments above
-                    transactionListener = handleTransactions()
+                    transactionListener = handleTransactionUpdates()
                     return
                 }
                 
-                // Update the list of products the user has access to
+                // Successful purchase transaction. Update the list of products the user has access to
+                purchaseState = .purchased
                 SKHelperLog.transaction(.transactionSuccess, productId: transaction.productID, transactionId: String(transaction.id))
                 updatePurchasedProducts(transaction.productID, purchased: true)
+                transactionUpdateListener?(transaction.productID, .success, transaction)
             }
         }
     }
@@ -830,8 +846,7 @@ public class SKHelper: Observable {
                 
                 let transactionId = String(transaction.id)
                 let hasExpired = renewalInfo.expirationReason != nil
-                
-                subscriptionStatusChange?(transaction.productID, transactionId, status.state, hasExpired)  // Broadcast the subscription change if anybody's listening
+                                
                 SKHelperLog.subscriptionChanged(productId: transaction.productID, transactionId: transactionId, newSubscriptionStatus: status.state.localizedDescription)
                 
                 if let expired = renewalInfo.expirationReason, let expirationDate = transaction.expirationDate {
@@ -840,6 +855,7 @@ public class SKHelper: Observable {
                 }
                 
                 updatePurchasedProducts(transaction.productID, purchased: status.state == .subscribed)
+                subscriptionStatusChange?(transaction.productID, transactionId, status.state, hasExpired)  // Broadcast the subscription change if anybody's listening
             }
         }
     }
@@ -862,7 +878,6 @@ public class SKHelper: Observable {
     /// 
     /// - Parameters:
     ///   - productId: The `ProductId` to insert/remove.
-    ///   - insert: If true the `ProductId` is purchased.
     ///   - purchased: true if the product is to be flagged as purchased, false otherwise.
     ///
     private func updatePurchasedProducts(_ productId: ProductId, purchased: Bool) {
@@ -906,4 +921,3 @@ public class SKHelper: Observable {
         return SKHelperConstants.value(for: key)
     }
 }
-

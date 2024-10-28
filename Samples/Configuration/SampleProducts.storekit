@@ -46,6 +46,7 @@
     }
   ],
   "settings" : {
+    "_askToBuyEnabled" : false,
     "_billingGracePeriodEnabled" : false,
     "_compatibilityTimeRate" : {
       "3" : 6

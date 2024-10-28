@@ -40,7 +40,7 @@ public struct SKHelperStoreView<Content: View>: View {
     /// Provides a collection of `Product` to display in the StoreView.
     private var products: [Product] { productIds == nil ? store.allProducts : store.products(from: productIds!) }
 
-    /// Used to check mutliple times for product availability.
+    /// Used to check multiple times for product availability.
     private let refreshProducts = Timer.publish(every: 1, on: .main, in: .common)
 
     /// Creates an `SKHelperStoreView` showing all available products. When you instantiate this view provide a closure that may be
@@ -94,28 +94,31 @@ public struct SKHelperStoreView<Content: View>: View {
     public var body: some View {
         
         if hasProducts {
-            StoreView(products: products) { product in
-                VStack {
-                    Image(product.id)
-                        .resizable()
-                        .scaledToFit()
-                        .clipShape(.circle)
-                        .SKHelperOnTapGesture {
-                            selectedProductId = product.id
-                            productSelected.toggle()
-                        }
+            ScrollView {
+                StoreView(products: products) { product in
+                    VStack {
+                        Image(product.id)
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(.circle)
+                            .SKHelperOnTapGesture {
+                                selectedProductId = product.id
+                                productSelected.toggle()
+                            }
+                    }
                 }
-            }
-            .productViewStyle(.automatic)
-            #if os(iOS)
-            .storeButton(.visible, for: .restorePurchases, .policies, .redeemCode)
-            #else
-            .storeButton(.visible, for: .restorePurchases, .policies)  // Redeem code requires macOS 15+
-            #endif
-            .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
-            .sheet(isPresented: $productSelected) {
-                if let productDetails { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected, productDetails: productDetails) }
-                else { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected) }
+                .productViewStyle(.automatic)
+                .onInAppPurchaseCompletion { product, result in await store.purchaseCompletion(for: product, with: try? result.get()) }
+                #if os(iOS)
+                .storeButton(.visible, for: .restorePurchases, .policies, .redeemCode)
+                #else
+                .storeButton(.visible, for: .restorePurchases, .policies)  // Redeem code requires macOS 15+
+                #endif
+                .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
+                .sheet(isPresented: $productSelected) {
+                    if let productDetails { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected, productDetails: productDetails) }
+                    else { SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $productSelected) }
+                }
             }
             
         } else {
@@ -127,10 +130,10 @@ public struct SKHelperStoreView<Content: View>: View {
             }
             .padding()
             .task { refreshProductsTask = refreshProducts.connect() }
-            .onReceive(refreshProducts, perform: { _ in
+            .onReceive(refreshProducts) { _ in
                 hasProducts = store.hasProducts
                 if hasProducts, let refreshProductsTask { refreshProductsTask.cancel() }
-            })
+            }
         }
     }
 }
