@@ -14,7 +14,7 @@ to provide a standard and easily customizable UI.
 
 - Note that `SKHelper` requires **Xcode 16, iOS 17+** and **macOS 14.6+**
 - Support for **consumable** transactions requires **iOS 18+** and **macOS 15+**
-- Support **Swift 6 strict concurrency**
+- Supports **Swift 6 Strict Concurrency Checking**
 
 Check out the [Quick Start Tutorial](https://russell-archer.github.io/SKHelper/tutorials/quickstart) to get a fast overview of how things work.
 
