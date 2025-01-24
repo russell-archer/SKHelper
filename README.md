@@ -53,14 +53,14 @@ support to **iOS 17+** and **macOS 14.6+** SwiftUI apps.
 `SKHelper` provides the following features:
 
 - Multi-platform (iOS, macOS) SwiftUI support for purchasing **Consumable** (not yet implemented), **Non-consumable** and **Subscription** products
+- Supports **Swift 6 Strict Concurrency Checking**
 - Makes use of Apple's **StoreKit Views** to provide a standard and easily customizable UI
 - Designed to be **lightweight**, simple and an easier-to-use refactoring of the `StoreHelper` package
 - Detailed **documentation** and an example project
 - Supports **transaction validation**, **pending ("ask to buy") transactions**, **cancelled** and **failed** transactions
+- Support for direct App Store purchases of **promoted in-app purchases** via Purchase Intents 
 - Supports customer **refunds** and management of **subscriptions** (not yet implemented)
 - Provides detailed **transaction information and history** for non-consumables and subscriptions (not yet implemented)
-- Support for direct App Store purchases of **promoted in-app purchases** via Purchase Intents
-- Supports Xcode 16's "complete" **Strict Concurrency Checking** 
 
 ## License
 
