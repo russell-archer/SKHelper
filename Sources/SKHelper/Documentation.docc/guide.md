@@ -4,7 +4,7 @@
     @PageImage(purpose: icon, source: skhelper-logo-small)
 }
 
-Updated: October 16, 2024 11:53 PM
+Updated: Jan 24, 2025
 
 ## Contents
 
@@ -30,7 +30,18 @@ Updated: October 16, 2024 11:53 PM
 - [Displaying a list of products](#Displaying-a-list-of-products)
 - [Testing non-U.S. localizations](#Testing-non-U.S.-localizations)
 - [Customizing the appearance of the product list](#Customizing-the-appearance-of-the-product-list)
-- [How does SKHelperStoreView work?](#How-does-SKHelperStoreView-work)
+- [Purchasing products](#Purchasing-products)
+- [How do I know if a product has been purchased](#How-do-I-know-if-a-product-has-been-purchased)
+- [Creating your own purchase button](#Creating-your-own-purchase-button)
+- [Transaction Validation](#Transaction-Validation)
+- [Restoring Previous Purchases](#Restoring-Previous-Purchases)
+- [Ask-to-buy Support](#Ask-to-buy-Support)
+- [Managing Purchases](#Managing-Purchases)
+- [Subscriptions](#Subscriptions)
+- [Managing Subscriptions](#Managing-Subscriptions)
+- [Introductory and Promotional Offers](#Introductory-and-Promotional-Offers)
+- [Supporting In-App Promotional Offer Codes](#Supporting-In-App-Promotional-Offer-Codes)
+- [Direct App Store Purchases](#Direct-App-Store-Purchases)
 
 ---
 
@@ -139,7 +150,7 @@ In the search field enter the URL of the **SKHelper** package on GitHub and ta
 
 > 👉 The URL of the **SKHelper** package is: [https://github.com/russell-archer/SKHelper](https://github.com/russell-archer/SKHelper)
 
-![](guide3.png)
+![](guide4.png)
 
 Xcode will now retrieve the **SKHelper** package from GitHub. When prompted, tap **Add Package** to add the package to your project:
 
@@ -147,11 +158,11 @@ Xcode will now retrieve the **SKHelper** package from GitHub. When prompted, t
 
 We now need to add the necessary in-app purchase capabilities to our project. Select your project’s target and navigate to the **Signing & Capabilities** tab. Tap the **+ Capability** button and add the **In-App Purchase** capability to your project:
 
-![](guide4.png)
+![](guide3.png)
 
 ## Configuring products
 
-Before we do anything else we need to define the products we’ll be selling. Ultimately, this will need to be done in **App Store Connect**. However, Xcode provides us with an local, on-device way of experimenting with in-app purchases.
+Before we do anything else we need to define the products we’ll be selling. Ultimately, this will need to be done in **App Store Connect**. However, Xcode provides us with a local, on-device way of experimenting with in-app purchases.
 
 **StoreKit Testing**, introduced in Xcode 12, is a test environment allows you to do early testing of in-app purchases in the simulator, without having to set anything up in App Store Connect. You define your products locally in a **StoreKit Configuration** file. Furthermore, you can view and delete transactions, issue refunds, cancel subscriptions, and a whole lot more. There’s also a new **StoreKitTest** framework that enables you to do automated testing of IAPs. 
 
@@ -240,11 +251,11 @@ For example, a consumable product might be an “super-powers token” that gran
 
 **Non-consumables**
 
-A non-consumable product is a something the user purchases once and which lasts “forever”. An example would be purchasing access to “pro-level” functionality in a camera app. In our demo we sell non-consumable products like flowers and chocolates.
+A non-consumable product is something the user purchases once and which lasts “forever”. An example would be purchasing access to “pro-level” functionality in a camera app. In our demo we sell non-consumable products like flowers and chocolates.
 
 **Auto-renewable subscriptions**
 
-An auto-renewable subscription represents a service that requires a regular payment. For example, a specialist skiing weather app might requires a monthly subscription. The user may cancel the subscription at any time, in which case access to the service will end when the next renewal payment becomes due. 
+An auto-renewable subscription represents a service that requires a regular payment. For example, a specialist skiing weather app might require a monthly subscription. The user may cancel the subscription at any time, in which case access to the service will end when the next renewal payment becomes due. 
 
 Note that subscriptions are offered as part of a **group** of subscription products. For example, in the demo app we define a “VIP” subscription group (see Products.plist above) which contains two product **levels**: “gold” (the highest value) and “silver”. The position of the product id in the file determines the **product level** or **value**. Products that appear towards the top of the file are of higher value than those defined towards the bottom of the file. We’ll see later how easy it is to support users upgrading, downgrading or cancelling subscriptions.
 
@@ -352,7 +363,7 @@ At this point you may very reasonably be wondering why we have a **Products.stor
 
 There is a fundamental principle in software development that may be summarized by the **DRY** mnemonic: **D**on’t **R**epeat **Y**ourself. Essentially, if you find you’ve duplicated code or data you should generally find a way of abstracting it into a single entity, and then referencing that entity as required from multiple places. Experience shows that if you’ve got basically the same thing scattered throughout your project, if you need to modify it there’s a good chance you’ll forgot to update *all* the occurrences. This can lead to difficult-to-find bugs and misery!
 
-So, because we’ve defined our products in the StoreKit configuration file, it seems obvious that we should use **that** as the repository for our product id data. Retrieving configuration data at runtime from the `.storekit` file isn’t difficult (it’s `JSON`). However, the `.storekit`configuration file is intended for use *when testing* and it’s really **not** a good idea to use it for production too. This is why the `.storekit` file is not included in any of your targets by default. It would be all too easy to allow “test products” to somehow make it into the release build! So, in this case it’s better to violate the DRY principle, rather than risk something far worse!
+So, because we’ve defined our products in the StoreKit configuration file, it seems obvious that we should use **that** as the repository for our product id data. Retrieving configuration data at runtime from the `.storekit` file isn’t difficult (it’s `JSON`). However, the `.storekit` configuration file is intended for use *when testing* and it’s really **not** a good idea to use it for production too. This is why the `.storekit` file is not included in any of your targets by default. It would be all too easy to allow “test products” to somehow make it into the release build! So, in this case it’s better to violate the DRY principle, rather than risk something far worse!
 
 ## Enable StoreKit Testing
 
@@ -418,8 +429,6 @@ struct ContentView: View {
         SKHelperStoreView()
     }
 }
-
-#Preview { ContentView().environment(SKHelper()) }
 ```
 
 `SKHelperStoreView()` uses a StoreKit `StoreView` (more on this later) to create a list of all our available products. When `SKHelper` is instantiated, it reads the **Products.plist** file we created previously and asks `StoreKit` to fetch a collection of localized product information. This product information is stored in `SKHelper.products`.
@@ -459,7 +468,7 @@ struct ContentView: View {
     var body: some View {
 
         SKHelperStoreView() { productId in
-            // When the use taps on the product's image SKHelperStoreView passes 
+            // When the user taps on the product's image SKHelperStoreView passes 
             // its `ProductId` to this closure, which we can use to customize 
             // the displayed details
             Group {
@@ -479,6 +488,291 @@ In a production app you would need to use the `productId` parameter passed to 
 
 ## Purchasing products
 
-There are two main ways of purchasing products (here we're '):
+There are two main ways of purchasing products:
 
-1. Using 
+- Use SKHelper `SKHelperStoreView` or `SKHelperSubscriptionStoreView`
+    - Simple and easy
+    - Uses the standard purchase button UI and purchase flow provided by StoreKit `StoreView` and `SubscriptionStoreView`
+
+- Call SKHelper's `purchase(_:options:)` method
+    - You provide your own purchase button and UI
+
+Here's the code required for the easy-to-use option - it's exactly as we used earlier for displaying the list of products:
+
+```swift
+import SwiftUI
+import SKHelper
+
+struct ContentView: View {
+    @Environment(SKHelper.self) private var store
+    
+    var body: some View {
+
+        // SKHelperStoreView() lists all available products for this app.
+        // Purchasing is supported. Purchased products will be grayed-out.
+        // Tapping on a product's image shows details for that product.
+        SKHelperStoreView()
+    }
+}
+```
+
+If you want more feedback on purchases you can add the optional `onTransaction` view modifier:
+
+```swift
+import SwiftUI
+import SKHelper
+
+struct ContentView: View {
+    @Environment(SKHelper.self) private var store
+    
+    var body: some View {
+        SKHelperStoreView()
+            .onTransaction { productId, reason, transaction  in
+                switch reason {
+                    case .success:   print("Product \(productId) successfully purchased")
+                    case .failure:   print("Purchase of \(productId) failed")
+                    case .cancelled: print("Purchase of \(productId) was cancelled by the user")
+                    case .revoked:   print("Access to the product \(productId) was revoked by the App Store")
+                    case .upgraded:  print("Product \(productId) was upgraed to a higher value product by the App Store")
+                    case .pending:   print("The purchase of \(productId) is pending awaiting parental approval")
+                }
+            }
+    }
+}
+```
+
+## How do I know if a product has been purchased
+
+A common scenario is to make the display of content dependent on a purchase. The following sample code shows how you can easily check the status of a purchase
+using the SKHelper `isPurchased(productId:)` method:
+
+```swift
+import SwiftUI
+import SKHelper
+
+/// This `SmallFlowersView` demonstrates how to check if the user has access to a 
+/// purchase-dependent resource. In this case, access to the "small flowers" resource 
+/// is only granted if the user has purchased the "com.rarcher.nonconsumable.flowers.small" 
+/// product.
+///
+/// Notice that we:
+///
+/// 1. Check the purchase before the View appears using: 
+///    .task { isPurchased = await store.isPurchased(productId: smallFlowersProductId) }
+/// 
+/// 2. If the user hasn't purchased the product we display a link to `SKHelperStoreView` and 
+///    pass the product id of the small flowers product. This causes `SKHelperStoreView` to display 
+///    only information about the small flowers product, rather than all available products 
+///    (the default)
+///
+import SwiftUI
+import SKHelper
+
+struct SmallFlowersView: View {
+    @Environment(SKHelper.self) private var store
+    @State private var isPurchased = false
+    private let smallFlowersProductId = "com.rarcher.nonconsumable.flowers.small"
+    
+    var body: some View {
+        VStack {
+            if isPurchased { FullAccess() }
+            else { NoAccess() }
+        }
+        .task { isPurchased = await store.isPurchased(productId: smallFlowersProductId) }
+    }
+    
+    func FullAccess() -> some View {
+        VStack {
+            Text("You've purchased the small flowers - here they are, enjoy!").padding()
+            Image(smallFlowersProductId).resizable().scaledToFit()
+        }
+        .padding()
+    }
+    
+    func NoAccess() -> some View {
+        VStack {
+            Text("You haven't purchased the small flowers and don't have access.").padding()
+            ProductNavLink()
+            Spacer()
+        }
+        .padding()
+    }
+    
+    func ProductNavLink() -> some View {
+        NavigationLink("Review Small Flowers Info") {
+            SKHelperStoreView(productIds: [smallFlowersProductId]) { productId in
+                Group {
+                    Image(productId + ".info").resizable().scaledToFit()
+                    Text("Here is some text about why you might want to buy this product.")
+                }
+                .padding()
+            }
+        }
+    }
+}
+
+```
+
+## Creating your own purchase button
+
+If you don't want to make use of `SKHelperStoreView` you can create your own purchase button and other purchase-related UI.
+A simple example is shown below.
+
+The steps required are as follows:
+
+- Get the `SKHelperProduct` for the product you want to purchase
+
+`SKHelperProduct` encapsulates a StoreKit `Product`, along with localized product information and a cached value for the user's entitlement to use the product.
+The easiest way to get the required product is to create an `onProductsAvailable` view modifier, which allows you to be notified when localized product information 
+has been successfully retrieved from the App Store (SKHelper does this automatically when it's initialized).
+
+- Call SKHelper's `purchase(_:options:)` method
+
+Asynchronously call the SKHelper `purchase(_:options:)` method and await for the result. If `result.purchaseState == .purchased` then the purchase was a success.
+
+```swift
+import SwiftUI
+import SKHelper
+
+struct ContentView: View {
+    @Environment(SKHelper.self) private var store
+    @State private var product: SKHelperProduct?
+    @State private var purchased = false
+    private static var productId = "com.rarcher.nonconsumable.flowers.small"
+    
+    var body: some View {
+        VStack {
+            if let product {
+                Text(product.product.displayName).font(.headline)
+                
+                // Display a button using the localized price
+                Button("Purchase for only \(product.product.displayPrice)") {
+                    Task {
+                        let result = await store.purchase(product.product)  // Start the purchase flow for the product
+                        if result.purchaseState == .purchased { purchased = true }
+                    }
+                }
+                .tint(.blue)
+                .padding()
+                
+            } else { Text("Product not found") }
+            
+            if purchased { Text("Purchase success!") }
+            
+            Spacer()
+            Button("Clear cached entitlements") { store.clearCachedEntitlements() }.font(.caption).padding()
+        }
+        .onProductsAvailable { products  in
+            // This view modifier is called when localized product information becomes available or updated
+            product = products.first { product in product.id == ContentView.productId }  // Get the small flowers product
+        }
+    }
+}
+```
+
+## Transaction Validation
+When purchases are made an important part of StoreKit's workflow is automatic **validation** of the transaction. The validation process ensures that the user is entitled
+to use the product on that particular device. This involves examining the encrypted purchase receipt, which is issued by the App Store whenever a purchase is made or restored.
+
+Prior to the introduction of StoreKit validation of receipts was a tricky business. The developer had four validation options: **server-side** (required your own app server 
+talking to Apple's receipt validation server), **on-device** (required a complex OpenSSL-based solution), **third-party** (e.g. RevenueCat) or no receipt validation (trust 
+the user). 
+
+Happily, we no longer have to deal with the details of this as StoreKit will validate transactions for us. To see how this works let's review what happens when the user 
+makes a purchase via SKHelper's `SKHelperStoreView`. Here's a simplified snippet from `SKHelperStoreView`: 
+
+```swift
+public struct SKHelperStoreView<Content: View>: View {    
+    @State private var hasProducts = false
+    private var products: [Product]
+    
+    public var body: some View {
+        
+        if hasProducts {
+            StoreView(products: products) { product in
+            }
+            .onInAppPurchaseCompletion { product, result in 
+                await store.purchaseCompletion(for: product, with: try? result.get())
+            }
+            
+        } else {            
+            .onProductsAvailable { _  in
+                // This view modifier is called when localized product information becomes available
+                hasProducts = store.hasProducts
+            }
+        }
+    }
+}
+```
+
+Notice how we make use of StoreKit's `StoreView()` method to handle the display of purchase-related UI and process the actual payment. We then use StoreKit's
+`onInAppPurchaseCompletion` modifier to be notified about the completion of the purchase process and call our `purchaseCompletion(for:with:)` method. 
+
+SKHelper's `purchaseCompletion(for:with:)` method essentially has three jobs: check the result of StoreKit's automatic validation, log the result and then
+call the host app's `TransactionUpdateClosure` (if any) to inform them of the result of the purchase. The app can then decide whether or not to make the
+product available to the user. 
+
+Here's a simplified snippet from `purchaseCompletion(for:with:)`:
+
+```swift
+internal func purchaseCompletion(for product: Product, with result: Product.PurchaseResult?) async -> (transaction: Transaction?, purchaseState: SKHelperPurchaseState) {
+    :
+    switch result {
+        case .success(let verificationResult):
+            let checkResult = checkVerificationResult(result: verificationResult)
+            await validatedTransaction.finish()  // Tell the App Store we delivered the purchased content to the user
+
+            // Let the caller know the purchase succeeded and that the user should be given access to the product
+            purchaseState = .purchased
+            SKHelperLog.event(.purchaseSuccess, productId: product.id, transactionId: String(validatedTransaction.id))
+            transactionUpdateListener?(product.id, .success, validatedTransaction)
+            return (transaction: validatedTransaction, purchaseState: .purchased)
+
+        case .userCancelled:
+            purchaseState = .cancelled
+            SKHelperLog.event(.purchaseCancelled, productId: product.id)
+            transactionUpdateListener?(product.id, .cancelled, nil)
+            return (transaction: nil, .cancelled)
+
+        case .pending:
+            purchaseState = .pending
+            SKHelperLog.event(.purchasePending, productId: product.id)
+            transactionUpdateListener?(product.id, .pending, nil)
+            return (transaction: nil, .pending)
+
+        default:
+            purchaseState = .unknown
+            SKHelperLog.event(.purchaseFailure, productId: product.id)
+            transactionUpdateListener?(product.id, .failure, nil)
+            return (transaction: nil, .unknown)
+    }
+}
+
+```
+
+We go through a similar validation process when we check if the user has purchased a product using SKHelper's `isPurchased(productId:)` method.
+In this case we use StoreKit's `Transaction.currentEntitlement(for: productId)` to get the user's entitlements for the particular product and then check 
+the automatic validation result. Here's a simplified snippet:
+
+```swift
+public func isPurchased(productId: ProductId) async -> Bool {
+    var latestTransaction = await Transaction.currentEntitlement(for: productId) }
+    if !latestTransaction { return false }  // No transaction means the user has not purchased the product
+
+    // Check the validation result to see if it's verified
+    return checkVerificationResult(result: latestTransaction).verified  
+}
+```
+
+## Restoring Previous Purchases
+## Ask-to-buy Support
+## Managing Purchases
+info and refunds
+## Subscriptions
+## Managing Subscriptions
+info, refunds, upgrades, downgrades and cancellations
+## Introductory and Promotional Offers
+## Supporting In-App Promotional Offer Codes
+## Direct App Store Purchases
+## 
+

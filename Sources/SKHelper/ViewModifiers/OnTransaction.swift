@@ -18,7 +18,7 @@ public struct OnTransaction: ViewModifier {
     private var update: TransactionUpdateClosure?
     
     /// Creates an `OnTransaction` ViewModifier.
-    /// - Parameter onUpdate: Optional handler allows you to be notified of purchase transactions and transaction updates.
+    /// - Parameter update: Optional handler allows you to be notified of purchase transactions and transaction updates.
     public init(update: TransactionUpdateClosure? = nil) { self.update = update }
     
     /// Builds the body of the `OnTransaction` view modifier.

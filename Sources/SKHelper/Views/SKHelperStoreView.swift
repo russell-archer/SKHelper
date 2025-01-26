@@ -7,7 +7,6 @@
 
 import SwiftUI
 import StoreKit
-import Combine
 
 /// Uses the StoreKit `StoreView` to create a list of all avaliable products.
 @available(iOS 17.0, macOS 14.6, *)
@@ -28,9 +27,6 @@ public struct SKHelperStoreView<Content: View>: View {
     /// True if the store has products.
     @State private var hasProducts = false
     
-    /// Used to cancel the refresh products task.
-    @State private var refreshProductsTask: (any Cancellable)?
-    
     /// A closure which is called to display product details.
     private var productDetails: ProductDetailsClosure?
     
@@ -39,9 +35,6 @@ public struct SKHelperStoreView<Content: View>: View {
     
     /// Provides a collection of `Product` to display in the StoreView.
     private var products: [Product] { productIds == nil ? store.allProducts : store.products(from: productIds!) }
-
-    /// Used to check multiple times for product availability.
-    private let refreshProducts = Timer.publish(every: 1, on: .main, in: .common)
 
     /// Creates an `SKHelperStoreView` showing all available products. When you instantiate this view provide a closure that may be
     /// called to display product information. This information will be displayed when the user taps on the product's image.
@@ -129,10 +122,9 @@ public struct SKHelperStoreView<Content: View>: View {
                 ProgressView()
             }
             .padding()
-            .task { refreshProductsTask = refreshProducts.connect() }
-            .onReceive(refreshProducts) { _ in
+            .onProductsAvailable { _  in
+                // This view modifier is called when localized product information becomes available
                 hasProducts = store.hasProducts
-                if hasProducts, let refreshProductsTask { refreshProductsTask.cancel() }
             }
         }
     }

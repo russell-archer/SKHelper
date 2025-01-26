@@ -7,7 +7,6 @@
 
 import SwiftUI
 import StoreKit
-import Combine
 
 /// Uses the StoreKit `SubscriptionStoreView` to create a list of all avaliable subscriptions.
 @available(iOS 17.0, macOS 14.6, *)
@@ -33,9 +32,6 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     
     /// True if the store has products.
     @State private var hasProducts = false
-    
-    /// Used to cancel the refresh products task.
-    @State private var refreshProductsTask: (any Cancellable)?
     
     /// The name of the subscription group from which to display subscriptions. If nil then we display all subscriptions in all groups.
     private var subscriptionGroupName: String?
@@ -115,10 +111,9 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 ProgressView()
             }
             .padding()
-            .task { refreshProductsTask = refreshProducts.connect() }
-            .onReceive(refreshProducts) { _ in
+            .onProductsAvailable { _  in
+                // This view modifier is called when localized product information becomes available
                 hasProducts = store.hasAutoRenewableSubscriptionProducts
-                if hasProducts, let refreshProductsTask { refreshProductsTask.cancel() }
             }
         }
     }
@@ -130,7 +125,7 @@ extension SKHelperSubscriptionStoreView {
     
     /// Creates a `SKHelperSubscriptionStoreView`.
     public init(
-        subscriptionGroupName: String,
+        subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure) where Control == EmptyView, Details == EmptyView {
             
         self.subscriptionGroupName = subscriptionGroupName
@@ -141,7 +136,7 @@ extension SKHelperSubscriptionStoreView {
     
     /// Creates a `SKHelperSubscriptionStoreView`.
     public init(
-        subscriptionGroupName: String,
+        subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionControl: @escaping SubscriptionControlClosure) where Header == EmptyView, Details == EmptyView {
             
         self.subscriptionGroupName = subscriptionGroupName
@@ -152,7 +147,7 @@ extension SKHelperSubscriptionStoreView {
     
     /// Creates a `SKHelperSubscriptionStoreView`.
     public init(
-        subscriptionGroupName: String,
+        subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionDetails: @escaping SubscriptionDetailsClosure) where Header == EmptyView, Control == EmptyView {
             
         self.subscriptionGroupName = subscriptionGroupName
@@ -163,7 +158,7 @@ extension SKHelperSubscriptionStoreView {
     
     /// Creates a `SKHelperSubscriptionStoreView`.
     public init(
-        subscriptionGroupName: String,
+        subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure,
         @ViewBuilder subscriptionControl: @escaping SubscriptionControlClosure) where Details == EmptyView {
 
@@ -175,7 +170,7 @@ extension SKHelperSubscriptionStoreView {
     
     /// Creates a `SKHelperSubscriptionStoreView`.
     public init(
-        subscriptionGroupName: String,
+        subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure,
         @ViewBuilder subscriptionDetails: @escaping SubscriptionDetailsClosure) where Control == EmptyView {
 
@@ -186,7 +181,7 @@ extension SKHelperSubscriptionStoreView {
     }
     
     /// Creates a `SKHelperSubscriptionStoreView`.
-    public init(subscriptionGroupName: String) where Header == EmptyView, Control == EmptyView, Details == EmptyView {
+    public init(subscriptionGroupName: String? = nil) where Header == EmptyView, Control == EmptyView, Details == EmptyView {
         self.subscriptionGroupName = subscriptionGroupName
         self.subscriptionHeader = nil
         self.subscriptionControl = nil

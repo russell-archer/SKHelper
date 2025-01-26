@@ -36,6 +36,8 @@ public typealias SubscriptionStatusChangeClosure = (_ productId: ProductId, _ tr
 ///
 public typealias TransactionUpdateClosure = (_ productId: ProductId, _ reason: SKHelperTransactionUpdateReason, _ transaction: StoreKit.Transaction?) -> Void
 
+public typealias ProductsAvailableClosure = (_ products: [SKHelperProduct]) -> Void
+
 /// SKHelper, a lightweight StoreKit helper.
 @MainActor
 @available(iOS 17.0, macOS 14.6, *)
@@ -46,15 +48,18 @@ public class SKHelper: Observable {
     /// Array of `SKHelperProduct`, which includes localized `Product` info retrieved from the App Store and a cached product entitlement.
     public private(set) var products = [SKHelperProduct]()
     
+    /// This property is true if `SKHelper.products` contains a valid collection of products, false otherwise.
+    public private(set) var hasProducts = false
+    
     /// When set to true `SKHelper` will use previously cached values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil.
     /// Using cached entitlements can help mitigate issues where `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an
     /// entitlement to use a product.
     public var useCachedEntitlements = true
     
-    /// A closure which is called when a subscription changes status.
+    /// A view modifier which is called when a subscription changes status.
     public var subscriptionStatusChange: SubscriptionStatusChangeClosure?
     
-    /// Allows you to provide a ``TransactionUpdateClosure`` closure, which is called when a purchase transaction or transaction update is received.
+    /// Allows you to provide a ``TransactionUpdateClosure`` view modifier, which is called when a purchase transaction or transaction update is received.
     ///
     /// You will receive notifications when:
     ///
@@ -68,6 +73,9 @@ public class SKHelper: Observable {
     /// Use this means of receiving transaction notifications in preference to the SwiftUI `onInAppPurchaseCompletion(perform:)` view modifier.
     /// 
     public var transactionUpdateListener: TransactionUpdateClosure?
+    
+    /// A view modifier which is called when SKHelper has successfully retrieved a collection of localized products.
+    public var productsAvailable: ProductsAvailableClosure?
 
     // MARK: - Private properties
     
@@ -149,6 +157,10 @@ public class SKHelper: Observable {
         localizedProducts.forEach { localizedProduct in
             products.append(SKHelperProduct(product: localizedProduct, hasEntitlement: purchasedProductIds.contains(localizedProduct.id)))
         }
+        
+        // Signal that we have successfully retrieved localized product information
+        hasProducts = true
+        productsAvailable?(products)
         
         SKHelperLog.event(.requestProductsSuccess)
         return true

@@ -63,9 +63,6 @@ public extension SKHelper {
     /// All `ProductId` that represent purchased products.
     var allPurchasedProductIds: [ProductId] { products.filter { $0.hasEntitlement }.map { $0.id }}
     
-    /// This property is true if `SKHelper.products` contains a valid collection of products, false otherwise.
-    var hasProducts: Bool { !products.isEmpty }
-    
     /// This property is true if `SKHelper.products` contains one or more consumable products, false otherwise.
     var hasConsumableProducts: Bool { !allSKHelperConsumableProducts.isEmpty }
     
