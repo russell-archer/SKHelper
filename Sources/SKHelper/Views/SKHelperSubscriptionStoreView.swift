@@ -43,7 +43,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     private var subscriptionControl: SubscriptionControlClosure?
     
     /// A closure which is called to display subscription details when the user taps the subscription's image.
-    private var subscriptionDetails: SubscriptionDetailsClosure?
+    private var subscriptionDetails: SubscriptionDetailsClosure
     
     /// Gets either all subscriptions in all groups, or subscriptions in a specific group if `subscriptionGroupName` was provided to init.
     private var subscriptions: [Product] {
@@ -64,12 +64,12 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
         @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure,
         @ViewBuilder subscriptionControl: @escaping SubscriptionControlClosure,
         @ViewBuilder subscriptionDetails: @escaping SubscriptionDetailsClosure) {
-        
-        self.subscriptionGroupName = subscriptionGroupName
-        self.subscriptionHeader = subscriptionHeader
-        self.subscriptionControl = subscriptionControl
-        self.subscriptionDetails = subscriptionDetails
-    }
+            
+            self.subscriptionGroupName = subscriptionGroupName
+            self.subscriptionHeader = subscriptionHeader
+            self.subscriptionControl = subscriptionControl
+            self.subscriptionDetails = subscriptionDetails
+        }
     
     /// Creates the body of the view.
     public var body: some View {
@@ -89,18 +89,11 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
                 .subscriptionStoreControlIcon { subscription, info in
                     
-                    subscriptionControl?(subscription.id)
-                        .SKHelperOnTapGesture {
-                            selectedProductId = subscription.id
-                            subscriptionSelected.toggle()
-                        }
+                    if let subscriptionControl { subscriptionControl(subscription.id).SKHelperOnTapGesture(perform: tapAction(subscription: subscription)) }
+                    else { defaultSubscriptionControl(productId: subscription.id).SKHelperOnTapGesture(perform: tapAction(subscription: subscription)) }
                 }
                 .sheet(isPresented: $subscriptionSelected) {
-                    if let subscriptionDetails {
-                        SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $subscriptionSelected, productDetails: subscriptionDetails)
-                    } else {
-                        SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $subscriptionSelected)
-                    }
+                    SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $subscriptionSelected, productDetails: subscriptionDetails)
                 }
             }
         } else {
@@ -117,6 +110,23 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
             }
         }
     }
+    
+    func defaultSubscriptionControl(productId: ProductId) -> some View {
+        VStack {
+            Image(productId).resizable().scaledToFit().padding(3)
+            HStack {
+                Image(systemName: "info.circle").font(.title3).foregroundColor(.blue)
+                Text("Info").font(.callout)
+            }
+        }
+    }
+    
+    func tapAction(subscription: Product) -> () -> Void {
+        {
+            selectedProductId = subscription.id
+            subscriptionSelected.toggle()
+        }
+    }
 }
 
 // MARK: - Additional initializers
@@ -126,67 +136,25 @@ extension SKHelperSubscriptionStoreView {
     /// Creates a `SKHelperSubscriptionStoreView`.
     public init(
         subscriptionGroupName: String? = nil,
-        @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure) where Control == EmptyView, Details == EmptyView {
-            
-        self.subscriptionGroupName = subscriptionGroupName
-        self.subscriptionHeader = subscriptionHeader
-        self.subscriptionControl = nil
-        self.subscriptionDetails = nil
-    }
-    
-    /// Creates a `SKHelperSubscriptionStoreView`.
-    public init(
-        subscriptionGroupName: String? = nil,
-        @ViewBuilder subscriptionControl: @escaping SubscriptionControlClosure) where Header == EmptyView, Details == EmptyView {
-            
-        self.subscriptionGroupName = subscriptionGroupName
-        self.subscriptionHeader = nil
-        self.subscriptionControl = subscriptionControl
-        self.subscriptionDetails = nil
-    }
-    
-    /// Creates a `SKHelperSubscriptionStoreView`.
-    public init(
-        subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionDetails: @escaping SubscriptionDetailsClosure) where Header == EmptyView, Control == EmptyView {
             
-        self.subscriptionGroupName = subscriptionGroupName
-        self.subscriptionHeader = nil
-        self.subscriptionControl = nil
-        self.subscriptionDetails = subscriptionDetails
-    }
-    
-    /// Creates a `SKHelperSubscriptionStoreView`.
-    public init(
-        subscriptionGroupName: String? = nil,
-        @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure,
-        @ViewBuilder subscriptionControl: @escaping SubscriptionControlClosure) where Details == EmptyView {
-
-        self.subscriptionGroupName = subscriptionGroupName
-        self.subscriptionHeader = subscriptionHeader
-        self.subscriptionControl = subscriptionControl
-        self.subscriptionDetails = nil
-    }
+            self.subscriptionGroupName = subscriptionGroupName
+            self.subscriptionHeader = nil
+            self.subscriptionControl = nil
+            self.subscriptionDetails = subscriptionDetails
+        }
     
     /// Creates a `SKHelperSubscriptionStoreView`.
     public init(
         subscriptionGroupName: String? = nil,
         @ViewBuilder subscriptionHeader: @escaping SubscriptionHeaderClosure,
         @ViewBuilder subscriptionDetails: @escaping SubscriptionDetailsClosure) where Control == EmptyView {
-
-        self.subscriptionGroupName = subscriptionGroupName
-        self.subscriptionHeader = subscriptionHeader
-        self.subscriptionControl = nil
-        self.subscriptionDetails = subscriptionDetails
-    }
-    
-    /// Creates a `SKHelperSubscriptionStoreView`.
-    public init(subscriptionGroupName: String? = nil) where Header == EmptyView, Control == EmptyView, Details == EmptyView {
-        self.subscriptionGroupName = subscriptionGroupName
-        self.subscriptionHeader = nil
-        self.subscriptionControl = nil
-        self.subscriptionDetails = nil
-    }
+            
+            self.subscriptionGroupName = subscriptionGroupName
+            self.subscriptionHeader = subscriptionHeader
+            self.subscriptionControl = nil
+            self.subscriptionDetails = subscriptionDetails
+        }
 }
 
 #Preview {

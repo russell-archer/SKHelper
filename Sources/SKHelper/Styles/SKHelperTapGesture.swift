@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// View extension for cross-platform tap gesture.
-extension View {
+public extension View {
     
     /// Cross-platform tap gesture.
     /// 

@@ -23,6 +23,9 @@ public struct SKHelperPurchasesView: View {
     /// true if a product has been selected.
     @State private var productSelected = false
     
+    /// True if the store has products.
+    @State private var hasProducts = false
+    
     /// Creates a `SKHelperPurchasesView`.
     public init() {}
     
@@ -30,7 +33,14 @@ public struct SKHelperPurchasesView: View {
     public var body: some View {
         ScrollView {
             LazyVStack {
-                if purchasedProducts.isEmpty {
+                if hasProducts, purchasedProducts.isEmpty {
+                    
+                    VStack {
+                        Text("No purchases have been made yet").font(.subheadline)
+                    }
+                    .padding()
+                    
+                } else if !hasProducts, purchasedProducts.isEmpty {
                     
                     VStack {
                         Text("Getting purchases...").font(.subheadline)
@@ -50,13 +60,14 @@ public struct SKHelperPurchasesView: View {
                                 .scaledToFit()
                         }
                         .padding(.all, 10)
-                        .productViewStyle(SKHelperProductViewStyle(selectedProductId: $selectedProductId, productSelected: $productSelected))
+//                        .productViewStyle(SKHelperProductViewStyle(selectedProductId: $selectedProductId, productSelected: $productSelected))
                         Divider().padding()
                     }
                 }
             }
         }
         .task { purchasedProducts = store.allPurchasedProductIds }
+        .onProductsAvailable { _  in hasProducts = store.hasProducts }
         .onChange(of: store.allPurchasedProductIds) { purchasedProducts = store.allPurchasedProductIds }
         .sheet(isPresented: $productSelected) { SKHelperManagePurchaseView(selectedProductId: $selectedProductId, showPurchaseInfoSheet: $productSelected) }
     }

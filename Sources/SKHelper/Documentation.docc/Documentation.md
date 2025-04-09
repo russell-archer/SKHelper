@@ -26,7 +26,7 @@ support to **iOS 17+** and **macOS 14.6+** SwiftUI apps.
 
 ## License
 
-MIT license, copyright (c) 2024 Russell Archer. This software is provided "as-is" without warranty and may be freely used, copied, 
+MIT license, copyright (c) 2024, 2025 Russell Archer. This software is provided "as-is" without warranty and may be freely used, copied, 
 modified and redistributed, including as part of commercial software. 
 
 See the `SKHelper` <doc:LICENSE> for details.

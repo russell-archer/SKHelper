@@ -4,7 +4,7 @@
     @PageImage(purpose: icon, source: skhelper-logo-small)
 }
 
-Updated: Jan 24, 2025
+Updated: March 12, 2025
 
 ## Contents
 
@@ -765,14 +765,71 @@ public func isPurchased(productId: ProductId) async -> Bool {
 ```
 
 ## Restoring Previous Purchases
+Apples's documentation states that apps must provide a mechanism to allow users to manually restore previous in-app purchases.
+
+> Failure to provide a "Restore" button will result in apps being rejected during the App Store review process. 
+
+Apple states that manually (and programmatically) restoring previous purchases should no longer normally be necessary. However, you MUST still provide a manual 
+restore feature (see below) or your app will be rejected during the review process.
+
+Programmatically restoring purchases simply requires an async call to `AppStore.sync()`. However, it’s not a good idea to initiate a restore unless the user 
+specifically requests it. This is because the user will immediately be prompted to authenticate with the App Store. This behaviour can be very disconcerting 
+for the user, as it may not be obvious why they’re being asked for their credentials.
+
+By default, SKHelper's `SKHelperStoreView` uses the `.storeButton` view modifier with the `.restorePurchases` option to display a button that will restore
+previous purchases:
+
+```swift
+// SKHelperStoreView.swift
+:
+StoreView(products: products) { product in
+    :
+}
+:
+#if os(iOS)
+.storeButton(.visible, for: .restorePurchases, .policies, .redeemCode)
+#else
+```
+
+When `SKHelperStoreView` is rendered it will display a "Restore Missing Purchases" button at the bottom of the available/purchased products list. 
+
 ## Ask-to-buy Support
+The App Store supports the concept of "ask-to-buy" purchases, where parents can configure an Apple ID to require their permission to make purchases. 
+When a user makes this type of purchase the `PurchaseResult` returned by StoreKit’s `product.purchase()` method will have a value of `.pending`. 
+This state can also be applicable when a user is required to make banking changes before a purchase is confirmed.
+
+With StoreKit testing we can easily simulate pending purchases to see if our app correctly supports them. To enable ask-to-buy support in StoreKit select 
+the .storekit configuration file and then select **Editor > Enable Ask To Buy**:
+
+![](guide23.png)
+
+Now run the demo app and attempt to make a purchase. You'll find that the purchase proceeds as normal. However, instead of receiving a purchase confirmation 
+you'll see an **Ask Permission** alert:
+
+![](guide24.png)
+
+Tap **Ask** and you'll see that the purchase enters a `.pending` state, as shown in the console log:
+
+`Purchase in progress. Awaiting authorization for product com.rarcher.nonconsumable.flowers.large`
+
+With the app still running, tap the **Manage StoreKit Transaction** button in the Xcode debug area pane:
+
+![](guide25.png)
+
+You'll now be able to see the transaction that is **Pending Approval**. Right-click the transaction that is pending approval and select **Approve Transaction**:
+
+![](guide26.png)
+
+You should see the purchase confirmed in the console log as SKHelper processes the transaction:
+
+`Transaction success for product com.rarcher.nonconsumable.flowers.large with transaction id 0`
+
 ## Managing Purchases
 info and refunds
+
 ## Subscriptions
 ## Managing Subscriptions
 info, refunds, upgrades, downgrades and cancellations
 ## Introductory and Promotional Offers
 ## Supporting In-App Promotional Offer Codes
 ## Direct App Store Purchases
-## 
-

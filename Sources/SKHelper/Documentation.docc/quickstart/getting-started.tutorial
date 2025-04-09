@@ -37,7 +37,7 @@
             @Step {
                 Xcode will now retrieve the **SKHelper** package from GitHub.
                 
-                When prompted,tap **Add Package** to add the package to your project.
+                When prompted, tap **Add Package** to add the package to your project.
                 
                 @Image(source: "quickstart4.png", alt: "Confirm adding the SKHelperDemo package to your project.")                
             }

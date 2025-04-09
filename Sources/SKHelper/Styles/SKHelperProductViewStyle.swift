@@ -11,12 +11,12 @@ import StoreKit
 /// StoreKit `SKHelperProductView` style.
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKHelperProductViewStyle: ProductViewStyle {
-    
-    /// The purchase state of the product.
-    @State private var purchased = false
-    
+        
     /// Caption shown on the "Manage" button.
     @State private var buttonCaption = "Manage Purchase"
+    
+    /// Purchase status of the selected product.
+    @Binding var purchased: Bool
     
     /// A binding to the `ProductId` of the selected product.
     @Binding var selectedProduct: ProductId
@@ -24,15 +24,20 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
     /// A binding to a value which determines if a product is selected.
     @Binding var productSelected: Bool
     
+    /// A binding used to determine if we need to display product information or a purchase management sheet for the product.
+    @Binding var managePurchase: Bool
+    
     /// Creates a StoreKit `SKHelperProductView` style.
     ///
     /// - Parameters:
     ///   - selectedProductId: A binding to the `ProductId` of the selected `Product`.
     ///   - productSelected: A binding to a value which determines if the `SKHelperProductView` is displayed.
     ///   
-    public init(selectedProductId: Binding<ProductId>, productSelected: Binding<Bool>) {
+    public init(purchased: Binding<Bool>, selectedProductId: Binding<ProductId>, productSelected: Binding<Bool>, managePurchase: Binding<Bool>) {
+        self._purchased = purchased
         self._selectedProduct = selectedProductId
         self._productSelected = productSelected
+        self._managePurchase = managePurchase
     }
     
     /// Creates the body of the StoreKit `SKHelperProductView` style.
@@ -46,19 +51,21 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
                 VStack(alignment: .center) {
                     configuration.icon.padding()
                     Text(product.displayName).font(.title)
-                    if purchased { managePurchaseButton(product: product) }
+                    if configuration.hasCurrentEntitlement { managePurchaseButton(product: product) }
                     else { purchaseButton(product: product, configuration: configuration) }
                 }
-                .task { purchased = await isPurchased(product: product, configuration: configuration) }
                 
-            default: ProductView(configuration)
+            case .loading: ProgressView()
+            default: Text("Unable to load product \(configuration.product?.displayName ?? "(unknown)")")
         }
     }
     
     private func managePurchaseButton(product: Product) -> some View {
         Button(action: {
+            purchased = true
             selectedProduct = product.id
-            productSelected.toggle()
+            productSelected = true
+            managePurchase = true
             
         }, label: {
             HStack {
@@ -84,22 +91,5 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
         }
         .tint(.blue)
         .padding()
-    }
-    
-    private func isPurchased(product: Product, configuration: Configuration) async -> Bool {
-        var value = false
-        var latestTransaction: VerificationResult<StoreKit.Transaction>?
-        
-        if product.type == .consumable { latestTransaction = await product.latestTransaction }
-        else if product.type == .nonConsumable || product.type == .autoRenewable { latestTransaction = await product.currentEntitlement }
-        
-        if let latestTransaction {
-            switch latestTransaction {
-                case .unverified(_, _): value = false
-                case .verified(_): value = true
-            }
-        }
-        
-        return value
     }
 }

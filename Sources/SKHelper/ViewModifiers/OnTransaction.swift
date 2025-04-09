@@ -6,7 +6,6 @@
 //
 
 public import SwiftUI
-public import StoreKit
 
 /// The `OnTransaction` ViewModifier allows you to be notified of purchase transactions and other transaction updates.
 /// See also the `onTransaction(update:)` View extension.

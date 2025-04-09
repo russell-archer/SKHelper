@@ -5,7 +5,6 @@
 //  Created by Russell Archer on 04/08/2024.
 //
 
-public import SwiftUI
 public import StoreKit
 
 @available(iOS 17.0, macOS 14.6, *)

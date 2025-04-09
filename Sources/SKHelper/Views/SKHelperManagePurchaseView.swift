@@ -65,6 +65,11 @@ public struct SKHelperManagePurchaseView: View {
     /// A binding that determines if the purchase info sheet is displayed.
     @Binding var showPurchaseInfoSheet: Bool
     
+    public init(selectedProductId: Binding<ProductId>, showPurchaseInfoSheet: Binding<Bool>) {
+        self._selectedProductId = selectedProductId
+        self._showPurchaseInfoSheet = showPurchaseInfoSheet
+    }
+    
     /// Creates the `SKHelperManagePurchaseView`.
     public var body: some View {
         VStack {
@@ -102,7 +107,9 @@ public struct SKHelperManagePurchaseView: View {
                 }
             }
         }
-        .task { await getPurchaseInfo() }
+        .task {
+            await getPurchaseInfo()
+        }
         .refundRequestSheet(for: refundRequestTransactionId, isPresented: $showRefundSheet) { result in
             var requestWasCancelled = false
             switch(result) {

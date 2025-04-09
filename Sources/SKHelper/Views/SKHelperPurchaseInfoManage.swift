@@ -24,7 +24,6 @@ internal struct SKHelperPurchaseInfoManage: View {
     
     /// Creates the body of the view.
     var body: some View {
-        Divider().padding(.bottom)
         
         #if os(iOS)
         

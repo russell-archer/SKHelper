@@ -5,6 +5,7 @@
 //  Created by Russell Archer on 14/07/2024.
 //
 
+import SwiftUI
 public import StoreKit
 
 /// The unique id that identifies a product.
@@ -36,6 +37,7 @@ public typealias SubscriptionStatusChangeClosure = (_ productId: ProductId, _ tr
 ///
 public typealias TransactionUpdateClosure = (_ productId: ProductId, _ reason: SKHelperTransactionUpdateReason, _ transaction: StoreKit.Transaction?) -> Void
 
+/// A closure that will be called when App Store products become available on initialization.
 public typealias ProductsAvailableClosure = (_ products: [SKHelperProduct]) -> Void
 
 /// SKHelper, a lightweight StoreKit helper.
@@ -172,7 +174,7 @@ public class SKHelper: Observable {
     /// - Parameter options: Purchase options. See `Product.PurchaseOption`.
     /// - Returns: Returns a tuple consisting of a `Transaction` object that represents the purchase and a `SKHelperPurchaseState` describing the state of the purchase.
     ///
-    public func purchase(_ product: Product, options: Set<Product.PurchaseOption> = []) async -> (transaction: Transaction?, purchaseState: SKHelperPurchaseState)  {
+    public func purchase(_ product: Product, options: Set<Product.PurchaseOption> = []) async -> (transaction: StoreKit.Transaction?, purchaseState: SKHelperPurchaseState)  {
         
         guard AppStore.canMakePayments else {
             SKHelperLog.event(.purchaseUserCannotMakePayments)
@@ -247,7 +249,7 @@ public class SKHelper: Observable {
         if isAutoRenewableSubscription(productId: productId) { return await isSubscribed(productId: productId) == .subscribed }
         guard let product = skhelperProduct(for: productId) else { return false }
                 
-        var latestTransaction: VerificationResult<Transaction>?
+        var latestTransaction: VerificationResult<StoreKit.Transaction>?
         if product.product.type == .consumable { latestTransaction = await product.product.latestTransaction }
         else { latestTransaction = await Transaction.currentEntitlement(for: productId) }
         
@@ -440,7 +442,7 @@ public class SKHelper: Observable {
         guard isConsumable(productId: productId), let product = product(from: productId) else { return nil }
         var purchaseInfo = [SKHelperPurchaseInfo]()
         
-        func createPurchaseInfo(transaction: Transaction) async -> SKHelperPurchaseInfo {
+        func createPurchaseInfo(transaction: StoreKit.Transaction) async -> SKHelperPurchaseInfo {
             var pi = SKHelperPurchaseInfo(id: product.id, name: product.displayName, isPurchased: false, productType: product.type, purchasePrice: product.displayPrice)
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "d MMM y, h:mm a"
@@ -626,7 +628,7 @@ public class SKHelper: Observable {
     /// - Parameter productId: The product's unique App Store id.
     /// - Returns: Returns the most recent `Transaction` for the product, or nil if the product's never been purchased.
     ///
-    public func mostRecentTransaction(for productId: ProductId) async -> Transaction? {
+    public func mostRecentTransaction(for productId: ProductId) async -> StoreKit.Transaction? {
         if let result = await Transaction.latest(for: productId) {
             let verificationResult = checkVerificationResult(result: result)
             if verificationResult.verified { return verificationResult.transaction }
@@ -663,7 +665,7 @@ public class SKHelper: Observable {
     /// - Parameter transaction: The `VerificationResult<Transaction>` object returned by the `currentEntitlementTask(for:)` view modifier.
     /// - Returns: Returns the user's current entitlement to a product. A result of `.verifiedEntitlement` will be returned if the user is entitled to access the product.
     ///
-    public func hasCurrentEntitlement(for transaction: VerificationResult<Transaction>?) -> SKHelperEntitlementState {
+    public func hasCurrentEntitlement(for transaction: VerificationResult<StoreKit.Transaction>?) -> SKHelperEntitlementState {
         // If there's no transaction for the product the user hasn't purchased it
         guard let transaction else { return .noEntitlement }
 
@@ -693,7 +695,7 @@ public class SKHelper: Observable {
     /// - Parameter result: The `Product.PurchaseResult` of the purchase process, or nil if there was an error during the purchase.
     /// - Returns: Returns a tuple consisting of a `Transaction` object that represents the purchase and a `SKHelperPurchaseState` describing the state of the purchase.
     ///
-    internal func purchaseCompletion(for product: Product, with result: Product.PurchaseResult?) async -> (transaction: Transaction?, purchaseState: SKHelperPurchaseState) {
+    public func purchaseCompletion(for product: Product, with result: Product.PurchaseResult?) async -> (transaction: StoreKit.Transaction?, purchaseState: SKHelperPurchaseState) {
         guard let result else {
             purchaseState = .failed
             SKHelperLog.event(.purchaseFailure, productId: product.id)

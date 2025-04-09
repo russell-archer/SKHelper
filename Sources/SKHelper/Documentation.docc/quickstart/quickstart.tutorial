@@ -31,7 +31,7 @@
     }
     
     @Chapter(name: "Display subscriptions") {
-        Support the display, promotion, purchase and management of subscriptions.
+        Support the display, promotion and purchase of subscriptions.
         
         @Image(source: "quickstart17.png", alt: "Display subscriptions.")
         @TutorialReference(tutorial: "doc:display-subscriptions")
@@ -50,6 +50,13 @@
         @Image(source: "quickstart29.png", alt: "Check a purchase.")
         @TutorialReference(tutorial: "doc:check-purchase")
     }  
+    
+    @Chapter(name: "Purchase and subscription management") {
+        Learn how to manage purchases and subscriptions.
+        
+        @Image(source: "quickstart29.png", alt: "Purchase and subscription management.")
+        @TutorialReference(tutorial: "doc:purchase-management")
+    }     
     
     @Resources {
         Explore more resources for learning about `SKHelper`.

@@ -11,9 +11,6 @@ import StoreKit
 /// A view normally displayed as a sheet showing details on a purchasable product.
 @available(iOS 17.0, macOS 14.6, *)
 public struct SKHelperProductView<Content: View>: View {
-    
-    /// A closure that is passed a `ProductId` and returns a `View` providing product details.
-    public typealias ProductDetailsClosure = (ProductId) -> Content
 
     /// The `SKHelper` object.
     @Environment(SKHelper.self) private var store
@@ -28,7 +25,7 @@ public struct SKHelperProductView<Content: View>: View {
     @Binding var showProductInfoSheet: Bool
     
     /// A closure which is called to display product details.
-    private var productDetails: ProductDetailsClosure?
+    private var productDetails: ((ProductId) -> Content)
     
     /// Creates an `SKHelperProductView` which displays custom product information using a StoreKit `ProductView`.
     ///
@@ -37,30 +34,30 @@ public struct SKHelperProductView<Content: View>: View {
     ///   - showProductInfoSheet: Used to togggle the display of the product information sheet
     ///   - productDetails: A closure which is called to display custom information about the product.
     ///
-    public init(selectedProductId: Binding<ProductId>, showProductInfoSheet: Binding<Bool>, @ViewBuilder productDetails: @escaping ProductDetailsClosure) {
+    public init(selectedProductId: Binding<ProductId>, showProductInfoSheet: Binding<Bool>, @ViewBuilder productDetails: @escaping (ProductId) -> Content) {
         self._selectedProductId = selectedProductId
         self._showProductInfoSheet = showProductInfoSheet
         self.productDetails = productDetails
     }
 
-    /// Creates an `SKHelperProductView` which displays default product information using a StoreKit `ProductView`.
-    ///
-    /// - Parameters:
-    ///   - selectedProductId: The `ProductId` of the product for which you want to display details.
-    ///   - showProductInfoSheet: Used to togggle the display of the product information sheet
-    ///
-    public init(selectedProductId: Binding<ProductId>, showProductInfoSheet: Binding<Bool>) where Content == EmptyView {
-        self._selectedProductId = selectedProductId
-        self._showProductInfoSheet = showProductInfoSheet
-        self.productDetails = nil
-    }
+//    /// Creates an `SKHelperProductView` which displays default product information using a StoreKit `ProductView`.
+//    ///
+//    /// - Parameters:
+//    ///   - selectedProductId: The `ProductId` of the product for which you want to display details.
+//    ///   - showProductInfoSheet: Used to togggle the display of the product information sheet
+//    ///
+//    public init(selectedProductId: Binding<ProductId>, showProductInfoSheet: Binding<Bool>) where Content == EmptyView {
+//        self._selectedProductId = selectedProductId
+//        self._showProductInfoSheet = showProductInfoSheet
+//        self.productDetails = nil
+//    }
     
     /// Creates the body of the view.
     /// 
     public var body: some View {
         SKHelperSheetBarView(showSheet: $showProductInfoSheet, title: product?.displayName ?? "Product Info")
         ScrollView {
-            productDetails?(selectedProductId)
+            productDetails(selectedProductId)
 
             ProductView(id: selectedProductId) {
                 Image(selectedProductId)
