@@ -33,8 +33,9 @@
             }              
             
             @Step {
-                Create a new **Property List** file in your project and name it **Products.plist**.
-                Paste the contents of the example **Products.plist** file shown into your **Products.list** file.
+                Create a new **Property List** file in your project and name it **Products.plist**. Right-click on **Products.plist** 
+                and select **Open As > Source Code**. Now paste the contents of the example **Products.plist** file shown into your 
+                **Products.list** file.
                 
                 @Code(name: "Products.plist", file: "quickstart-products.plist", reset: true) {}
             }
