@@ -39,18 +39,6 @@ public struct SKHelperProductView<Content: View>: View {
         self._showProductInfoSheet = showProductInfoSheet
         self.productDetails = productDetails
     }
-
-//    /// Creates an `SKHelperProductView` which displays default product information using a StoreKit `ProductView`.
-//    ///
-//    /// - Parameters:
-//    ///   - selectedProductId: The `ProductId` of the product for which you want to display details.
-//    ///   - showProductInfoSheet: Used to togggle the display of the product information sheet
-//    ///
-//    public init(selectedProductId: Binding<ProductId>, showProductInfoSheet: Binding<Bool>) where Content == EmptyView {
-//        self._selectedProductId = selectedProductId
-//        self._showProductInfoSheet = showProductInfoSheet
-//        self.productDetails = nil
-//    }
     
     /// Creates the body of the view.
     /// 

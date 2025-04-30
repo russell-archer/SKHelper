@@ -9,7 +9,7 @@ import Foundation
 
 /// The state of a purchase.
 @available(iOS 17.0, macOS 14.6, *)
-public enum SKHelperPurchaseState {
+public enum SKHelperPurchaseState: Sendable {
     /// A purchase has not yet started.
     case notStarted
     

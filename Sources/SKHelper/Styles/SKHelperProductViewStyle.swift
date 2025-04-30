@@ -30,10 +30,15 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
     /// Creates a StoreKit `SKHelperProductView` style.
     ///
     /// - Parameters:
-    ///   - selectedProductId: A binding to the `ProductId` of the selected `Product`.
-    ///   - productSelected: A binding to a value which determines if the `SKHelperProductView` is displayed.
-    ///   
-    public init(purchased: Binding<Bool>, selectedProductId: Binding<ProductId>, productSelected: Binding<Bool>, managePurchase: Binding<Bool>) {
+    ///  - purchased: A binding to a Bool property which holds the purchased state of the product.
+    ///  - selectedProductId: A binding to the `ProductId` of the selected `Product`.
+    ///  - productSelected: A binding to a value which determines if the `SKHelperProductView` is displayed.
+    ///  - managePurchase: A binding to a property which determines if this view will display purchase and subscription management functionality.
+    public init(purchased: Binding<Bool>,
+                selectedProductId: Binding<ProductId>,
+                productSelected: Binding<Bool>,
+                managePurchase: Binding<Bool>) {
+        
         self._purchased = purchased
         self._selectedProduct = selectedProductId
         self._productSelected = productSelected
@@ -52,7 +57,11 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
                     configuration.icon.padding()
                     Text(product.displayName).font(.title)
                     if configuration.hasCurrentEntitlement { managePurchaseButton(product: product) }
-                    else { purchaseButton(product: product, configuration: configuration) }
+                    else {
+                        productInformationButton(product: product)
+                        purchaseButton(product: product, configuration: configuration)
+                        Divider()
+                    }
                 }
                 
             case .loading: ProgressView()
@@ -85,11 +94,20 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
         }
     }
     
+    private func productInformationButton(product: Product) -> some View {
+        Button("\(Image(systemName: "info.circle")) Product Information") {
+            productSelected = true
+            selectedProduct = product.id
+        }
+        .tint(.blue)
+        .padding(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 1))
+    }
+    
     private func purchaseButton(product: Product, configuration: Configuration) -> some View {
         Button(product.displayPrice) {
             configuration.purchase()
         }
         .tint(.blue)
-        .padding()
+        .padding(EdgeInsets(top: 0, leading: 5, bottom: 5, trailing: 3))
     }
 }

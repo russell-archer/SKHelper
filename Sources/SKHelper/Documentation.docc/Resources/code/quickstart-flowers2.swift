@@ -1,19 +1,19 @@
-import SwiftUI
-import SKHelper
-
 struct SmallFlowersView: View {
-    @Environment(SKHelper.self) private var store
-    @State private var isPurchased = false
-    private let smallFlowersProductId = "com.rarcher.nonconsumable.flowers.small"
-    
     var body: some View {
-        VStack {
-            if isPurchased { FullAccess() }
-            else { NoAccess() }
+        if hasProducts {
+            :
+            
+        } else {
+            
+            VStack {
+                :
+            }
+            .onProductsAvailable { _ in
+                hasProducts = store.hasProducts
+                if hasProducts {
+                    Task { isPurchased = await store.isPurchased(productId: smallFlowersProductId) }
+                }
+            }
         }
-        .task { isPurchased = await store.isPurchased(productId: smallFlowersProductId) }
     }
-    
-    :
-    :
 }

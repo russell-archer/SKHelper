@@ -35,14 +35,7 @@
         
         @Image(source: "quickstart17.png", alt: "Display subscriptions.")
         @TutorialReference(tutorial: "doc:display-subscriptions")
-    }
-
-    @Chapter(name: "Display all purchases") {
-        Display all purchases and allow the user to manage those purchases. 
-        
-        @Image(source: "quickstart24.png", alt: "Display all purchases.")
-        @TutorialReference(tutorial: "doc:display-purchases")
-    }    
+    }  
     
     @Chapter(name: "Check a purchase") {
         Check for purchases and grant or deny access to purchase-dependent resources.
@@ -54,7 +47,7 @@
     @Chapter(name: "Purchase and subscription management") {
         Learn how to manage purchases and subscriptions.
         
-        @Image(source: "quickstart29.png", alt: "Purchase and subscription management.")
+        @Image(source: "quickstart24.png", alt: "Purchase and subscription management.")
         @TutorialReference(tutorial: "doc:purchase-management")
     }     
     

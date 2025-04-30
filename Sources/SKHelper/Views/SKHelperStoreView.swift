@@ -57,6 +57,10 @@ public struct SKHelperStoreView<Content: View>: View {
     /// Set by `SKHelperProductViewStyle` if the user taps the "Manage Purchase" button.
     @State private var managePurchase = false
     
+    /// Used to determine if this view has requested a refresh of localized product information. This happens automatically
+    /// once only if `SKHelper.hasProducts` is false.
+    @State private var hasRequestedProducts = false
+    
     /// A closure which is called to display product details.
     private var productDetails: ((ProductId) -> Content)
     
@@ -98,6 +102,13 @@ public struct SKHelperStoreView<Content: View>: View {
             }
             .padding()
             .onProductsAvailable { _  in hasProducts = store.hasProducts }
+            .task {
+                if !hasRequestedProducts, !hasProducts {
+                    hasRequestedProducts = true
+                    await store.requestProducts()
+                    hasProducts = store.hasProducts
+                }
+            }
         }
     }
     

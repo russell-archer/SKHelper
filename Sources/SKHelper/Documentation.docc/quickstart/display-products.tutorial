@@ -48,6 +48,8 @@
                 If you now build and run the app you should see a list of all the products we configured earlier.
                 
                 @Image(source: "quickstart14.png", alt: "A list of all available products.")
+                
+                Notice how all types of products (non-consumables and subscriptions) are displayed
             }     
             
             @Step {  

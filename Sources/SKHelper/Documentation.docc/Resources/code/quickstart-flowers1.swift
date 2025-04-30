@@ -1,17 +1,34 @@
 import SwiftUI
+import StoreKit
 import SKHelper
 
 struct SmallFlowersView: View {
     @Environment(SKHelper.self) private var store
+    @State private var hasProducts = false
     @State private var isPurchased = false
+    @State private var product: Product?
     private let smallFlowersProductId = "com.rarcher.nonconsumable.flowers.small"
     
     var body: some View {
-        VStack {
+        if hasProducts {
             if isPurchased { FullAccess() }
             else { NoAccess() }
+            
+        } else {
+            
+            VStack {
+                Text("No products available").font(.subheadline).padding()
+                Button("Refresh Products") { Task { await store.requestProducts() }}
+                ProgressView()
+            }
+            .padding()
+            .onProductsAvailable { _  in
+                hasProducts = store.hasProducts
+                if hasProducts {
+                    Task { isPurchased = await store.isPurchased(productId: smallFlowersProductId) }
+                }
+            }
         }
-        .task { isPurchased = await store.isPurchased(productId: smallFlowersProductId) }
     }
     
     func FullAccess() -> some View {
@@ -24,24 +41,22 @@ struct SmallFlowersView: View {
     }
     
     func NoAccess() -> some View {
+        
         VStack {
             Text("😢").font(.system(size: 100)).padding()
             Text("You haven't purchased the small flowers and don't have access.").padding()
-            ProductNavLink()
-            Spacer()
-        }
-        .padding()
-    }
-    
-    func ProductNavLink() -> some View {
-        NavigationLink("Review Small Flowers Info") {
-            SKHelperStoreView(productIds: [smallFlowersProductId]) { productId in
-                Group {
-                    Image(productId + ".info").resizable().scaledToFit()
-                    Text("Here is some text about why you might want to buy this product.")
+            
+            if let product {
+                Button("Purchase Small Flowers for \(product.displayPrice)") {
+                    Task {
+                        let result = await store.purchase(product)
+                        if result.purchaseState == .purchased { isPurchased = true }
+                    }
                 }
-                .padding()
+                .tint(.blue)
             }
         }
+        .padding()
+        .task { product = store.product(from: smallFlowersProductId) }
     }
 }

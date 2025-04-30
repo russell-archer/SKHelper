@@ -36,6 +36,7 @@ public struct OnProductsAvailable: ViewModifier {
 public extension View {
     
     /// View extension to provide a `OnProductsAvailable(update:)` modifier.
+    /// The `OnProductsAvailable` ViewModifier allows you to be notified when SKHelper retrieves a collection of localized product information from the App Store.
     /// ```
     /// // Example usage:
     /// VStack {
