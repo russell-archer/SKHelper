@@ -78,10 +78,11 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
             
         }, label: {
             HStack {
-                Image(systemName: "creditcard.circle")
-                Text(buttonCaption)
+                Image(systemName: "creditcard.circle").resizable().scaledToFit().frame(height: 24)
+                Text(buttonCaption).padding(5)
             }
         })
+        .SKHelperButtonStyleBorderedProminent()
         .tint(.blue)
         .padding()
         .task {
@@ -95,19 +96,25 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
     }
     
     private func productInformationButton(product: Product) -> some View {
-        Button("\(Image(systemName: "info.circle")) Product Information") {
-            productSelected = true
+        Button(action: {
+            purchased = false
             selectedProduct = product.id
-        }
+            productSelected = true
+            managePurchase = false
+        }, label: {
+            HStack {
+                Image(systemName: "info.circle").resizable().scaledToFit().frame(height: 24)
+                Text("Product Information").padding(5)
+            }
+        })
+        .SKHelperButtonStyleBorderedProminent()
         .tint(.blue)
         .padding(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 1))
     }
     
     private func purchaseButton(product: Product, configuration: Configuration) -> some View {
-        Button(product.displayPrice) {
-            configuration.purchase()
-        }
+        Button(action: { configuration.purchase()}, label: { Text(product.displayPrice).padding(5) })
         .tint(.blue)
-        .padding(EdgeInsets(top: 0, leading: 5, bottom: 5, trailing: 3))
+        .padding(EdgeInsets(top: 10, leading: 5, bottom: 5, trailing: 10))
     }
 }
