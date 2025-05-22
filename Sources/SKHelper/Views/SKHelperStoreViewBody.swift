@@ -62,7 +62,6 @@ public struct SKHelperStoreViewBody<Content: View>: View {
                     .SKHelperOnTapGesture {
                         Task {
                             purchased = await store.isPurchased(productId: selectedProductId)
-                            managePurchase = false
                             selectedProductId = product.id
                             productSelected = true
                         }

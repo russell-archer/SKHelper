@@ -26,9 +26,7 @@ public struct OnProductsAvailable: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .onAppear {
-                store.productsAvailable = { products in
-                    update?(products)
-                }
+                if let update { store.productsAvailable.append( { products in update(products) }) }
             }
     }
 }

@@ -33,7 +33,7 @@ internal struct SKHelperPurchaseInfoManage: View {
                 withAnimation { showRefundSheet.toggle()}
             }
         }) {
-            Label(title: { Text("Manage Purchase").padding()},
+            Label(title: { Text("Manage Purchase").padding(5)},
                   icon:  { Image(systemName: "creditcard.circle").resizable().scaledToFit().frame(height: 24)})
         }
         .SKHelperButtonStyleBorderedProminent()

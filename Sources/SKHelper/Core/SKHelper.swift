@@ -76,8 +76,8 @@ public class SKHelper: Observable {
     /// 
     public var transactionUpdateListener: TransactionUpdateClosure?
     
-    /// A view modifier which is called when SKHelper has successfully retrieved a collection of localized products.
-    public var productsAvailable: ProductsAvailableClosure?
+    /// The .onProductsAvailable view modifiers to be called when SKHelper has successfully retrieved a collection of localized products.
+    public var productsAvailable = [ProductsAvailableClosure]()
 
     // MARK: - Private properties
     
@@ -131,9 +131,15 @@ public class SKHelper: Observable {
     ///  
     /// Product information returned from the App Store is stored in the `SKHelper.products` property.
     ///  
+    /// - Parameter force: If true an App Store request is made for fresh localized product info. Otherwise existing product data is used.
     /// - Returns: Returns true if product information was successfully returned by the App Store, false otherwise.
-    ///  
-    public func requestProducts() async -> Bool {
+    ///
+    public func requestProducts(force: Bool = false) async -> Bool {
+        if hasProducts, !force {
+            productsAvailable.forEach { closure in closure(products) }
+            return true
+        }
+        
         SKHelperLog.event(.requestProductsStart)
         
         // Read our list of product ids
@@ -162,7 +168,9 @@ public class SKHelper: Observable {
         
         // Signal that we have successfully retrieved localized product information
         hasProducts = true
-        productsAvailable?(products)
+        
+        // Tell all Views using the .onProductsAvailable modifier that fresh App Store product info is available.
+        productsAvailable.forEach { closure in closure(products) }
         
         SKHelperLog.event(.requestProductsSuccess)
         return true
