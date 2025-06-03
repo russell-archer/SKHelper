@@ -22,7 +22,7 @@
             }
             
             @Step {
-                Create a new SwiftUI and name it **SmallFlowersView**. Replace the contents of the file with the following code.
+                Create a new SwiftUI View and name it **SmallFlowersView**. Replace the contents of the file with the following code.
 
                 @Code(name: "SmallFlowersView.swift", file: "quickstart-flowers1.swift", reset: true) {}              
             }
@@ -36,7 +36,6 @@
             
             @Step {
                 Build and run the app. For the purposes of this demo we'll assume you haven't yet purchased the small flowers product.
-                Navigate to the **SmallFlowersView** via the **Access Small Flowers** link.
             }
             
             @Step {

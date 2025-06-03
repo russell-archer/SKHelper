@@ -100,7 +100,7 @@ public extension SKHelper {
     /// - Returns: Returns the display name of the first `Product` in `SKHelper.products` whose `id` matches the supplied `ProductId`., or an empty `String` if no match is found.
     ///
     func productDisplayName(from productId: ProductId) -> String {
-        products.first(where: { $0.id == productId })?.product.displayName ?? ""
+        products.first(where: { $0.id == productId })?.product.displayName ?? "Unknown"
     }
     
     /// The products in `SKHelper.products` whose ids match the supplied [`ProductId`].

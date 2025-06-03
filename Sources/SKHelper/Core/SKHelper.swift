@@ -369,6 +369,19 @@ public class SKHelper: Observable {
         return result
     }
     
+    /// Gets a collection of `ProductId` for all currently active subscriptions in all subscription groups.
+    /// - Returns: Returns a collection of `ProductId` for all currently active subscriptions in all subscription groups.
+    public func allActiveSubscriptions() async -> [ProductId] {
+        var activeSubscriptions = [ProductId]()
+        
+        for sub in allAutoRenewableSubscriptionProductIds {
+            let state = await isSubscribed(productId: sub)
+            if state == .subscribed { activeSubscriptions.append(sub) }
+        }
+        
+        return activeSubscriptions
+    }
+    
     /// Return the highest service level auto-renewing subscription the user is subscribed to in the `subscriptionGroup`.
     /// - Parameter groupName: The name of the subscription group.
     /// - Returns: Returns the `Product` for the highest service level auto-renewing subscription the user is subscribed to in the `subscriptionGroup`, or nil if the user isn't subscribed to a product in the group.

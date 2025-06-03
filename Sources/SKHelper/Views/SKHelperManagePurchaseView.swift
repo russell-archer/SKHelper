@@ -94,8 +94,8 @@ public struct SKHelperManagePurchaseView: View {
                     
                 } else if let subscriptionPurchaseInfo {
                     
-                    SKHelperSubscriptionInfoMain(subInfo: subscriptionPurchaseInfo)
                     SKHelperSubscriptionInfoManage(showManageSubscriptionsSheet: $showManageSubscriptionsSheet)
+                    SKHelperSubscriptionInfoMain(subInfo: subscriptionPurchaseInfo)
                     
                 } else {
                     
@@ -145,7 +145,7 @@ public struct SKHelperManagePurchaseView: View {
             nonConsumablePurchaseInfo = await store.nonConsumablePurchaseInformation(for: selectedProductId)
             productType = .nonConsumable
             viewTitle = nonConsumablePurchaseInfo?.name ?? "Purchase Info"
-            
+
         } else if store.isAutoRenewableSubscription(productId: selectedProductId) {
             
             subscriptionPurchaseInfo = await store.subscriptionInformation(for: selectedProductId)

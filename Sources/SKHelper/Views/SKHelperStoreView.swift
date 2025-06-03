@@ -112,8 +112,6 @@ public struct SKHelperStoreView<Content: View>: View {
         }
     }
     
-    // TODO: BUG: When showing mixed purchased and unpurchased products the 'Manage Purchase' and 'Product Info" buttons don't always trigger the correct action
-    
     private func bodyWithAutomaticStyle() -> some View {
         SKHelperStoreViewBody(selectedProductId: $selectedProductId,
                               productSelected: $productSelected,
@@ -121,7 +119,7 @@ public struct SKHelperStoreView<Content: View>: View {
                               managePurchase: $managePurchase,
                               products: products,
                               productDetails: productDetails)
-            .productViewStyle(.automatic)
+        .productViewStyle(.automatic)
     }
     
     private func bodyWithManagementStyle() -> some View {

@@ -27,11 +27,21 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     /// The `ProductId` of the currently selected subscription.
     @State private var selectedProductId = ""
     
-    /// true if a subscription has been selected.
+    /// True if a subscription has been selected.
     @State private var subscriptionSelected = false
     
     /// True if the store has products.
     @State private var hasProducts = false
+    
+    /// Set to true to display the subscription info and management sheet.
+    @State private var manageSubscription = false
+    
+    /// Setting this value to true will display a sheet showing active subscriptions from which the user can choose. Used when the user
+    /// taps the "Manage Subscriptions" button and there is more than one currently active subscription.
+    @State private var showSubscriptionSelection = false
+    
+    /// Collection of all active subscriptions. Initialized when the user taps the "Manage Subscriptions" button.
+    @State private var allActiveSubscriptions = [ProductId]()
     
     /// The name of the subscription group from which to display subscriptions. If nil then we display all subscriptions in all groups.
     private var subscriptionGroupName: String?
@@ -76,7 +86,11 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
         if hasProducts {
             ScrollView {
                 SubscriptionStoreView(subscriptions: subscriptions) {
-                    VStack { subscriptionHeader?() }.padding()
+                    VStack {
+                        subscriptionHeader?()
+                        managementSheetButton().padding(10)
+                    }
+                    .padding()
                 }
                 .subscriptionStoreButtonLabel(.action)
                 .subscriptionStoreControlStyle(.prominentPicker)
@@ -88,12 +102,17 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 .subscriptionStorePolicyDestination(url: URL(string: "https://russell-archer.github.io/Writerly/privacy/")!, for: .privacyPolicy)
                 .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
                 .subscriptionStoreControlIcon { subscription, info in
-                    
                     if let subscriptionControl { subscriptionControl(subscription.id).SKHelperOnTapGesture(perform: tapAction(subscription: subscription)) }
                     else { defaultSubscriptionControl(productId: subscription.id).SKHelperOnTapGesture(perform: tapAction(subscription: subscription)) }
                 }
                 .sheet(isPresented: $subscriptionSelected) {
                     SKHelperProductView(selectedProductId: $selectedProductId, showProductInfoSheet: $subscriptionSelected, productDetails: subscriptionDetails)
+                }
+                .sheet(isPresented: $manageSubscription) {
+                    SKHelperManagePurchaseView(selectedProductId: $selectedProductId, showPurchaseInfoSheet: $manageSubscription)
+                }
+                .sheet(isPresented: $showSubscriptionSelection) {
+                    subscriptionSelection()
                 }
             }
         } else {
@@ -104,7 +123,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 ProgressView()
             }
             .padding()
-            .onProductsAvailable { _  in
+            .onProductsAvailable { _ in
                 // This view modifier is called when localized product information becomes available
                 hasProducts = store.hasAutoRenewableSubscriptionProducts
             }
@@ -125,6 +144,37 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
         {
             selectedProductId = subscription.id
             subscriptionSelected.toggle()
+        }
+    }
+    
+    func managementSheetButton() -> some View {
+        Button(action: { showSubscriptionSelection.toggle() }) {
+            Label(title: { Text("Manage Subscriptions").padding()},
+                  icon:  { Image(systemName: "creditcard.circle").resizable().scaledToFit().frame(height: 24)})
+        }
+        .SKHelperButtonStyleBorderedProminent()
+    }
+    
+    func subscriptionSelection() -> some View {
+        return VStack {
+            Text("Select the currently active subscription you want to manage.").padding()
+            List(allActiveSubscriptions, id: \.self) { productId in
+                Text(store.productDisplayName(from: productId))
+                    .SKHelperOnTapGesture { showSubManagement(productId: productId) }.padding(5)
+            }
+            .task {
+                allActiveSubscriptions = await store.allActiveSubscriptions()
+                if allActiveSubscriptions.count == 1 { showSubManagement(productId: allActiveSubscriptions.first!) }
+            }
+            .padding()
+        }
+        .presentationDetents([.medium, .large])
+        .padding()
+        
+        func showSubManagement(productId: ProductId) {
+            selectedProductId = productId
+            manageSubscription = true
+            showSubscriptionSelection = false
         }
     }
 }
@@ -167,13 +217,6 @@ extension SKHelperSubscriptionStoreView {
                 Text("Our top-rated serices will make your plants happy").font(.headline)
             }
         },
-        subscriptionControl: { productId in
-            
-            VStack {
-                Image(productId).resizable().scaledToFit()
-                Text("A florist will call \(productId == "com.rarcher.subscription.vip.gold" ? "weekly" : "monthly") to water your plants.").font(.caption2)
-            }
-        },
         subscriptionDetails: { productId in
             
             VStack {
@@ -183,3 +226,4 @@ extension SKHelperSubscriptionStoreView {
         })
     .environment(SKHelper())
 }
+
