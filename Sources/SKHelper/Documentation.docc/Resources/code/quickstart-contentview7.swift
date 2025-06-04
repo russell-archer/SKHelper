@@ -7,7 +7,6 @@ struct ContentView: View {
     @State private var nonConsumables: [ProductId]? = nil
     
     var body: some View {
-        
         VStack {
             if hasProducts {
                 SKHelperStoreView(allowManagement: true, productIds: nonConsumables) { productId in

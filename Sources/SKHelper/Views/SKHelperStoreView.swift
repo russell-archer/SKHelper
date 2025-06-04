@@ -105,7 +105,7 @@ public struct SKHelperStoreView<Content: View>: View {
             .task {
                 if !hasRequestedProducts, !hasProducts {
                     hasRequestedProducts = true
-                    await store.requestProducts()
+                    let _ = await store.requestProducts()
                     hasProducts = store.hasProducts
                 }
             }
