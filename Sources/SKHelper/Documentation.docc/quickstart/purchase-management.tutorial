@@ -7,7 +7,7 @@
     
     @Section(title: "Manage Purchases") {
         @ContentAndMedia {
-            In this section we see how to allow the user to manage purchases.  
+            In this section we see how to allow the user to manage purchases for consumables and non-consumable products.  
             
             @Image(source: "quickstart24.png", alt: "Manage purchases.")
         }
@@ -60,16 +60,30 @@
             }
             
             @Step {
-                Build and run the app. Notice that by default SKHelper shows an **Info** button for subscriptions that you're not subscribed to.
+                Build and run the app. Notice that by default SKHelper shows an **Info** button that the user can tap on for product information.
                 
-                @Image(source: "quickstartxx.png", alt: "Manage Subscriptions.")
+                @Image(source: "quickstart19.png", alt: "Manage Subscriptions.")
             }
 
             @Step {
-                Subscribe to the **Silver** product. Notice that the **Info** button changes to a **Manage** button for the silver product.
+                Subscribe to the **Silver** product. Then tap the **Manage Subscriptions** button at the top of the page. 
+                You'll see a sheet appear showing details for the subscription.
                 
-                @Image(source: "quickstartxx.png", alt: "Manage Subscriptions.")
+                @Image(source: "quickstart32.png", alt: "Manage Subscriptions.")
             }
+            
+            @Step {
+                The subscription information includes details of the most recent transaction and a transaction history of all payments related to
+                the selected subscription.
+                
+                @Image(source: "quickstart33.png", alt: "Manage Subscriptions.")
+            }
+            
+            @Step {
+                Tapping the **Manage Subscription** button at the top of the subscription information sheet enables the user to cancel the subscription.
+                
+                @Image(source: "quickstart34.png", alt: "Manage Subscriptions.")
+            }            
 
             This concludes the **Quick Start** tutorial, but we've only scratched the surface of what you can do with **StoreKit** and **SKHelper**. Explore more resources for learning about `SKHelper`.
 
