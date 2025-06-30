@@ -157,7 +157,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     
     func subscriptionSelection() -> some View {
         return VStack {
-            Text("\(allActiveSubscriptions.count > 0 ? "Select the active subscription you want to manage." : "Searching for active subscriptions...")").padding()
+            Text("\(allActiveSubscriptions.count > 0 ? "Select the active subscription you want to manage." : "No active subscriptions found.")").padding()
             List(allActiveSubscriptions, id: \.self) { productId in
                 Text(store.productDisplayName(from: productId))
                     .SKHelperOnTapGesture { showSubManagement(productId: productId) }.padding(5)

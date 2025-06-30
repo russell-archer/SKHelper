@@ -53,8 +53,8 @@ public class SKHelper: Observable {
     /// This property is true if `SKHelper.products` contains a valid collection of products, false otherwise.
     public private(set) var hasProducts = false
     
-    /// When set to true `SKHelper` will use previously cached values for product entitlements if calls to `Transaction.currentEntitlement(for:)` return nil.
-    /// Using cached entitlements can help mitigate issues where `Transaction.currentEntitlement(for:)` can sometimes erroneously indicate the user does not have an
+    /// When set to true `SKHelper` will use previously cached values for product entitlements if calls to `Transaction.currentEntitlements(for:)` return no transactions.
+    /// Using cached entitlements can help mitigate issues where `Transaction.currentEntitlements(for:)` can sometimes erroneously indicate the user does not have an
     /// entitlement to use a product.
     public var useCachedEntitlements = true
     
@@ -212,11 +212,11 @@ public class SKHelper: Observable {
     /// ## Notes on non-consumable products ##
     ///
     /// Note that the process of determining if a product is purchased can be unreliable. Calls to
-    /// `Transaction.currentEntitlement(for:)` mostly produce the correct result. However, in both the Xcode testing
-    /// and live production environments it is quite common for `Transaction.currentEntitlement(for:)` to erroneously
-    /// return nil, indicating the user has not purchased the product.
+    /// `Transaction.currentEntitlements(for:)` mostly produce the correct result. However, in both the Xcode testing
+    /// and live production environments it is quite common for `Transaction.currentEntitlements(for:)` to erroneously
+    /// return noo transactions, indicating the user has not purchased the product.
     ///
-    /// Also, calling `Transaction.currentEntitlement(for:)` can (seemingly randomly) result one of the following errors:
+    /// Also, calling `Transaction.currentEntitlements(for:)` can (seemingly randomly) result one of the following errors:
     ///
     /// - UIDevice.current.identifierForVendor
     /// - AppStore.deviceVerificationID
@@ -227,12 +227,12 @@ public class SKHelper: Observable {
     /// Because of theses inconsistencies we maintain a `SKHelperProduct` collection which contains a cached value
     /// for the user's entitlement to use each product.
     ///
-    /// When checking the purchased state of a product we return true if `Transaction.currentEntitlement(for:)` returns
-    /// non-nil. If the result is nil then if `useCachedEntitlements` is true we return the value of `SKHelperProduct.hasEntitlement`.
+    /// When checking the purchased state of a product we return true if `Transaction.currentEntitlements(for:)` returns
+    /// a valid transaction. If the result is nil then if `useCachedEntitlements` is true we return the value of `SKHelperProduct.hasEntitlement`.
     ///
     /// ## Notes on consumable products ##
     ///
-    /// Consumables don't have entitlements, so `Transaction.currentEntitlement(for:)` returns nil.
+    /// Consumables don't have entitlements, so `Transaction.currentEntitlements(for:)` returns no transactions.
     /// However, the following do return transactions for both finished and unfinished consumables in iOS18+ and macOS15+
     /// (you also need to add `SKIncludeConsumableInAppPurchaseHistory = YES` to your app's info.plist file):
     ///
@@ -254,12 +254,22 @@ public class SKHelper: Observable {
     /// - Returns: Returns true if user is entitled to use the product, false otherwise.
     ///
     public func isPurchased(productId: ProductId) async -> Bool {
+        var latestTransaction: VerificationResult<StoreKit.Transaction>?
+
         if isAutoRenewableSubscription(productId: productId) { return await isSubscribed(productId: productId) == .subscribed }
         guard let product = skhelperProduct(for: productId) else { return false }
-                
-        var latestTransaction: VerificationResult<StoreKit.Transaction>?
+
+        // To support consumable transactions you must set the `SKIncludeConsumableInAppPurchaseHistory` property list key to true
         if product.product.type == .consumable { latestTransaction = await product.product.latestTransaction }
-        else { latestTransaction = await Transaction.currentEntitlement(for: productId) }
+        else {
+            // We're dealing with a non-consumable product
+            if #available(iOS 18.4, macOS 15.4, *) {
+                // Note that use of Transaction.currentEntitlement(for:) has been deprecated with iOS 18.4 and higher
+                for await verificationResult in Transaction.currentEntitlements(for: productId) { latestTransaction = verificationResult }
+            } else {
+                latestTransaction = await Transaction.currentEntitlement(for: productId)
+            }
+        }
         
         if let latestTransaction {
             // We've found a transaction. See if it has been verified by StoreKit
@@ -284,11 +294,11 @@ public class SKHelper: Observable {
     /// then `.notSubscribed` is returned.
     ///
     /// Note that the process of determining if a product is purchased can be unreliable. Calls to
-    /// `Transaction.currentEntitlement(for:)` mostly produce the correct result. However, in both the Xcode testing
-    /// and live production environments it is quite common for `Transaction.currentEntitlement(for:)` to erroneously
-    /// return nil, indicating the user has not purchased the product.
+    /// `Transaction.currentEntitlements(for:)` mostly produce the correct result. However, in both the Xcode testing
+    /// and live production environments it is quite common for `Transaction.currentEntitlements(for:)` to erroneously
+    /// return no transactions, indicating the user has not purchased the product.
     ///
-    /// Also, calling `Transaction.currentEntitlement(for:)` can (seemingly randomly) result one of the following errors:
+    /// Also, calling `Transaction.currentEntitlements(for:)` can (seemingly randomly) result one of the following errors:
     ///
     /// - UIDevice.current.identifierForVendor
     /// - AppStore.deviceVerificationID
@@ -301,8 +311,8 @@ public class SKHelper: Observable {
     ///
     /// When checking the purchased state of a subscription product we:
     ///
-    /// - check the return of `Transaction.currentEntitlement(for:)`
-    /// - check `SKHelperProduct.hasEntitlement` if `Transaction.currentEntitlement(for:)` is nil and `useCachedEntitlements` is true
+    /// - check the return of `Transaction.currentEntitlements(for:)`
+    /// - check `SKHelperProduct.hasEntitlement` if `Transaction.currentEntitlements(for:)` is nil and `useCachedEntitlements` is true
     /// - check if the product is the highest value product subscribed to in the subscription group
     ///
     /// ## Important ##
@@ -329,10 +339,12 @@ public class SKHelper: Observable {
         guard let storeProduct = skhelperProduct(for: productId), let groupName = storeProduct.groupName else { return .notSubscribed }
         
         // We're dealing with an auto-renewable product. Does the user have a current entitlement to use it?
+        // Note that use of Transaction.currentEntitlement(for:) has been deprecated with iOS 18.4.
+        // currentEntitlements(for:) should return 0 or 1 transactions for a regular product id.
         var hasEntitlement = false
-        if let currentEntitlement = await Transaction.currentEntitlement(for: productId) {
+        for await verificationResult in Transaction.currentEntitlements(for: productId) {
             hasEntitlement = true
-            if !checkVerificationResult(result: currentEntitlement).verified {
+            if !checkVerificationResult(result: verificationResult).verified {
                 // The user seems to have an entitlement but we couldn't verify it.
                 SKHelperLog.transaction(.transactionValidationFailure, productId: productId)
                 updatePurchasedProducts(productId, purchased: false)
@@ -342,7 +354,7 @@ public class SKHelper: Observable {
         
         if !hasEntitlement {
             // The user does NOT have an entitlement to use the product. In case this is a invalid result from
-            // `Transaction.currentEntitlement(for:)` see if the user has previously had an entitlement cached.
+            // `Transaction.currentEntitlements(for:)` see if the user has previously had an entitlement cached.
             if !useCachedEntitlements { return .notSubscribed }
             if !storeProduct.hasEntitlement {
                 updatePurchasedProducts(productId, purchased: false)
@@ -393,7 +405,7 @@ public class SKHelper: Observable {
     /// Enumeration of the `SubscriptionInfo.Status` array is necessary because a user may have multiple active subscriptions to products in the same subscription group. For example, a user may have
     /// subscribed themselves to the "Gold" product, as well as receiving an automatic subscription to the "Silver" product through family sharing. In this case, we'd need to return information on the "Gold" product.
     /// 
-    /// Also, note that even if the `Product.SubscriptionInfo.Status` collection does NOT contain a particular product `Transaction.currentEntitlement(for:)` may still report that the user has an
+    /// Also, note that even if the `Product.SubscriptionInfo.Status` collection does NOT contain a particular product `Transaction.currentEntitlements(for:)` may still report that the user has an
     /// entitlement. This can happen when upgrading or downgrading subscriptions. Because of this we always need to search the `Product.SubscriptionInfo.Status` collection for a subscribed product with a higher-value.
     /// 
     public func highestValueActiveSubscription(in groupName: String) async -> Product? {
@@ -492,7 +504,8 @@ public class SKHelper: Observable {
         return purchaseInfo
     }
     
-    /// Provides information on the purchase of an auto-renewable subscription productin a format that's suitable for direct display to the user.
+    /// Provides information on the purchase of an auto-renewable subscription product in a format that's suitable
+    /// for direct display to the user.
     ///
     /// - Parameter productId: The `ProductId` of the auto-renewable subscription product.
     /// - Returns: Returns `SKHelperSubscriptionInfo` containing info on the purchase of an auto-renewable subscription product.
@@ -677,13 +690,12 @@ public class SKHelper: Observable {
         }
     }
     
-    /// Checks the user's current entitlement to a product using the `VerificationResult<Transaction>` object returned by the `currentEntitlementTask(for:)`
-    /// view modifier.
+    /// Checks the user's current entitlement to a product using a `VerificationResult<Transaction>` object.
     ///
     /// A nil `transaction` parameter means the user has not purchased the product. The transaction is verified and a check is made to ensure the App Store has not
     /// revoked access to the product.
     ///
-    /// - Parameter transaction: The `VerificationResult<Transaction>` object returned by the `currentEntitlementTask(for:)` view modifier.
+    /// - Parameter transaction: A `VerificationResult<Transaction>` object, such as returned by the `currentEntitlementTask(for:)` view modifier or `Transaction.currentEntitlements(for:)`.
     /// - Returns: Returns the user's current entitlement to a product. A result of `.verifiedEntitlement` will be returned if the user is entitled to access the product.
     ///
     public func hasCurrentEntitlement(for transaction: VerificationResult<StoreKit.Transaction>?) -> SKHelperEntitlementState {
@@ -699,6 +711,19 @@ public class SKHelper: Observable {
         if verificationResult.transaction.revocationDate != nil { return .revoked }
         
         return .verifiedEntitlement
+    }
+    
+    /// Checks the user's current entitlement to a product using the product's `ProductId`.
+    ///
+    /// - Parameter productId: The `ProductId` of the product.
+    /// - Returns: Returns `.verifiedEntitlement` if the user has an entitlement to the product, `.noEntitlement` otherwise.
+    public func hasCurrentEntitlement(for productId: ProductId) async -> SKHelperEntitlementState {
+        for await verificationResult in Transaction.currentEntitlements(for: productId) {
+            // We've found a transaction. See if it has been verified by StoreKit
+            if checkVerificationResult(result: verificationResult).verified { return .verifiedEntitlement }
+        }
+        
+        return .noEntitlement
     }
     
     /// Clears all in-memory and persisted cached entitlements.

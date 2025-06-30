@@ -41,7 +41,12 @@ public struct SKHelperSheetBarView: View {
     
     /// Creates the body view.
     public var body: some View {
-        HStack {
+        var trailingInset: CGFloat
+        
+        if #available(iOS 26, *) { trailingInset = 20 }
+        else { trailingInset = 10 }
+        
+        return HStack {
             ZStack {
                 if let img = sysImg { Label(title ?? "", systemImage: img).padding(insetsTitle)}
                 else if let t = title { Text(t).padding(insetsTitle)}
@@ -56,6 +61,7 @@ public struct SKHelperSheetBarView: View {
                 }
             }
         }
+        .padding(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: trailingInset))
         Divider()
         Spacer()
     }
@@ -98,7 +104,12 @@ public struct SKHelperSheetBarView: View {
     
     /// Creates the body view.
     public var body: some View {
-        HStack {
+        var trailingInset: CGFloat
+        
+        if #available(macOs 26, *) { trailingInset = 20 }
+        else { trailingInset = 10 }
+        
+        return HStack {
             ZStack {
                 if let img = sysImg { Label(title ?? "", systemImage: img).padding(insetsTitle).font(.title)}
                 else if let t = title { Text(t).font(.title).padding(insetsTitle)}
@@ -123,6 +134,7 @@ public struct SKHelperSheetBarView: View {
                 }
             }
         }
+        .padding(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: trailingInset))
         Divider()
     }
 }
