@@ -103,8 +103,9 @@ public class SKHelper: Observable {
     /// - Parameters:
     ///   - useCachedEntitlements: When set to `true` `SKHelper` will use previously cached values for product entitlements.
     ///   - customConfiguration: The name of a property list file contain custom configuration values. See `SKHelperConstants` for available values.
-    ///
-    public init(useCachedEntitlements: Bool = true, customConfiguration: String? = nil) {
+    ///   - autoRequestProducts: Prevent the automatic loading of App Store products by setting this parameter to false.
+    /// 
+    public init(useCachedEntitlements: Bool = true, customConfiguration: String? = nil, autoRequestProducts: Bool = true) {
         self.transactionListener = handleTransactionUpdates()
         self.purchaseIntentListener = handlePurchaseIntents()
         self.subscriptionListener = handleSubscriptionChanges()
@@ -114,7 +115,9 @@ public class SKHelper: Observable {
         if useCachedEntitlements { SKHelperLog.event(.configurationCacheEntitlementsUsed) }
         if customConfiguration != nil { SKHelperLog.event(.configurationCustomUsed) }
         
-        Task { await requestProducts() }
+        if autoRequestProducts {
+            Task { await requestProducts() }
+        }
     }
     
     /// Stop listening for App Store transactions, purchase intents and subscription changes.
@@ -279,8 +282,7 @@ public class SKHelper: Observable {
             return verified
         }
         
-        // The user appears NOT to have have an entitlement, or any previous transactions (in the case of consumables).
-        // See if we've previously cached an entitlement.
+        // The user appears NOT to have have an entitlement, or any previous transactions. See if we've previously cached an entitlement.
         return useCachedEntitlements ? product.hasEntitlement : false
     }
     
