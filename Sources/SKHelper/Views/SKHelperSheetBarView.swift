@@ -62,8 +62,6 @@ public struct SKHelperSheetBarView: View {
             }
         }
         .padding(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: trailingInset))
-        Divider()
-        Spacer()
     }
 }
 #endif

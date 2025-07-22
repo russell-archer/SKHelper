@@ -344,13 +344,26 @@ public class SKHelper: Observable {
         // Note that use of Transaction.currentEntitlement(for:) has been deprecated with iOS 18.4.
         // currentEntitlements(for:) should return 0 or 1 transactions for a regular product id.
         var hasEntitlement = false
-        for await verificationResult in Transaction.currentEntitlements(for: productId) {
-            hasEntitlement = true
-            if !checkVerificationResult(result: verificationResult).verified {
-                // The user seems to have an entitlement but we couldn't verify it.
-                SKHelperLog.transaction(.transactionValidationFailure, productId: productId)
-                updatePurchasedProducts(productId, purchased: false)
-                return .notVerified
+        
+        if #available(iOS 18.4, macOS 15.4, tvOS 18.4, watchOS 11.4, *) {
+            for await verificationResult in Transaction.currentEntitlements(for: productId) {
+                hasEntitlement = true
+                if !checkVerificationResult(result: verificationResult).verified {
+                    // The user seems to have an entitlement but we couldn't verify it.
+                    SKHelperLog.transaction(.transactionValidationFailure, productId: productId)
+                    updatePurchasedProducts(productId, purchased: false)
+                    return .notVerified
+                }
+            }
+        } else {
+            if let currentEntitlement = await Transaction.currentEntitlement(for: productId) {
+                hasEntitlement = true
+                if !checkVerificationResult(result: currentEntitlement).verified {
+                    // The user seems to have an entitlement but we couldn't verify it.
+                    SKHelperLog.transaction(.transactionValidationFailure, productId: productId)
+                    updatePurchasedProducts(productId, purchased: false)
+                    return .notVerified
+                }
             }
         }
         
@@ -720,9 +733,15 @@ public class SKHelper: Observable {
     /// - Parameter productId: The `ProductId` of the product.
     /// - Returns: Returns `.verifiedEntitlement` if the user has an entitlement to the product, `.noEntitlement` otherwise.
     public func hasCurrentEntitlement(for productId: ProductId) async -> SKHelperEntitlementState {
-        for await verificationResult in Transaction.currentEntitlements(for: productId) {
-            // We've found a transaction. See if it has been verified by StoreKit
-            if checkVerificationResult(result: verificationResult).verified { return .verifiedEntitlement }
+        if #available(iOS 18.4, macOS 15.4, tvOS 18.4, watchOS 11.4, *) {
+            for await verificationResult in Transaction.currentEntitlements(for: productId) {
+                // We've found a transaction. See if it has been verified by StoreKit
+                if checkVerificationResult(result: verificationResult).verified { return .verifiedEntitlement }
+            }
+        } else {
+            if let verificationResult = await Transaction.currentEntitlement(for: productId) {
+                if checkVerificationResult(result: verificationResult).verified { return .verifiedEntitlement }
+            }
         }
         
         return .noEntitlement
