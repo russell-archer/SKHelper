@@ -124,24 +124,30 @@ public class SKHelperConfiguration {
         }
         
         // Read the "Products" list. This can contain consumable, non-consumable and subscription products
-        guard var values = result[SKHelperConstants.ProductsConfiguration] as? [String] else {
-            SKHelperLog.event(.configurationEmpty)
-            SKHelperLog.event(.configurationFailure)
-            return nil
+        var values = [String]()
+        if let products = result[SKHelperConstants.ProductsConfiguration] as? [String] {
+            values = [ProductId](products.compactMap { $0 })
         }
         
         // Do we have an optional "Subscriptions" list?
-        values = [ProductId](values.compactMap { $0 })
-        guard let subscriptions = result[SKHelperConstants.SubscriptionsConfiguration] as? [[String : AnyObject]] else { return values }
+        guard let subscriptions = result[SKHelperConstants.SubscriptionsConfiguration] as? [[String : AnyObject]] else {
+            return values.isEmpty ? nil : values
+        }
+        
         for subscriptionGroup in subscriptions {
             guard subscriptionGroup[SKHelperConstants.SubscriptionGroupConfiguration] is String else { continue }
             guard let subscriptionsInGroup = subscriptionGroup[SKHelperConstants.ProductsConfiguration] as? [String] else { continue }
             for subscription in subscriptionsInGroup { values.append(subscription) }
         }
         
-        SKHelperLog.event(.configurationSuccess)
-        
-        return values
+        if values.isEmpty {
+            SKHelperLog.event(.configurationEmpty)
+            SKHelperLog.event(.configurationFailure)
+            return nil
+        } else {
+            SKHelperLog.event(.configurationSuccess)
+            return values
+        }
     }
     
     /// Read a property from a dictionary of custom configuration values.
