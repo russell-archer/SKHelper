@@ -60,6 +60,10 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
         subscriptionGroupName == nil ? store.allAutoRenewableSubscriptions : store.allAutoRenewableSubscriptionProductsByLevel(for: subscriptionGroupName!)
     }
     
+    /// Used to determine if this view has requested a refresh of localized product information. This happens automatically
+    /// once only if `SKHelper.hasProducts` is false.
+    @State private var hasRequestedProducts = false
+    
     /// Used to check multiple times for product availability.
     private let refreshProducts = Timer.publish(every: 1, on: .main, in: .common)
     
@@ -118,14 +122,18 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
         } else {
             
             VStack {
-                Text("No subscriptions available").font(.subheadline)
+                Text("No subscriptions available").font(.subheadline).padding()
                 Button("Refresh Subscriptions") { Task { await store.requestProducts() }}
                 ProgressView()
             }
             .padding()
-            .onProductsAvailable { _ in
-                // This view modifier is called when localized product information becomes available
-                hasProducts = store.hasAutoRenewableSubscriptionProducts
+            .onProductsAvailable { _ in hasProducts = store.hasAutoRenewableSubscriptionProducts }
+            .task {
+                if !hasRequestedProducts, !hasProducts {
+                    hasRequestedProducts = true
+                    let _ = await store.requestProducts()
+                    hasProducts = store.hasProducts
+                }
             }
         }
     }

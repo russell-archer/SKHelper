@@ -54,19 +54,17 @@ public struct SKHelperStoreViewBody<Content: View>: View {
     /// Creates the body of the view.
     public var body: some View {
         StoreView(products: products) { product in
-            VStack {
-                Image(product.id)
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(.circle)
-                    .SKHelperOnTapGesture {
-                        Task {
-                            purchased = await store.isPurchased(productId: selectedProductId)
-                            selectedProductId = product.id
-                            productSelected = true
-                        }
+            Image(product.id)
+                .resizable()
+                .scaledToFit()
+                .clipShape(.circle)
+                .SKHelperOnTapGesture {
+                    Task {
+                        purchased = await store.isPurchased(productId: selectedProductId)
+                        selectedProductId = product.id
+                        productSelected = true
                     }
-            }
+                }
         }
         .onInAppPurchaseCompletion { product, result in
             let _ = await store.purchaseCompletion(for: product, with: try? result.get()).purchaseState
