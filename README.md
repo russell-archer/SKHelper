@@ -24,25 +24,6 @@ Check out the [Quick Start Tutorial](https://russell-archer.github.io/SKHelper/t
 - [SKHelper Quick Start](https://russell-archer.github.io/SKHelper/tutorials/quickstart) - `SKHelper` quick-start guide 
 - [SKHelper In-Depth Guide](https://russell-archer.github.io/SKHelper/documentation/skhelper/guide) - `SKHelper` and `StoreKit2` in-depth guide
 - [SKHelper Demo Project](https://github.com/russell-archer/SKHelperDemo) - Example Xcode `SKHelper` project
-
----
-
-# Recent Major Changes
-- 28 Oct, 2024
-    - Removed `SubscriptionStatusChangeClosure` from `SKHelper` initializer. Functionality now provided by `onSubscriptionChange(onChange:)` view modifier
-    - Added new `onTransaction(update:)` view modifier to enable transaction updates notifications
-- 6 Oct, 2024
-    - Fixed logging bug with release build; added `onSubscriptionChange(onChange:)` view modifier
-- 27 Sep, 2024
-    - Improved support for consumables 
-- 23 Sep, 2024
-    - Added support for consumable products. Note that supporting consumable transactions requires iOS18+ and macOS15+
-- 20 Sep, 2024
-    - DocC documentation complete, including Quick Start tutorial (detailed Guide currently incomplete)
-- 5 Sep, 2024
-    - `SKHelper` is now "feature complete" (apart from support for consumables)
-- 5 Aug, 2024
-    - First proof-of-concept public release of `SKHelper` on GitHub
     
 ---
 
