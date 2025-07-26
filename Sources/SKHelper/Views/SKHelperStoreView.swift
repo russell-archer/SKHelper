@@ -103,7 +103,7 @@ public struct SKHelperStoreView<Content: View>: View {
             .padding()
             .onProductsAvailable { _ in hasProducts = store.hasProducts }
             .task {
-                if !hasRequestedProducts, !hasProducts {
+                if !hasRequestedProducts, !hasProducts, store.autoRequestProducts {
                     hasRequestedProducts = true
                     let _ = await store.requestProducts()
                     hasProducts = store.hasProducts

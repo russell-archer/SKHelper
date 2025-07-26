@@ -129,7 +129,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
             .padding()
             .onProductsAvailable { _ in hasProducts = store.hasAutoRenewableSubscriptionProducts }
             .task {
-                if !hasRequestedProducts, !hasProducts {
+                if !hasRequestedProducts, !hasProducts, store.autoRequestProducts {
                     hasRequestedProducts = true
                     let _ = await store.requestProducts()
                     hasProducts = store.hasProducts
