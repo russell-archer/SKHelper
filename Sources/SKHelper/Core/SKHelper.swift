@@ -53,6 +53,9 @@ public class SKHelper: Observable {
     /// This property is true if `SKHelper.products` contains a valid collection of products, false otherwise.
     public private(set) var hasProducts = false
     
+    /// This property is true if an app store request for products is currently in progress.
+    public private(set) var productRequestInProgress = false
+    
     /// When set to true `SKHelper` will use previously cached values for product entitlements if calls to `Transaction.currentEntitlements(for:)` return no transactions.
     /// Using cached entitlements can help mitigate issues where `Transaction.currentEntitlements(for:)` can sometimes erroneously indicate the user does not have an
     /// entitlement to use a product.
@@ -147,6 +150,8 @@ public class SKHelper: Observable {
     /// - Returns: Returns true if product information was successfully returned by the App Store, false otherwise.
     /// 
     public func requestProducts(productIds: [ProductId]? = nil, force: Bool = false) async -> Bool {
+        if productRequestInProgress { return false }
+        
         var appStoreProductIds: [ProductId] = []
         
         if hasProducts, !force {
@@ -155,25 +160,32 @@ public class SKHelper: Observable {
         }
         
         SKHelperLog.event(.requestProductsStart)
+        productRequestInProgress = true
         
         if let productIds {
             // Use product ids supplied to us
             appStoreProductIds = productIds
         } else {
             // Read the configured list of product ids
-            guard let configuredProductIds = SKHelperConfiguration.readProductConfiguration() else { return false }
+            guard let configuredProductIds = SKHelperConfiguration.readProductConfiguration() else {
+                productRequestInProgress = false
+                return false
+            }
+            
             appStoreProductIds = configuredProductIds
         }
         
         // Get localized product info from the App Store
         guard let localizedProducts = try? await Product.products(for: appStoreProductIds), !localizedProducts.isEmpty else {
             SKHelperLog.event(.requestProductsFailure)
+            productRequestInProgress = false
             return false
         }
     
         // Make sure we don't have to deal with non-renewable subscriptions
         guard !hasNonRenewableSubscriptionProducts else {
             SKHelperLog.event(.nonRenewableSubscriptionsNotSupported)
+            productRequestInProgress = false
             return false
         }
         
@@ -191,6 +203,7 @@ public class SKHelper: Observable {
         productsAvailable.forEach { closure in closure(products) }
         
         SKHelperLog.event(.requestProductsSuccess)
+        productRequestInProgress = false
         return true
     }
 

@@ -173,6 +173,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     
     func subscriptionSelection() -> some View {
         return VStack {
+            SKHelperSheetBarView(showSheet: $showSubscriptionSelection, title: "Manage Subscriptions")
             Text("\(allActiveSubscriptions.count > 0 ? "Select the active subscription you want to manage." : "No active subscriptions found.")").padding()
             List(allActiveSubscriptions, id: \.self) { productId in
                 Text(store.productDisplayName(from: productId))

@@ -105,7 +105,8 @@ public class SKHelperConfiguration {
     /// - Parameter filename: The name of the file to read. If the parameter is not supplied the value of `SKHelperConstants.StoreConfiguration` is used instead.
     ///
     public static func readProductConfiguration(filename: String? = nil) -> [ProductId]? {
-        let result = read(filename: filename == nil ? SKHelperConstants.StoreConfiguration : filename!)
+        let filename = filename ?? SKHelperConstants.StoreConfiguration
+        let result = read(filename: filename)
         guard !result.isEmpty else {
             SKHelperLog.event(.configurationNotFound)
             SKHelperLog.event(.configurationFailure)
@@ -163,7 +164,7 @@ public class SKHelperConfiguration {
     /// If the key can't be found nil is returned.
     ///
     public static func configurationValue(for key: SKHelperConstantKey) -> String {
-        let fileName = customConfigFile ?? "Configuration"
+        guard let fileName = customConfigFile else { return SKHelperConstants.value(for: key) }
         if let value = SKHelperConfiguration.value(for: key.rawValue, in: fileName), !value.isEmpty { return value }
         return SKHelperConstants.value(for: key)
     }
