@@ -8,29 +8,21 @@ If a key is missing a default value will be used.
 -->
 <plist version="1.0">
 <dict>
-    <!-- Returns the name of the .plist configuration file that holds a list of `ProductId`. Default = "Products". -->
-    <key>storeConfiguration</key>
-    <string>Products</string>
-    
-    <!-- The name of the section of the Products.plist file that contains product ids. Default = "Products". -->
-    <key>productsConfiguration</key>
-    <string>Products</string>
-    
-    <!-- The name of the optional section of the Products.plist file that contains subscription product ids. Default = "Subscriptions". -->
-    <key>subscriptionsConfiguration</key>
-    <string>Subscriptions</string>
-    
-    <!-- The name of the optional section of the Products.plist file that contains a subscription group. Default = "Group". -->
-    <key>subscriptionGroupConfiguration</key>
-    <string>Group</string>
-    
-    <!-- A URL which users on macOS can use to request a refund for an IAP. Default = "https://reportaproblem.apple.com/". -->
+    <!-- A URL which users on macOS can use to request a refund for an IAP. -->
     <key>requestRefundUrl</key>
     <string>https://reportaproblem.apple.com/</string>
     
-    <!-- A URL which can be used to contact the app's developers. Default = "https://reportaproblem.apple.com/". -->
+    <!-- A URL which can be used to contact the app's developers. -->
     <key>contactUsUrl</key>
     <string>https://reportaproblem.apple.com/</string>
+
+    <!-- A URL for the app's terms of service. -->
+    <key>termsOfServiceUrl</key>
+    <string></string>
+    
+    <!-- A URL which can be used to contact the app's developers. -->
+    <key>privacyPolicyUrl</key>
+    <string></string>
 </dict>
 </plist>
 
