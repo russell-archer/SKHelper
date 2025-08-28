@@ -8,15 +8,7 @@
 import Foundation
 
 /// `SKHelperConfiguration` is used to read the contents of the product definition property list (e.g. `Products.plist`).
-/// It also handles the reading of custom configuration property list files and get individual values by key.
-///
-/// ## Example of reading a custom configuration value ##
-///
-/// ```
-/// color = SKHelperConfiguration.value(
-///     for: "color",
-///     in: "Config") ?? "Unknown"
-/// ```
+/// It also handles the reading of custom configuration property list files and getting individual values by key.
 ///
 /// # Notes on The product definition file #
 /// The structure of the product definition property file may take one of two alternative formats, as described below.
@@ -98,11 +90,14 @@ import Foundation
 @available(iOS 17.0, macOS 14.6, *)
 public class SKHelperConfiguration {
     
+    /// The name of the file holding custom configuration values. Normally set by the SKHelper initializer.
+    public static var customConfigFile: String?
+    
     /// The dictionary of values read from the property list file.
     private static var customConfigDictionary: [String : AnyObject] = [:]
     
     /// The file most recently read. Allows for caching of dictionary values.
-    private static var mruCustomConfigFile = ""
+    private static var mruConfigFile = ""
     
     /// Read the contents of the product definition property list (e.g. `Products.plist`).
     ///
@@ -157,9 +152,20 @@ public class SKHelperConfiguration {
     /// - Returns: Returns a property from a dictionary of values that is read from a .plist file.
     /// 
     public static func value(for key: String, in file: String) -> String? {
-        if customConfigDictionary.isEmpty || mruCustomConfigFile != file { customConfigDictionary = read(filename: file) }
+        if customConfigDictionary.isEmpty { customConfigDictionary = read(filename: file) }
         if let val = customConfigDictionary[key] as? String { return val }
         return nil
+    }
+    
+    /// Gets a constant configuration value, either from `SKHelperConstants` or the custom configuration file (if used).
+    /// - Parameter key: The key for the required value.
+    /// - Returns: Returns the requested configuration value, either from `SKHelperConstants` or the custom configuration file (if used).
+    /// If the key can't be found nil is returned.
+    ///
+    public static func configurationValue(for key: SKHelperConstantKey) -> String {
+        let fileName = customConfigFile ?? "Configuration"
+        if let value = SKHelperConfiguration.value(for: key.rawValue, in: fileName), !value.isEmpty { return value }
+        return SKHelperConstants.value(for: key)
     }
     
     /// Read a plist property file and return a dictionary of values.
@@ -168,7 +174,7 @@ public class SKHelperConfiguration {
     /// - Returns: A set of [String : AnyObject], or nil if the file couldn't be read.
     ///
     private static func read(filename: String) -> [String : AnyObject] {
-        mruCustomConfigFile = filename
+        mruConfigFile = filename
         guard let path = Bundle.main.path(forResource: filename, ofType: "plist"),
               let contents = NSDictionary(contentsOfFile: path) as? [String : AnyObject]  else { return [:] }
         

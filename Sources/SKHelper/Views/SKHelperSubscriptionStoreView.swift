@@ -67,6 +67,12 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     /// Used to check multiple times for product availability.
     private let refreshProducts = Timer.publish(every: 1, on: .main, in: .common)
     
+    /// URL used for the app's privacy policy.
+    private var privacyPolicyURL: String = ""
+    
+    /// URL used for the app's terms of service.
+    private var termsOfServiceURL: String = ""
+    
     /// Creates a `SKHelperSubscriptionStoreView`.
     /// - Parameters:
     ///   - subscriptionGroupName: The group name from which subscriptions will be displayed. If nil then all subscriptions in all groups will be displayed.
@@ -83,7 +89,9 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
             self.subscriptionHeader = subscriptionHeader
             self.subscriptionControl = subscriptionControl
             self.subscriptionDetails = subscriptionDetails
-        }
+            self.privacyPolicyURL = SKHelperConfiguration.configurationValue(for: .privacyPolicyUrl)
+            self.termsOfServiceURL = SKHelperConfiguration.configurationValue(for: .termsOfServiceUrl)
+    }
     
     /// Creates the body of the view.
     public var body: some View {
@@ -103,8 +111,8 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 #endif
                 .storeButton(.visible, for: .restorePurchases, .policies)
                 .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
-                .subscriptionStorePolicyDestination(url: URL(string: "https://russell-archer.github.io/Writerly/privacy/")!, for: .privacyPolicy)
-                .subscriptionStorePolicyDestination(url: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!, for: .termsOfService)
+                .subscriptionStorePolicyDestination(url: URL(string: privacyPolicyURL)!, for: .privacyPolicy)
+                .subscriptionStorePolicyDestination(url: URL(string: termsOfServiceURL)!, for: .termsOfService)
                 .subscriptionStoreControlIcon { subscription, info in
                     if let subscriptionControl { subscriptionControl(subscription.id).SKHelperOnTapGesture(perform: tapAction(subscription: subscription)) }
                     else { defaultSubscriptionControl(productId: subscription.id).SKHelperOnTapGesture(perform: tapAction(subscription: subscription)) }
@@ -202,6 +210,8 @@ extension SKHelperSubscriptionStoreView {
             self.subscriptionHeader = nil
             self.subscriptionControl = nil
             self.subscriptionDetails = subscriptionDetails
+            self.privacyPolicyURL = SKHelperConfiguration.configurationValue(for: .privacyPolicyUrl)
+            self.termsOfServiceURL = SKHelperConfiguration.configurationValue(for: .termsOfServiceUrl)
         }
     
     /// Creates a `SKHelperSubscriptionStoreView`.
@@ -214,6 +224,8 @@ extension SKHelperSubscriptionStoreView {
             self.subscriptionHeader = subscriptionHeader
             self.subscriptionControl = nil
             self.subscriptionDetails = subscriptionDetails
+            self.privacyPolicyURL = SKHelperConfiguration.configurationValue(for: .privacyPolicyUrl)
+            self.termsOfServiceURL = SKHelperConfiguration.configurationValue(for: .termsOfServiceUrl)
         }
 }
 
