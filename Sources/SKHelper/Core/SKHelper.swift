@@ -117,7 +117,10 @@ public class SKHelper: Observable {
         self.autoRequestProducts = autoRequestProducts
         
         if useCachedEntitlements { SKHelperLog.event(.configurationCacheEntitlementsUsed) }
-        if customConfiguration != nil { SKHelperLog.event(.configurationCustomUsed) }
+        if customConfiguration != nil {
+            SKHelperLog.event(.configurationCustomUsed)
+            SKHelperConfiguration.customConfigFile = customConfiguration
+        }
         
         if autoRequestProducts {
             Task { await requestProducts() }
@@ -765,8 +768,6 @@ public class SKHelper: Observable {
         products.forEach { $0.hasEntitlement = false }
         UserDefaults.standard.set([ProductId](), forKey: SKHelperConstants.PurchasedProductsKey)
     }
-    
-    // MARK: - Internal methods
     
     /// Completes a purchase workflow.
     ///

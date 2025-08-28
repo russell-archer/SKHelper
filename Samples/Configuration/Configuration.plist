@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
- The avaiable keys are as follows:
 
-    storeConfiguration
-    productsConfiguration
-    subscriptionsConfiguration
-    subscriptionGroupConfiguration
-    requestRefundUrl
-    contactUsUrl
+Note that these values override the indicated default values used by SKHelper.
+If a key is missing a default value will be used.
 
 -->
 <plist version="1.0">
