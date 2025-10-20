@@ -100,9 +100,8 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 SubscriptionStoreView(subscriptions: subscriptions) {
                     VStack {
                         subscriptionHeader?()
-                        managementSheetButton().padding(10)
+                        managementSheetButton().padding(2)
                     }
-                    .padding()
                 }
                 .subscriptionStoreButtonLabel(.action)
                 .subscriptionStoreControlStyle(.prominentPicker)
