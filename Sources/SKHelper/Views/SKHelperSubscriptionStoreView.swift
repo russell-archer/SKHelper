@@ -73,6 +73,9 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
     /// URL used for the app's terms of service.
     private var termsOfServiceURL: String = ""
     
+    /// Use to control visibility of the redeem code button (iOS only). See configuration.
+    private var redeemCodeVisible = true
+    
     /// Creates a `SKHelperSubscriptionStoreView`.
     /// - Parameters:
     ///   - subscriptionGroupName: The group name from which subscriptions will be displayed. If nil then all subscriptions in all groups will be displayed.
@@ -91,6 +94,7 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
             self.subscriptionDetails = subscriptionDetails
             self.privacyPolicyURL = SKHelperConfiguration.configurationValue(for: .privacyPolicyUrl)
             self.termsOfServiceURL = SKHelperConfiguration.configurationValue(for: .termsOfServiceUrl)
+            self.redeemCodeVisible = Bool(SKHelperConfiguration.configurationValue(for: .redeemCodeVisible)) ?? true
     }
     
     /// Creates the body of the view.
@@ -100,13 +104,13 @@ public struct SKHelperSubscriptionStoreView<Header: View, Control: View, Details
                 SubscriptionStoreView(subscriptions: subscriptions) {
                     VStack {
                         subscriptionHeader?()
-                        managementSheetButton().padding(2)
+                        managementSheetButton().padding(5)
                     }
                 }
                 .subscriptionStoreButtonLabel(.action)
                 .subscriptionStoreControlStyle(.prominentPicker)
                 #if os(iOS)
-                .storeButton(.visible, for: .redeemCode)
+                .storeButton(redeemCodeVisible ? .visible : .hidden, for: .redeemCode)
                 #endif
                 .storeButton(.visible, for: .restorePurchases, .policies)
                 .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
@@ -212,6 +216,7 @@ extension SKHelperSubscriptionStoreView {
             self.subscriptionDetails = subscriptionDetails
             self.privacyPolicyURL = SKHelperConfiguration.configurationValue(for: .privacyPolicyUrl)
             self.termsOfServiceURL = SKHelperConfiguration.configurationValue(for: .termsOfServiceUrl)
+            self.redeemCodeVisible = Bool(SKHelperConfiguration.configurationValue(for: .redeemCodeVisible)) ?? true
         }
     
     /// Creates a `SKHelperSubscriptionStoreView`.
@@ -226,6 +231,7 @@ extension SKHelperSubscriptionStoreView {
             self.subscriptionDetails = subscriptionDetails
             self.privacyPolicyURL = SKHelperConfiguration.configurationValue(for: .privacyPolicyUrl)
             self.termsOfServiceURL = SKHelperConfiguration.configurationValue(for: .termsOfServiceUrl)
+            self.redeemCodeVisible = Bool(SKHelperConfiguration.configurationValue(for: .redeemCodeVisible)) ?? true
         }
 }
 

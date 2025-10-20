@@ -18,6 +18,7 @@ public enum SKHelperConstantKey: String {
     case contactUsUrl                   = "contactUsUrl"
     case termsOfServiceUrl              = "termsOfServiceUrl"
     case privacyPolicyUrl               = "privacyPolicyUrl"
+    case redeemCodeVisible              = "redeemCodeVisible"
 }
 
 /// Constants used in support of App Store operations.
@@ -55,6 +56,9 @@ public struct SKHelperConstants: Sendable {
     /// Default value is an empty string.
     public static let PrivacyPolicyUrl = "https://reportaproblem.apple.com/"
     
+    /// True if the redeem code button (iOS only) will be visible. The button will only be hidden if "false" is supplied. All other values will default to "true".
+    public static let RedeemCodeVisible = "true"
+    
     /// Get the value of a constant by using a key.
     /// - Parameter key: The key of the required value.
     /// - Returns: Returns the value of a constant by using a key, or nil if the value cannot be found.
@@ -70,6 +74,7 @@ public struct SKHelperConstants: Sendable {
             case .contactUsUrl:                     return SKHelperConstants.ContactUsUrl
             case .termsOfServiceUrl:                return SKHelperConstants.TermsOfServiceUrl
             case .privacyPolicyUrl:                 return SKHelperConstants.PrivacyPolicyUrl
+            case .redeemCodeVisible:                return SKHelperConstants.RedeemCodeVisible
         }
     }
 }

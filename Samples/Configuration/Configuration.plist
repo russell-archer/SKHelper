@@ -23,6 +23,10 @@ If a key is missing a default value will be used.
     <!-- A URL which can be used to contact the app's developers. -->
     <key>privacyPolicyUrl</key>
     <string></string>
+    
+    <!-- Configures the display of the Redeem Code button (iOS only). Note deliberate use of "true" or "false" string values -->
+    <key>redeemCodeVisible</key>
+    <string>true</string>
 </dict>
 </plist>
 

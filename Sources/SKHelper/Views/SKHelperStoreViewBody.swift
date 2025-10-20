@@ -36,6 +36,9 @@ public struct SKHelperStoreViewBody<Content: View>: View {
     /// A closure which is called to display product details.
     public var productDetails: ProductDetailsClosure
     
+    /// Use to control visibility of the redeem code button (iOS only). See configuration.
+    private var redeemCodeVisible = true
+    
     public init(selectedProductId: Binding<ProductId>,
                 productSelected: Binding<Bool>,
                 purchased: Binding<Bool>,
@@ -49,6 +52,7 @@ public struct SKHelperStoreViewBody<Content: View>: View {
         self._managePurchase = managePurchase
         self.products = products
         self.productDetails = productDetails
+        self.redeemCodeVisible = Bool(SKHelperConfiguration.configurationValue(for: .redeemCodeVisible)) ?? true
     }
     
     /// Creates the body of the view.
@@ -70,10 +74,9 @@ public struct SKHelperStoreViewBody<Content: View>: View {
             let _ = await store.purchaseCompletion(for: product, with: try? result.get()).purchaseState
         }
         #if os(iOS)
-        .storeButton(.visible, for: .restorePurchases, .policies, .redeemCode)
-        #else
-        .storeButton(.visible, for: .restorePurchases, .policies)  // Redeem code requires macOS 15+
+        .storeButton(redeemCodeVisible ? .visible : .hidden, for: .redeemCode)  // Redeem code requires macOS 15+
         #endif
+        .storeButton(.visible, for: .restorePurchases, .policies)  // Redeem code requires macOS 15+
         .storeButton(.hidden, for: .cancellation)  // Hides the close "X" at the top-right of the view
         .sheet(isPresented: $productSelected) { [managePurchase] in
             if managePurchase {
