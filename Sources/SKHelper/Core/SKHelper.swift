@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Observation
 public import StoreKit
 
 /// The unique id that identifies a product.
@@ -42,8 +43,9 @@ public typealias ProductsAvailableClosure = (_ products: [SKHelperProduct]) -> V
 
 /// SKHelper, a lightweight StoreKit helper.
 @MainActor
+@Observable
 @available(iOS 17.0, macOS 14.6, *)
-public class SKHelper: Observable {
+public class SKHelper {
     
     // MARK: - Public properties
     
@@ -132,6 +134,7 @@ public class SKHelper: Observable {
     
     /// Stop listening for App Store transactions, purchase intents and subscription changes.
     ///
+    @MainActor
     deinit {
         transactionListener?.cancel()
         purchaseIntentListener?.cancel()
@@ -1036,3 +1039,4 @@ public class SKHelper: Observable {
         return SKHelperConstants.value(for: key)
     }
 }
+

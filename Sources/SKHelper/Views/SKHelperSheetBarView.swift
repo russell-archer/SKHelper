@@ -104,7 +104,7 @@ public struct SKHelperSheetBarView: View {
     public var body: some View {
         var trailingInset: CGFloat
         
-        if #available(macOs 26, *) { trailingInset = 20 }
+        if #available(macOS 26, *) { trailingInset = 20 }
         else { trailingInset = 10 }
         
         return HStack {
@@ -133,7 +133,6 @@ public struct SKHelperSheetBarView: View {
             }
         }
         .padding(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: trailingInset))
-        Divider()
     }
 }
 #endif

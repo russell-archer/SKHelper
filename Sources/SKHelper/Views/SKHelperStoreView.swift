@@ -92,6 +92,7 @@ public struct SKHelperStoreView<Content: View>: View {
                 if allowManagement { bodyWithManagementStyle() }
                 else { bodyWithAutomaticStyle() }
             }
+            .padding()
             
         } else {
             
