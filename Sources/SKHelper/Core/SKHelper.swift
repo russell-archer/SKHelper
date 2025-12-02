@@ -369,19 +369,27 @@ public class SKHelper: Observable {
         guard let storeProduct = skhelperProduct(for: productId), let groupName = storeProduct.groupName else { return .notSubscribed }
         
         // We're dealing with an auto-renewable product. Does the user have a current entitlement to use it?
-        // Note that use of Transaction.currentEntitlement(for:) has been deprecated with iOS 18.4.
-        // currentEntitlements(for:) should return 0 or 1 transactions for a regular product id.
         var hasEntitlement = false
         
         if #available(iOS 18.4, macOS 15.4, tvOS 18.4, watchOS 11.4, *) {
+            var latestDate: Date?
             for await verificationResult in Transaction.currentEntitlements(for: productId) {
-                hasEntitlement = true
-                if !checkVerificationResult(result: verificationResult).verified {
+                // Make sure we find the latest verified entitlement found for this product.
+                // Note that use of Transaction.currentEntitlement(for:) has been deprecated with iOS 18.4.
+                // For subscriptions, despite Apple's docs saying otherwise, there can be multiple transactions in `Transaction.currentEntitlements(for: productId)`.
+                let verifiedResult = checkVerificationResult(result: verificationResult)
+                if !verifiedResult.verified {
                     // The user seems to have an entitlement but we couldn't verify it.
                     SKHelperLog.transaction(.transactionValidationFailure, productId: productId)
                     updatePurchasedProducts(productId, purchased: false)
                     return .notVerified
                 }
+                
+                // If we already have a newer or equal transaction, skip this one.
+                if let latest = latestDate, latest > verifiedResult.transaction.purchaseDate { continue }
+                
+                hasEntitlement = true
+                latestDate = verifiedResult.transaction.purchaseDate  // This is the newest valid entitlement so far.
             }
         } else {
             if let currentEntitlement = await Transaction.currentEntitlement(for: productId) {
