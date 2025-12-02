@@ -54,14 +54,18 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
         switch configuration.state {
             case .success(let product):
                 VStack(alignment: .center) {
-                    configuration.icon.padding()
+                    configuration.icon.padding(20)
                     Text(product.displayName).font(.title)
-                    if configuration.hasCurrentEntitlement { managePurchaseButton(product: product) }
+                    if configuration.hasCurrentEntitlement {
+                        managePurchaseButton(product: product)
+                        purchaseButton(product: product, configuration: configuration).disabled(true)
+                    }
                     else {
                         productInformationButton(product: product)
                         purchaseButton(product: product, configuration: configuration)
-                        Divider()
                     }
+                    
+                    Divider()
                 }
                 
             case .loading: ProgressView()
@@ -84,7 +88,7 @@ public struct SKHelperProductViewStyle: ProductViewStyle {
         })
         .SKHelperButtonStyleBorderedProminent()
         .tint(.blue)
-        .padding()
+        .padding(EdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 1))
         .task {
             buttonCaption = switch product.type {
                 case .consumable: "Manage Purchase"
