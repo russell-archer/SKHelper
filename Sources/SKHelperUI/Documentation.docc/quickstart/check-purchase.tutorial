@@ -1,5 +1,5 @@
 @Tutorial(time: 5) {
-    @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
+    @XcodeRequirement(title: "Xcode 16.3+", destination: "https://developer.apple.com/download/applications/")
     
     @Intro(title: "Check a purchase") {
         Check if the user has purchased a specific product. 

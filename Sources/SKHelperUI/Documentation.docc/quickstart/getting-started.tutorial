@@ -1,5 +1,5 @@
 @Tutorial(time: 5) {
-    @XcodeRequirement(title: "Xcode 16", destination: "https://developer.apple.com/download/applications/") 
+    @XcodeRequirement(title: "Xcode 16.3+", destination: "https://developer.apple.com/download/applications/")
     
     @Intro(title: "Getting Started") {
         How to get started with **SKHelper** by creating a simple demo app using SwiftUI.

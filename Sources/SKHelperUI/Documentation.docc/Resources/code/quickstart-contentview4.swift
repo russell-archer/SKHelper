@@ -1,5 +1,5 @@
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 struct ContentView: View {
     @Environment(SKHelper.self) private var store
@@ -9,6 +9,7 @@ struct ContentView: View {
             SKHelperSubscriptionStoreView(
                 subscriptionGroupName: "vip",
                 subscriptionHeader: { header() },
+                subscriptionControl: { productId in control(productId: productId) },
                 subscriptionDetails: { productId in details(productId: productId) })
         }
     }
@@ -17,6 +18,13 @@ struct ContentView: View {
         VStack {
             Image("plant-services").resizable().scaledToFit()
             Text("Our top-rated services will make your plants happy").font(.headline)
+        }
+    }
+    
+    func control(productId: ProductId) -> some View {
+        VStack {
+            Image(productId).resizable().scaledToFit()
+            Text("We'll water your plants \(productId == "com.rarcher.subscription.vip.gold" ? "weekly" : "monthly").").font(.callout)
         }
     }
     

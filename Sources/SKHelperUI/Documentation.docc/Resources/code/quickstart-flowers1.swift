@@ -1,6 +1,6 @@
 import SwiftUI
 import StoreKit
-import SKHelper
+import SKHelperUI
 
 struct SmallFlowersView: View {
     @Environment(SKHelper.self) private var store

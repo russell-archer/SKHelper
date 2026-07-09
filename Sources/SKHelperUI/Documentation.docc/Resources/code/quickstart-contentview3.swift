@@ -1,5 +1,5 @@
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 struct ContentView: View {
     var body: some View {

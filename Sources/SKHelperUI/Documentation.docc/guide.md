@@ -47,7 +47,7 @@ Updated: March 12, 2025
 
 ## Overview
 
-This guide describes how to implement and test in-app purchases with **SwiftUI**, `SKHelper`, `StoreKit2`, **Xcode 16, iOS 17+** and **macOS 14.6+**. 
+This guide describes how to implement and test in-app purchases with **SwiftUI**, `SKHelper`, `StoreKit2`, **Xcode 16.3+, iOS 17+** and **macOS 14.6+**.
 
 ![](skhelper-logo.png)
 
@@ -65,9 +65,9 @@ We will cover similar ground to that discussed in the [SKHelper Quick Start](htt
 
 ## What is SKHelper?
 
-`SKHelper` is  a lightweight `StoreKit` **SwiftUI** helper package that logically sits between your app and `StoreKit` to provide support for implementing in-app purchases and subscriptions in **Xcode 16, iOS 17+** and **macOS 14.6+**. Note that support for **consumable** transactions requires **iOS 18+** and **macOS 15+**.
+`SKHelper` is a lightweight `StoreKit` helper package that logically sits between your app and `StoreKit` to provide support for implementing in-app purchases and subscriptions in **Xcode 16.3+, iOS 17+** and **macOS 14.6+**. Note that support for **consumable** transactions requires **iOS 18+** and **macOS 15+**.
 
-Designed to be an easier-to-use refactoring of my [StoreHelper](https://github.com/russell-archer/StoreHelper) package, `SKHelper` makes use of Apple's **StoreKit Views** to provide a standard and easily customizable UI.
+Designed to be an easier-to-use refactoring of my [StoreHelper](https://github.com/russell-archer/StoreHelper) package, `SKHelper` makes use of Apple's **StoreKit Views** to provide a standard and easily customizable UI. Apps that use custom paywalls can depend on `SKHelperCore` directly, while SwiftUI apps can use `SKHelperUI` for StoreKit Views integration.
 
 ![](guide1.png)
 
@@ -134,7 +134,7 @@ In this guide we’ll be developing a demo app (**SKHelperDemo**) for an on-line
 
 ## Prerequisites
 
-Before getting started you’ll need to download **Xcode 16**, along with the **iOS 18 SDK and simulator**.
+Before getting started you’ll need to download **Xcode 16.3 or later**, along with the **iOS 18.4 SDK and simulator**.
 
 ## Get Started
 
@@ -397,7 +397,7 @@ Open the project’s **SKHelperDemoApp.swift** file and replace the contents wi
 
 ```swift
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 @main
 struct SKHelperDemoApp: App {
@@ -416,7 +416,7 @@ Now open **ContentView.swift** file and replace the contents with the code show
 
 ```swift
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 struct ContentView: View {
     @Environment(SKHelper.self) private var store
@@ -501,7 +501,7 @@ Here's the code required for the easy-to-use option - it's exactly as we used ea
 
 ```swift
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 struct ContentView: View {
     @Environment(SKHelper.self) private var store
@@ -520,7 +520,7 @@ If you want more feedback on purchases you can add the optional `onTransaction` 
 
 ```swift
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 struct ContentView: View {
     @Environment(SKHelper.self) private var store
@@ -548,7 +548,7 @@ using the SKHelper `isPurchased(productId:)` method:
 
 ```swift
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 /// This `SmallFlowersView` demonstrates how to check if the user has access to a 
 /// purchase-dependent resource. In this case, access to the "small flowers" resource 
@@ -566,7 +566,7 @@ import SKHelper
 ///    (the default)
 ///
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 struct SmallFlowersView: View {
     @Environment(SKHelper.self) private var store
@@ -632,7 +632,7 @@ Asynchronously call the SKHelper `purchase(_:options:)` method and await for the
 
 ```swift
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 struct ContentView: View {
     @Environment(SKHelper.self) private var store

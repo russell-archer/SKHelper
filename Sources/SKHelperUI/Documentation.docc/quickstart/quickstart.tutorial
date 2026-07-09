@@ -4,7 +4,7 @@
         
         You'll see just how little code is required to enable users to purchase and manage non-consumable in-app purchases and subscriptions.
                         
-        Before getting started, make sure you've downloaded and installed Xcode 16, along with the iOS SDK.
+        Before getting started, make sure you've downloaded and installed Xcode 16.3 or later, along with the iOS 18.4 SDK.
         
         @Image(source: "skhelper-logo.png", alt: "SKHelper Logo.")
     }
@@ -57,10 +57,9 @@
         @Documentation(destination: "https://github.com/russell-archer/SKHelper/") {
             Browse and search **SKHelper**-related documentation and code on GitHub.
 
-            - [Documentation landing page](https://russell-archer.github.io/SKHelper/documentation/skhelper)
-            - [In-depth guide to in-app purchases and **SKHelper**](https://russell-archer.github.io/SKHelper/documentation/skhelper/guide)
+            - [Documentation landing page](https://russell-archer.github.io/SKHelper/documentation/skhelperui)
+            - [In-depth guide to in-app purchases and **SKHelper**](https://russell-archer.github.io/SKHelper/documentation/skhelperui/guide)
             - [SKHelperDemo Xcode project](https://github.com/russell-archer/SKHelperDemo)
         }
     }    
 }
-

@@ -1,5 +1,5 @@
 import SwiftUI
-import SKHelper
+import SKHelperUI
 
 @main
 struct SKHelperDemoApp: App {

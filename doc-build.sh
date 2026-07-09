@@ -1,7 +1,7 @@
 #!/bin/zsh
 
-# This script is used to build DocC documentation for the SKHelper package in a static HTML format suitable for hosting on
-# GitHub Pages at https://russell-archer.github.io/SKHelper/documentation/skhelper/
+# This script builds DocC documentation for the SKHelper package in a static HTML format suitable for hosting on
+# GitHub Pages at https://russell-archer.github.io/SKHelper/.
 #
 # Run this script from the root of the SKHelper project directory.
 #
@@ -11,24 +11,40 @@
 #    See here for details: https://www.swift.org/documentation/docc/
 #
 # 2. Generate the static website using the Swift package manager. The package manager is included in Xcode.
-#    You can verify your installation by typing swift package --version in a terminal
+#    You can verify your installation by typing swift package --version in a terminal.
 #
-# 3. Open a terminal and navigate to the root of this package and run this script
+# 3. Open a terminal, navigate to the root of this package and run this script.
 #
-# 4. Documentation will be output to the /docs directory in the root of this package. It's in a format suitable for hosting on GitHub Pages
+# 4. Documentation will be output to the /docs directory in the root of this package. It's in a format suitable for hosting on GitHub Pages.
 #
-# 5. If this is the first time you’ve generated documentation to the /docs folder, make sure to add /docs and all sub-directories to your git repo
+# 5. If this is the first time you’ve generated documentation to the /docs folder, make sure to add /docs and all sub-directories to your git repo.
 #
-# 6. Open this package's GitHub repo in a browser, then open Settings > Pages
+# 6. Open this package's GitHub repo in a browser, then open Settings > Pages.
 #
-# 7. Set the source of the website to be "Deploy from a branch" and then select the appropriate branch (e.g. main) and folder (/docs)
+# 7. Set the source of the website to be "Deploy from a branch" and then select the appropriate branch (e.g. main) and folder (/docs).
 #
 # 8. The above enables GitHub Pages and sets it to automatically update the published documentation website when source is pushed to the main branch.
-#    This assumes that you'll be hosting your documentation website on github.io, and your GitHub Pages website URL will be in the form: {username}.github.io/{repository}
+#    This assumes that you'll be hosting your documentation website on github.io, and your GitHub Pages website URL will be in the form: {username}.github.io/{repository}.
 #
-# 9. After a few minutes documentation should be available from: https://russell-archer.github.io/SKHelper/documentation/skhelper/
+# 9. After a few minutes documentation should be available from:
+#    https://russell-archer.github.io/SKHelper/documentation/skhelpercore/
+#    https://russell-archer.github.io/SKHelper/documentation/skhelperui/
+
+set -e
 
 echo "Build DocC documentation for the SKHelper package."
+echo "This regenerates combined docs for SKHelperCore and SKHelperUI."
 echo "Press [Return] to continue or ^C to abort..."
 read -n -s
-swift package --allow-writing-to-directory docs generate-documentation --target SKHelper --disable-indexing --transform-for-static-hosting --hosting-base-path SKHelper --output-path docs
+
+swift package \
+    --allow-writing-to-directory docs \
+    generate-documentation \
+    --target SKHelperCore \
+    --target SKHelperUI \
+    --enable-experimental-combined-documentation \
+    --disable-indexing \
+    --experimental-skip-synthesized-symbols \
+    --transform-for-static-hosting \
+    --hosting-base-path SKHelper \
+    --output-path docs
