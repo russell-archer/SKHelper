@@ -23,5 +23,13 @@ let package = Package(
             name: "SKHelperUI",
             dependencies: ["SKHelperCore"]
         ),
+        .testTarget(
+            name: "SKHelperCoreTests",
+            dependencies: ["SKHelperCore"]
+        ),
+        .testTarget(
+            name: "SKHelperUITests",
+            dependencies: ["SKHelperUI"]
+        ),
     ]
 )
