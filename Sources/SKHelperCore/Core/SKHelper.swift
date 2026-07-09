@@ -5,7 +5,7 @@
 //  Created by Russell Archer on 14/07/2024.
 //
 
-import SwiftUI
+import Foundation
 import Observation
 public import StoreKit
 

@@ -6,6 +6,7 @@
 //
 
 public import SwiftUI
+import SKHelperCore
 
 /// The `OnProductsAvailable` ViewModifier allows you to be notified when SKHelper retrieves a collection of localized product information from the App Store.
 /// See also the `onProductsAvailable(update:)` View extension.

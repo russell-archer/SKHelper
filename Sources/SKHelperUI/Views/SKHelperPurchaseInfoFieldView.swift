@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SKHelperCore
 
 /// Creates a view containing two horizontally-aligned `Text` views that take the form "field name" : "field value".
 @available(iOS 17.0, macOS 14.6, *)

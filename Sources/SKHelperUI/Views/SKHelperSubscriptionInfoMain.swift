@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SKHelperCore
 
 /// A composable view that displays purchase information related to a subscription.
 /// See `SKHelperManagePurchaseView`, which includes this view.

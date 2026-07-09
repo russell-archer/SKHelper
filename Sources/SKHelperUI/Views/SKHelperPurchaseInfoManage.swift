@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SKHelperCore
 
 /// A composable view that allows the user to request a refund for a consumable or non-consumable product.
 /// See `SKHelperManagePurchaseView`, which includes this view.

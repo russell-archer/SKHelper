@@ -5,8 +5,9 @@
 //  Created by Russell Archer on 13/08/2024.
 //
 
-import SwiftUI
-import StoreKit
+public import SwiftUI
+import SKHelperCore
+public import StoreKit
 
 /// StoreKit `SKHelperProductView` style.
 @available(iOS 17.0, macOS 14.6, *)

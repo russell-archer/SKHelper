@@ -5,7 +5,7 @@
 //  Created by Russell Archer on 28/10/2024.
 //
 
-/// Reasons that a transaction update is broadcast. See the ``OnTransaction`` view modifier.
+/// Reasons that a transaction update is broadcast to transaction update listeners.
 @available(iOS 17.0, macOS 14.6, *)
 public enum SKHelperTransactionUpdateReason: Equatable {
     /// The transaction was successfully completed.

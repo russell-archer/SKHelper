@@ -6,6 +6,7 @@
 //
 
 public import SwiftUI
+import SKHelperCore
 
 /// The `OnSubscriptionChange` ViewModifier allows you to be notified of changes to the status of all subscriptions.
 /// See also the `onSubscriptionChange(onChange:)` View extension.

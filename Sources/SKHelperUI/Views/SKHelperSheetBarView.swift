@@ -5,7 +5,8 @@
 //  Created by Russell Archer on 15/08/2024.
 //
 
-import SwiftUI
+public import SwiftUI
+import SKHelperCore
 
 /// An iOS-specific view that forms a "title bar", with a title and a close button at the top of a sheet.
 #if os(iOS)

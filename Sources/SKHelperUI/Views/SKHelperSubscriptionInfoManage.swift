@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SKHelperCore
 
 /// A composable view that allows the user to manage a subscription, including cancelling, upgrading or downgrading.
 /// See `SKHelperManagePurchaseView`, which includes this view.

@@ -5,7 +5,8 @@
 //  Created by hengyu on 2024/3/30.
 //
 
-import SwiftUI
+public import SwiftUI
+import SKHelperCore
 
 /// View extension for cross-platform tap gesture.
 public extension View {

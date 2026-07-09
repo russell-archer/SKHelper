@@ -5,7 +5,8 @@
 //  Created by Russell Archer on 13/02/2024.
 //
 
-import SwiftUI
+public import SwiftUI
+import SKHelperCore
 import StoreKit
 
 /// Creates a list showing all available products. When you instantiate this view provide a closure that will be called

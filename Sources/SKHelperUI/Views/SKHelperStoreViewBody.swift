@@ -5,8 +5,9 @@
 //  Created by Russell Archer on 06/03/2025.
 //
 
-import SwiftUI
-import StoreKit
+public import SwiftUI
+import SKHelperCore
+public import StoreKit
 
 /// Uses the StoreKit `StoreView` to create a list of all avaliable products.
 @available(iOS 17.0, macOS 14.6, *)

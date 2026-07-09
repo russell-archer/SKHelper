@@ -5,7 +5,8 @@
 //  Created by Russell Archer on 13/02/2024.
 //
 
-import SwiftUI
+public import SwiftUI
+import SKHelperCore
 import StoreKit
 
 /// A view normally displayed as a sheet showing details on a purchasable product.

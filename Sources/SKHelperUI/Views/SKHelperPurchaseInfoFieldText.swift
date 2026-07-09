@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SKHelperCore
 
 /// A view that creates a cross-pltform `Text` view with a font suitable for that platform.
 @available(iOS 17.0, macOS 14.6, *)

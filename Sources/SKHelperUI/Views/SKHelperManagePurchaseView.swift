@@ -5,7 +5,8 @@
 //  Created by Russell Archer on 13/08/2024.
 //
 
-import SwiftUI
+public import SwiftUI
+import SKHelperCore
 import StoreKit
 
 /// A view that displays detailed information related to a consumable, non-consumable or subscription purchase, along with purchase management options.
